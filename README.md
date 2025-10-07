@@ -1,6 +1,7 @@
 # ShelterLink
 
 This repository contains the source code for **ShelterLink**, a web app that lets shelters post real-time needs and enables donors to match those needs with items they already have.
+Detailed document can be found here: https://docs.google.com/document/d/1s5NMwjEzoDznN2sx6Q9rOc3J_6tVi-ZZtgh33FRwXoA/edit?usp=sharing 
 
 ## Features
 
