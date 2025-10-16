@@ -5,11 +5,24 @@ echo "======================================"
 echo " 🚀 FastAPI + React (CRA) Setup Script"
 echo "======================================"
 
-# --- Check dependencies ---
-for cmd in python3 pip npm; do
+# --- Detect OS and set Python + venv activation paths ---
+OS="$(uname -s 2>/dev/null || echo Windows)"
+
+case "$OS" in
+    Linux*)     PLATFORM="linux";   PY_CMD="python3"; ACTIVATE_PATH="venv/bin/activate";;
+    Darwin*)    PLATFORM="mac";     PY_CMD="python3"; ACTIVATE_PATH="venv/bin/activate";;
+    CYGWIN*|MINGW*|MSYS*|Windows*)
+                PLATFORM="windows"; PY_CMD="py";       ACTIVATE_PATH="venv/Scripts/activate";;
+    *)          PLATFORM="unknown"; PY_CMD="python3";  ACTIVATE_PATH="venv/bin/activate";;
+esac
+
+echo "Detected OS: $PLATFORM"
+echo "Using Python command: $PY_CMD"
+
+# --- Check dependencies (only python + npm) ---
+for cmd in $PY_CMD npm; do
   if ! command -v $cmd &>/dev/null; then
     echo "❌ Missing dependency: $cmd"
-    echo "Please install $cmd first."
     exit 1
   fi
 done
@@ -25,25 +38,25 @@ cd backend
 # Create a Python virtual environment
 if [ ! -d "venv" ]; then
   echo "📦 Creating virtual environment..."
-  py -m venv venv
+  $PY_CMD -m venv venv
 fi
-# Activate virtual environment based on OS
-if [ -f "venv/Scripts/activate" ]; then
-  source venv/Scripts/activate
-elif [ -f "venv/bin/activate" ]; then
-  source venv/bin/activate
+
+# Activate virtual environment
+if [ -f "$ACTIVATE_PATH" ]; then
+  source "$ACTIVATE_PATH"
 else
   echo "Error: Could not find virtual environment activation script."
   exit 1
 fi
 
-# Install backend dependencies
+# Create requirements.txt if missing
 if [ ! -f "requirements.txt" ]; then
   echo "fastapi" > requirements.txt
   echo "uvicorn" >> requirements.txt
 fi
 
-pip install -r requirements.txt
+# Install backend dependencies (safe cross-platform pip call)
+$PY_CMD -m pip install -r requirements.txt
 
 deactivate
 cd ..
@@ -84,7 +97,11 @@ echo "To start the development servers:"
 echo ""
 echo "  1️⃣  Start backend:"
 echo "      cd backend"
+if [ "$PLATFORM" = "windows" ]; then
+echo "      venv\\Scripts\\activate"
+else
 echo "      source venv/bin/activate"
+fi
 echo "      uvicorn main:app --reload"
 echo ""
 echo "  2️⃣  Start frontend:"
