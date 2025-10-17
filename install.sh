@@ -74,6 +74,16 @@ else
   echo "✅ Firebase already listed in package.json"
 fi
 
+# --- Install React Router DOM ---
+if ! grep -q "\"react-router-dom\"" package.json; then
+  echo ""
+  echo "🛣️  Installing React Router DOM..."
+  npm install react-router-dom
+  npm install --save-dev @types/react-router-dom
+else
+  echo "✅ React Router DOM already listed in package.json"
+fi
+
 cd ..
 
 echo ""
