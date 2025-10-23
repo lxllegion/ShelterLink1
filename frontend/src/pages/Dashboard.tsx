@@ -1,6 +1,16 @@
+import { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
+  const [userType, setUserType] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const userType = localStorage.getItem('userType');
+    setUserType(userType);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
@@ -9,7 +19,11 @@ function Dashboard() {
       {/* Dashboard Content */}
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-800 mb-8">Dashboard</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
+            <button className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors" onClick={() => navigate('/form')}>{userType === 'donor' ? '+ New Donation' : '+ New Request'}</button>
+          </div>
+          
           
           <div className="bg-gray-50 rounded-lg p-8">
             <h2 className="text-2xl font-semibold text-gray-700 mb-4">

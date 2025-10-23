@@ -4,40 +4,26 @@ function AuthNavBar() {
   const navigate = useNavigate();
   
   return (
-    <nav style={{
-      backgroundColor: 'black',
-      color: 'white',
-      padding: '20px 32px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <span style={{ fontSize: '24px' }}>❤️</span>
-        <span style={{ fontSize: '24px', fontWeight: 'bold' }}>ShelterLink</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-        <button style={{
-          background: 'none',
-          border: 'none',
-          color: 'white',
-          cursor: 'pointer',
-          fontSize: '16px'
-        }} onClick={() => navigate('/login')}>
-          Login
-        </button>
-        <button style={{
-          backgroundColor: 'white',
-          color: 'black',
-          border: 'none',
-          padding: '10px 24px',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '16px',
-          fontWeight: '500'
-        }} onClick={() => navigate('/register')}>
-          Sign Up
-        </button>
+    <nav className="bg-black text-white px-6 py-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <span className="text-2xl">❤️</span>
+          <span className="text-xl font-bold">ShelterLink</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-transparent border-none text-white hover:text-gray-300 transition-colors"
+          >
+            Login
+          </button>
+          <button 
+            onClick={() => navigate('/register')}
+            className="px-6 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors font-medium"
+          >
+            Sign Up
+          </button>
+        </div>
       </div>
     </nav>
   );
