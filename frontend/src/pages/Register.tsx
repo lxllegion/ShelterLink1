@@ -34,7 +34,14 @@ function Register() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      // TODO: Save user type and additional info to Firestore
+      
+      // Store user type in localStorage (mock data until database is ready)
+      localStorage.setItem('userType', userType || '');
+      localStorage.setItem('userName', name);
+      if (userType === 'shelter' && shelterName) {
+        localStorage.setItem('shelterName', shelterName);
+      }
+      
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message);
