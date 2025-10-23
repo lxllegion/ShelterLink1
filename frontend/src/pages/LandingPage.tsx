@@ -1,32 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import AuthNavBar from '../components/AuthNavBar';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <nav className="bg-black text-white px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">❤️</span>
-            <span className="text-xl font-bold">ShelterLink</span>
-          </div>
-          <div className="flex space-x-4">
-            <Link 
-              to="/login" 
-              className="px-4 py-2 bg-transparent border border-white rounded hover:bg-white hover:text-black transition-colors"
-            >
-              Login
-            </Link>
-            <Link 
-              to="/register" 
-              className="px-4 py-2 bg-white text-black rounded hover:bg-gray-200 transition-colors"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <AuthNavBar />
 
       {/* Hero Section */}
       <div className="container mx-auto px-6 py-16">
