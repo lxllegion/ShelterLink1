@@ -97,6 +97,11 @@ else
   echo "✅ React Router DOM already listed in package.json"
 fi
 
+# --- Install Tailwind CSS v3 (compatible version) ---
+echo ""
+echo "🎨 Installing Tailwind CSS v3..."
+npm install --save-dev tailwindcss@^3.4.0 postcss@^8.4.0 autoprefixer@^10.4.0
+
 cd ..
 
 echo ""
