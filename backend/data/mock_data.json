@@ -1,0 +1,38 @@
+{
+    "donors": [
+        {
+            "userID": "D00001",
+            "username": "Alice",
+            "email": "alice@gmail.com",
+            "phone_number": "123-456-7890"
+        },
+        {
+            "userID": "D00002",
+            "username": "Bob",
+            "email": "bob@gmail.com",
+            "phone_number": "987-654-3210"
+        },
+        {
+            "userID": "D00003",
+            "username": "Carl",
+            "email": "carl@gmail.com",
+            "phone_number": "253-333-3333"
+        }
+    ],
+    "shelters": [
+        {
+            "userID": "S00001",
+            "username": "SeaShelter",
+            "shelter_name": "Seattle Shelter",
+            "email": "contact@seashelter.org",
+            "phone_number": "555-123-4567"
+        },
+        {
+            "userID": "S00002",
+            "username": "TacCenter",
+            "shelter_name": "Tacoma Care Center",
+            "email": "info@tacshelter.org",
+            "phone_number": "555-987-6543"
+        }
+    ]
+}
