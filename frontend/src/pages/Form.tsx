@@ -12,6 +12,7 @@ function Form() {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     // Get user type from localStorage
@@ -24,7 +25,7 @@ function Form() {
     setLoading(true);
 
     try {
-      const userId = useAuth().currentUser?.uid || '';
+      const userId = currentUser?.uid || '';
       
       const formData = {
         donor_id: userId,
