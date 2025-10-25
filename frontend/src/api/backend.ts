@@ -162,3 +162,64 @@ export const getRequests = async (): Promise<RequestForm[]> => {
     throw error;
   }
 };
+
+// Match Type
+export interface Match {
+  id: string;
+  donor_id?: string;
+  shelter_id?: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+  matched_at: string;
+  status: string;
+}
+
+export const getMatches = async (): Promise<Match[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/matches`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch matches');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching matches:', error);
+    throw error;
+  }
+};
+
+// User Info Type
+export interface UserInfo {
+  userType: 'donor' | 'shelter' | null;
+  userData: any;
+  error?: string;
+}
+
+export const getUserInfo = async (userId: string): Promise<UserInfo> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/register/user/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch user info');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching user info:', error);
+    throw error;
+  }
+};
