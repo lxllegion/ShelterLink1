@@ -1,246 +1,55 @@
 import { useEffect, useState } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
+import NavBar from '../components/NavBar';
 import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
-  const navigate = useNavigate();
   const [userType, setUserType] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
-    const type = localStorage.getItem('userType');
-    setUserType(type);
+    const userType = localStorage.getItem('userType');
+    setUserType(userType);
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/login');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
-
-  // Sample match data - TODO: Replace with actual API call
-  const matches = [
-    {
-      shelter: 'Downtown Shelter',
-      item: 'Food Items',
-      detail: '20 cans of soup',
-      time: '2 days ago'
-    },
-    {
-      shelter: 'Downtown Shelter',
-      item: 'Food Items',
-      detail: '20 cans of soup',
-      time: '2 days ago'
-    },
-    {
-      shelter: 'Downtown Shelter',
-      item: 'Food Items',
-      detail: '20 cans of soup',
-      time: '2 days ago'
-    }
-  ];
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
+    <div className="min-h-screen bg-white">
       {/* Navigation Bar */}
-      <nav style={{
-        backgroundColor: 'black',
-        color: 'white',
-        padding: '16px 32px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '24px' }}>❤️</span>
-          <span style={{ fontSize: '20px', fontWeight: 'bold' }}>ShelterLink</span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <button style={{
-            background: 'none',
-            border: 'none',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}>
-            Dashboard
-          </button>
-          <button style={{
-            background: 'none',
-            border: 'none',
-            color: 'white',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }}
-          onClick={() => navigate('/profile')}
-          >
-            Profile
-          </button>
-          <span style={{ fontSize: '20px', cursor: 'pointer' }}>🔔</span>
-          <span style={{ fontSize: '20px', cursor: 'pointer' }}>👤</span>
-        </div>
-      </nav>
+      <NavBar />
 
-      {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 32px' }}>
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '32px'
-        }}>
-          <h1 style={{
-            fontSize: '36px',
-            fontWeight: 'bold',
-            color: '#1f2937'
-          }}>
-            Dashboard
-          </h1>
-          <button
-            onClick={() => navigate('/form')}
-            style={{
-              backgroundColor: 'black',
-              color: 'white',
-              padding: '12px 24px',
-              border: 'none',
-              borderRadius: '6px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              cursor: 'pointer'
-            }}
-          >
-            {userType === 'donor' ? '+ New Donation' : '+ New Request'}
-          </button>
-        </div>
-
-        {/* Stats Cards */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-          {/* Total Donations */}
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            border: '2px solid black'
-          }}>
-            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-              {userType === 'donor' ? 'Total Donations' : 'Total Requests'}
-            </p>
-            <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-              12
-            </p>
+      {/* Dashboard Content */}
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800">Dashboard</h1>
+            <button className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors" onClick={() => navigate('/form')}>{userType === 'donor' ? '+ New Donation' : '+ New Request'}</button>
           </div>
-
-          {/* Active Matches */}
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            border: '2px solid black'
-          }}>
-            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-              Active Matches
-            </p>
-            <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-              3
-            </p>
-          </div>
-
-          {/* Completed */}
-          <div style={{
-            backgroundColor: 'white',
-            padding: '24px',
-            borderRadius: '12px',
-            border: '2px solid black'
-          }}>
-            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-              Completed
-            </p>
-            <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-              9
-            </p>
-          </div>
-        </div>
-
-        {/* Active Matches List */}
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          border: '2px solid black',
-          overflow: 'hidden'
-        }}>
-          {/* Header */}
-          <div style={{
-            padding: '24px',
-            borderBottom: '1px solid #e5e7eb'
-          }}>
-            <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-              Active Matches
+          
+          
+          <div className="bg-gray-50 rounded-lg p-8">
+            <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+              Welcome to ShelterLink!
             </h2>
-          </div>
-
-          {/* Matches List */}
-          <div>
-            {matches.map((match, index) => (
-              <div
-                key={index}
-                style={{
-                  padding: '24px',
-                  borderBottom: index < matches.length - 1 ? '1px solid #e5e7eb' : 'none',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <div>
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                    {match.shelter}
-                  </h3>
-                  <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
-                    {match.item} • {match.detail}
-                  </p>
-                  <p style={{ fontSize: '12px', color: '#9ca3af' }}>
-                    Matched {match.time}
-                  </p>
-                </div>
-
-                <button style={{
-                  backgroundColor: 'white',
-                  color: 'black',
-                  padding: '10px 20px',
-                  border: '2px solid black',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}>
-                  Schedule Drop-off
-                </button>
+            <p className="text-gray-600 mb-6">
+              You are successfully logged in. This is your protected dashboard where you can manage shelter resources and help connect people in need.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Shelter Management</h3>
+                <p className="text-gray-600 text-sm">Manage shelter listings and availability</p>
               </div>
-            ))}
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Resource Tracking</h3>
+                <p className="text-gray-600 text-sm">Track resources and capacity</p>
+              </div>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">User Support</h3>
+                <p className="text-gray-600 text-sm">Help users find shelter resources</p>
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Logout Button */}
-        <div style={{ marginTop: '32px', textAlign: 'center' }}>
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: 'white',
-              color: '#6b7280',
-              padding: '12px 32px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px',
-              fontSize: '16px',
-              fontWeight: '500',
-              cursor: 'pointer'
-            }}
-          >
-            Logout
-          </button>
         </div>
       </div>
     </div>
