@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import AuthNavBar from '../components/AuthNavBar';
+import { registerDonor, registerShelter } from '../api/backend';
 
 function Register() {
   const [userType, setUserType] = useState<string | null>(null); // 'donor' or 'shelter'
@@ -11,6 +12,7 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [shelterName, setShelterName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -33,11 +35,32 @@ function Register() {
     setLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // Create Firebase user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
       
-      // Store user type in localStorage (mock data until database is ready)
+      // Register user in backend
+      if (userType === 'donor') {
+        await registerDonor({
+          userID: userId,
+          username: name,
+          email: email,
+          phone_number: phoneNumber,
+        });
+      } else if (userType === 'shelter') {
+        await registerShelter({
+          userID: userId,
+          username: name,
+          shelter_name: shelterName,
+          email: email,
+          phone_number: phoneNumber,
+        });
+      }
+      
+      // Store user type in localStorage (Remove when db is implemented)
       localStorage.setItem('userType', userType || '');
       localStorage.setItem('userName', name);
+      localStorage.setItem('userId', userId);
       if (userType === 'shelter' && shelterName) {
         localStorage.setItem('shelterName', shelterName);
       }
@@ -191,6 +214,27 @@ function Register() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    border: '2px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                  placeholder="(123) 456-7890"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
