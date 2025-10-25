@@ -36,10 +36,8 @@ function Form() {
 
       if (userType === 'donor') {
         await createDonation(formData);
-        alert('Donation submitted successfully!');
       } else {
         await createRequest(formData);
-        alert('Request submitted successfully!');
       }
 
       navigate('/dashboard');
