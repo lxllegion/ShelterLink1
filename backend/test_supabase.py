@@ -1,4 +1,6 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, text
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 # from sqlalchemy.pool import NullPool
 # from dotenv import load_dotenv
 import os
@@ -28,8 +30,26 @@ engine = create_engine(DATABASE_URL)
 # engine = create_engine(DATABASE_URL, poolclass=NullPool)
 
 # Test the connection
-try:
-    with engine.connect() as connection:
-        print("Connection successful!")
-except Exception as e:
-    print(f"Failed to connect: {e}")
+metadata = MetaData(schema="public")  # set schema if needed
+
+donors = Table(
+    "donors", metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("uid", String, unique=True),
+    Column("username", String, unique=True),
+    Column("email", String, unique=True),
+)
+
+with engine.connect() as conn:
+    trans = conn.begin()
+
+    ins = donors.insert().values(
+        id=uuid.uuid4(),
+        uid="test-donor-1",
+        username="test-donor-1",
+        email="test-donor-1@example.com",
+    ).returning(donors.c.id, donors.c.username, donors.c.email)
+
+    row = conn.execute(ins).mappings().one()
+    trans.commit()
+    print("Inserted:", dict(row))
