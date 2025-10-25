@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import { createDonation, createRequest } from '../api/backend';
+import { useAuth } from '../contexts/AuthContext';
 
 function Form() {
   const [userType, setUserType] = useState<string | null>(null);
@@ -10,6 +12,7 @@ function Form() {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     // Get user type from localStorage
@@ -21,40 +24,31 @@ function Form() {
     e.preventDefault();
     setLoading(true);
 
-    // TODO: Submit to backend API
-    console.log({
-      userType,
-      category,
-      description,
-      quantity,
-      notes,
-    });
+    try {
+      const userId = currentUser?.uid || '';
+      
+      const formData = {
+        donor_id: userId,
+        item_name: description,
+        quantity: quantity,
+        category: category,
+      };
 
-    // TODO: remove after backend is implemented
-    if (userType === 'donor') {
-      localStorage.setItem('donation', JSON.stringify({
-        userType,
-        category,
-        description,
-        quantity,
-        notes,
-      }));
-    } else {
-      localStorage.setItem('request', JSON.stringify({
-        userType,
-        category,
-        description,
-        quantity,
-        notes,
-      }));
-    }
+      if (userType === 'donor') {
+        await createDonation(formData);
+        alert('Donation submitted successfully!');
+      } else {
+        await createRequest(formData);
+        alert('Request submitted successfully!');
+      }
 
-    // TODO: remove after backend is implemented
-    setTimeout(() => {
-      setLoading(false);
-      alert(`${userType === 'donor' ? 'Donation' : 'Request'} submitted successfully!`);
       navigate('/dashboard');
-    }, 1000);
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      alert(`Failed to submit ${userType === 'donor' ? 'donation' : 'request'}: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const categories = [
