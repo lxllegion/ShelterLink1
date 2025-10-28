@@ -1,0 +1,20 @@
+[
+  {
+    "shelter_id": "S00005",
+    "item_name": "Blankets",
+    "quantity": 20,
+    "category": "Clothing"
+  },
+  {
+    "shelter_id": "S00006",
+    "item_name": "Canned Fruit",
+    "quantity": 50,
+    "category": "Food"
+  },
+  {
+    "shelter_id": "S00007",
+    "item_name": "Bandages",
+    "quantity": 50,
+    "category": "Medical Supplies"
+  }
+]
