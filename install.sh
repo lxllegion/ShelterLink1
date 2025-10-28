@@ -53,6 +53,14 @@ fi
 if [ ! -f "requirements.txt" ]; then
   echo "fastapi" > requirements.txt
   echo "uvicorn" >> requirements.txt
+  echo "sqlalchemy" >> requirements.txt
+  echo "psycopg2-binary" >> requirements.txt
+  echo "python-dotenv" >> requirements.txt
+  echo "alembic" >> requirements.txt
+  echo "pydantic" >> requirements.txt
+  echo "pytest" >> requirements.txt
+  echo "httpx" >> requirements.txt
+  echo "pydantic[email]" >> requirements.txt
 fi
 
 # Install backend dependencies (safe cross-platform pip call)
