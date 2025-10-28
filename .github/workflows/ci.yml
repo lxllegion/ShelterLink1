@@ -1,19 +1,6 @@
 name: CI
 
-on:
-  push:
-    branches: ["**"]
-    paths:
-      - "ShelterLink1/backend/**"
-      - "ShelterLink1/frontend/**"
-      - ".github/workflows/**"
-  pull_request:
-    branches: ["**"]
-    paths:
-      - "ShelterLink1/backend/**"
-      - "ShelterLink1/frontend/**"
-      - ".github/workflows/**"
-  workflow_dispatch:
+on: [push, pull_request]
 
 jobs:
   backend-tests:
