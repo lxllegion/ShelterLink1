@@ -1,6 +1,4 @@
 import { useEffect, useState } from 'react';
-import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches, getUserInfo } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
@@ -68,15 +66,6 @@ function Dashboard() {
 
     fetchUserTypeAndData();
   }, [currentUser]);
-  
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      navigate('/login');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
 
   // Calculate stats
   const totalItems = userType === 'donor' ? donations.length : requests.length;
