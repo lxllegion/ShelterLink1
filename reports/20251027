@@ -1,0 +1,51 @@
+# Team Status Report
+
+## 1. Team Report
+
+### A. Last Week's Goals
+- Set up the repository by installing the required frontend framework, setting up API endpoints, and creating the database.
+- Work on setting up FastAPI for backend framework, helping set up the repository.
+- Set up the repository by installing PostgresSQL, creating the database, and coding the login/registration system.
+- Work on the backend framework. Set up firebase authentication.
+- Work on authentication pages using react (login/signup)
+
+### B. Progress and Issues
+- No issues so far.
+- Fleshed out the frontend structure, connected firebase to the frontend, created an installation file, completed the system architecture/design doc.
+- Set up FastAPI. Worked on the risk assessment, coding guidelines, and test plan & bugs sections of the requirements document. 
+- Installed PostgreSQL, setup database + pushed files necessary for setting up database on a new machine / location
+- Setting up backend structure, fixed use case, software architecture, and part of the risk assessment .
+- Worked on the ui for signup / login using react and connected it to firebase. 
+
+
+### C. Plans and Goals for the Next Week
+- Revise the system architecture doc, finish the system design doc, and work on the Testing and CI doc. Will complete the request/donation form page and help with the backend registration/form logic if needed. 
+- Work on saving the request / donation form, completing the system design section and extending our testing plan.
+- Connect registration / login information / requests form with database
+- Create function to save registration information
+- Complete the dashboard page, connecting to the backend database to frontend.
+
+
+## 2. Contributions of Individual Team Members
+
+### A. Last Week's Goals
+- **Fernando Pazaran:** Revise the system architecture doc, finish the system design doc, and work on the Testing and CI doc. Will complete the request/donation form page and help with the backend registration/form logic if needed. 
+- **Gianna Carlson:** Will work on saving the request / donation form, completing the system design section and extending our testing plan.
+- **Alex(Xinlei) Liu:** Connect registration / login information / requests form with database
+- **Charles Zhou:** Will work on the function to save registration information
+- **Justin Huynh:** Completing the dashboard page, connecting to the backend database to frontend.
+
+### B. Progress and Issues
+- No issues so far.
+- **Fernando Pazaran:** Completed the Frontend MVP, specifically, completed the donation/request form page and connected the frontend (dashboard, form page) to backend endpoints. 
+- **Gianna Carlson:** Completed functions required for saving the donor request / shelter donation forms, created mock data for it. Added endpoints. Worked on the living document. 
+- **Alex(Xinlei) Liu:** Completed creation of the database and tables. Did research on implementation of vector databases.
+- **Charles Zhou:** Completed the function required for saving donors and shelters registration information. Add endpoints for accepting information from the front end. Created mock data and tested adding registration information onto it using the registration function created.
+- **Justin Huynh:** Completed the dashboard page.
+
+### C. Plans and Goals for the Next Week
+- **Fernando Pazaran:** Will create and complete the profile page on the frontend by Friday (starting stretch goals). Will also help connect the database to backend logic if help is needed.
+- **Gianna Carlson:** Will work on creating the basic matching algorithm for the backend, having it ready by Sunday. Revise sections of the living document.
+- **Alex(Xinlei) Liu:** Will work on connecting the registration form, login information, and donation/request forms with the database, having it ready by Sunday. 
+- **Charles Zhou:** Will work on sending back information to the front end, so when the front end sends the user id, the back end will send back username and usertype(donor/shelter). Will have it ready by Sunday.
+- **Justin Huynh:** Will create the “shelters near me” page, and will have researched the api needed for this by Sunday.
