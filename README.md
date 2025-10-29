@@ -20,11 +20,11 @@ Detailed document can be found here: https://docs.google.com/document/d/1atBtn-0
   Automatic matching between shelter needs and donor offerings when items align.  
   Email confirmations are sent to both the shelter and the donor once a match is made.
 
-## Code Layout
+## Developers
 
-> **[TODO]**
+See developer-documentation.md for guidelines to setup and test.
 
-## How to Compile / Run
+## Users
 
-> **[TODO]**
+See user-documentation.md for the user manual.
 
