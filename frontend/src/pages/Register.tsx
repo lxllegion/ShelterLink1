@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import AuthNavBar from '../components/AuthNavBar';
-import { registerDonor, registerShelter } from '../api/backend';
+import { register } from '../api/auth';
 
 function Register() {
   const [userType, setUserType] = useState<string | null>(null); // 'donor' or 'shelter'
@@ -20,54 +18,26 @@ function Register() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    // Validation
-    if (password !== confirmPassword) {
-      setError("Passwords don't match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // Create Firebase user
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid;
-      
-      // Register user in backend
-      if (userType === 'donor') {
-        await registerDonor({
-          userID: userId,
-          username: name,
-          email: email,
-          phone_number: phoneNumber,
-        });
-      } else if (userType === 'shelter') {
-        await registerShelter({
-          userID: userId,
-          username: name,
-          shelter_name: shelterName,
-          email: email,
-          phone_number: phoneNumber,
-        });
+      const result = await register({
+        email,
+        password,
+        confirmPassword,
+        name,
+        phoneNumber,
+        userType: userType as 'donor' | 'shelter',
+        shelterName,
+      });
+
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error || 'Registration failed');
       }
-      
-      // Store user type in localStorage (Remove when db is implemented)
-      localStorage.setItem('userType', userType || '');
-      localStorage.setItem('userName', name);
-      localStorage.setItem('userId', userId);
-      if (userType === 'shelter' && shelterName) {
-        localStorage.setItem('shelterName', shelterName);
-      }
-      
-      navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
     }

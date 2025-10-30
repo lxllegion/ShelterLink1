@@ -177,7 +177,7 @@ export interface Match {
 
 export const getMatches = async (): Promise<Match[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/matches`, {
+    const response = await fetch(`${API_BASE_URL}/match/matches`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -189,7 +189,8 @@ export const getMatches = async (): Promise<Match[]> => {
       throw new Error(error.detail || 'Failed to fetch matches');
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data.matches || [];
   } catch (error) {
     console.error('Error fetching matches:', error);
     throw error;
@@ -205,7 +206,7 @@ export interface UserInfo {
 
 export const getUserInfo = async (userId: string): Promise<UserInfo> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/register/user/${userId}`, {
+    const response = await fetch(`${API_BASE_URL}/user/user_info/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
