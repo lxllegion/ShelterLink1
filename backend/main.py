@@ -1,11 +1,15 @@
 from fastapi import FastAPI
-from routers import register
 from fastapi.middleware.cors import CORSMiddleware
+from routers.register import router as register_router
 from routers.forms import router as forms_router
+from routers.user import router as user_router
+from routers.match import router as match_router
 
 app = FastAPI()
-app.include_router(register.router)
+app.include_router(register_router)
 app.include_router(forms_router)
+app.include_router(user_router)
+app.include_router(match_router)
 
 # For frontend requests
 app.add_middleware(
