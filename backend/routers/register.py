@@ -1,6 +1,6 @@
-from fastapi import APIRouter
-from schemas.donor import DonorRegister
-from schemas.shelter import ShelterRegister
+from fastapi import APIRouter, HTTPException
+from schemas.donor import Donor
+from schemas.shelter import Shelter
 from services.signup import create_donor, create_shelter
 
 from pathlib import Path
@@ -22,25 +22,41 @@ router = APIRouter(
 
 # Donor Registration
 @router.post("/donor")
-def register_donor(donor: DonorRegister):
+def register_donor(donor: Donor):
     """
     Endpoint for donor registration.
     Accepts JSON with userID, username, email, and phone_number. for now.
     """
+    result = create_donor(donor)
+    
+    # Check if registration failed
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    # Only add to mock data if database registration succeeded
     data["donors"].append(donor.dict())
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    return create_donor(donor)
+    
+    return result
 
 
 # Shelter Registration
 @router.post("/shelter")
-def register_shelter(shelter: ShelterRegister):
+def register_shelter(shelter: Shelter):
     """
     Endpoint for shelter registration.
     Accepts JSON with userID, username, shelter_name, email, and phone_number. for now
     """
+    result = create_shelter(shelter)
+    
+    # Check if registration failed
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    # Only add to mock data if database registration succeeded
     data["shelters"].append(shelter.dict())
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=4)
-    return create_shelter(shelter)
+    
+    return result

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
-class ShelterRegister(BaseModel):
+class Shelter(BaseModel):
     userID: str
     username: str
     shelter_name: str
