@@ -35,11 +35,7 @@ function App() {
           />
           <Route 
             path="/register" 
-            element={
-              <PublicRoute>
-                <Register />
-              </PublicRoute>
-            } 
+            element={<Register />} 
           />
           <Route 
             path="/dashboard" 

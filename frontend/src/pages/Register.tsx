@@ -4,11 +4,12 @@ import AuthNavBar from '../components/AuthNavBar';
 import { register } from '../api/auth';
 
 function Register() {
-  const [userType, setUserType] = useState<string | null>(null); // 'donor' or 'shelter'
+  const [userType, setUserType] = useState<'donor' | 'shelter'>('donor');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [userName, setUserName] = useState('');
   const [shelterName, setShelterName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
@@ -26,8 +27,9 @@ function Register() {
         password,
         confirmPassword,
         name,
+        userName,
         phoneNumber,
-        userType: userType as 'donor' | 'shelter',
+        userType,
         shelterName,
       });
 
@@ -152,6 +154,29 @@ function Register() {
                   }}
                 />
               </div>
+
+              {userType === 'donor' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    required
+                    placeholder="Choose a unique username"
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              )}
 
               {userType === 'shelter' && (
                 <div>

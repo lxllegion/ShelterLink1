@@ -4,6 +4,9 @@ import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 
+const RETRY_DELAY = 1500;
+const MAX_RETRIES = 3;
+
 function Dashboard() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -23,11 +26,26 @@ function Dashboard() {
         setLoading(true);
         const userId = currentUser.uid;
 
-        // Fetch user type from backend
-        const userInfo = await getUserInfo(userId);
+        // Fetch user type from backend with retry logic
+        let userInfo;
+        let retries = MAX_RETRIES;
+        while (retries > 0) {
+          try {
+            userInfo = await getUserInfo(userId);
+            if (!userInfo.error && userInfo.userType) {
+              break;
+            }
+          } catch (err) {
+            console.log('Error fetching user info, retrying...', err);
+          }
+          retries--;
+          if (retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+          }
+        }
         
-        if (userInfo.error || !userInfo.userType) {
-          setError('User not found in system');
+        if (userInfo?.error || !userInfo?.userType) {
+          setError('User not found in system. Please try logging out and back in.');
           setLoading(false);
           return;
         }
@@ -118,7 +136,7 @@ function Dashboard() {
               cursor: 'pointer'
             }}
           >
-            {userType === 'donor' ? '+ New Donation' : '+ New Request'}
+            {loading ? '+' : userType === 'donor' ? '+ New Donation' : '+ New Request'}
           </button>
         </div>
 
