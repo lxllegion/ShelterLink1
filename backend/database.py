@@ -7,13 +7,24 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Use SQLite for testing if no DATABASE_URL is provided
+if not DATABASE_URL:
+    DATABASE_URL = "sqlite:///:memory:"
+
 engine = create_engine(DATABASE_URL)
 
-metadata = MetaData(schema="public")
+is_sqlite = DATABASE_URL.startswith("sqlite")
+
+if is_sqlite:
+    id_type = String(36)
+    metadata = MetaData()
+else:
+    id_type = UUID(as_uuid=True)
+    metadata = MetaData(schema="public")
 
 donors_table = Table(
     "donors", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("id", id_type, primary_key=True),
     Column("uid", String, unique=True),
     Column("name", String),
     Column("username", String, unique=True),
@@ -23,10 +34,14 @@ donors_table = Table(
 
 shelters_table = Table(
     "shelters", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
+    Column("id", id_type, primary_key=True),
     Column("uid", String, unique=True),
     Column("username", String, unique=True),
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
 )
+
+# Create tables if using SQLite (for testing)
+if is_sqlite:
+    metadata.create_all(engine)
