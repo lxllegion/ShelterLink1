@@ -39,7 +39,6 @@ def create_shelter(shelter: Shelter):
             ins = shelters_table.insert().values(
                 id=uuid.uuid4(),
                 uid=shelter.userID,
-                username=shelter.username,
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
                 phone_number=shelter.phone_number,
