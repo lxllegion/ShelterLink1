@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from schemas.donor import DonorRegister
-from schemas.shelter import ShelterRegister
+from schemas.donor import Donor
+from schemas.shelter import Shelter
 from services.signup import create_donor, create_shelter
 
 from pathlib import Path
@@ -22,7 +22,7 @@ router = APIRouter(
 
 # Donor Registration
 @router.post("/donor")
-def register_donor(donor: DonorRegister):
+def register_donor(donor: Donor):
     """
     Endpoint for donor registration.
     Accepts JSON with userID, username, email, and phone_number. for now.
@@ -35,7 +35,7 @@ def register_donor(donor: DonorRegister):
 
 # Shelter Registration
 @router.post("/shelter")
-def register_shelter(shelter: ShelterRegister):
+def register_shelter(shelter: Shelter):
     """
     Endpoint for shelter registration.
     Accepts JSON with userID, username, shelter_name, email, and phone_number. for now

@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, String, text
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from schemas.donor import DonorRegister
-from schemas.shelter import ShelterRegister
+from schemas.donor import Donor
+from schemas.shelter import Shelter
 
 # Database connection
 DATABASE_URL = f"postgresql://postgres.ukfpqtjwmutklagjssqp:uwcse403@aws-1-us-west-1.pooler.supabase.com:5432/postgres"
@@ -31,7 +31,7 @@ shelters_table = Table(
 )
 
 
-def create_donor(donor: DonorRegister):
+def create_donor(donor: Donor):
     """
     Save donor to database
     """
@@ -42,6 +42,7 @@ def create_donor(donor: DonorRegister):
             ins = donors_table.insert().values(
                 id=uuid.uuid4(),
                 uid=donor.userID,
+                name=donor.name,
                 username=donor.username,
                 email=donor.email,
                 phone_number=donor.phone_number,
@@ -55,7 +56,7 @@ def create_donor(donor: DonorRegister):
         return {"message": "Error registering donor", "error": str(e)}
 
 
-def create_shelter(shelter: ShelterRegister):
+def create_shelter(shelter: Shelter):
     """
     Save shelter to database
     """
@@ -66,6 +67,7 @@ def create_shelter(shelter: ShelterRegister):
             ins = shelters_table.insert().values(
                 id=uuid.uuid4(),
                 uid=shelter.userID,
+                name=shelter.name,
                 username=shelter.username,
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
