@@ -3,11 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from schemas.donor import Donor
 from schemas.shelter import Shelter
-
-# Database connection
-DATABASE_URL = f"postgresql://postgres.ukfpqtjwmutklagjssqp:uwcse403@aws-1-us-west-1.pooler.supabase.com:5432/postgres"
-engine = create_engine(DATABASE_URL)
-metadata = MetaData(schema="public")
+from database import engine, metadata
 
 # Define donors table
 donors_table = Table(
@@ -46,7 +42,7 @@ def create_donor(donor: Donor):
                 username=donor.username,
                 email=donor.email,
                 phone_number=donor.phone_number,
-            ).returning(donors_table.c.id, donors_table.c.username, donors_table.c.email)
+            ).returning(donors_table.c.id, donors_table.c.name, donors_table.c.username, donors_table.c.email, donors_table.c.phone_number)
             
             row = conn.execute(ins).mappings().one()
             trans.commit()
@@ -67,12 +63,11 @@ def create_shelter(shelter: Shelter):
             ins = shelters_table.insert().values(
                 id=uuid.uuid4(),
                 uid=shelter.userID,
-                name=shelter.name,
                 username=shelter.username,
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
                 phone_number=shelter.phone_number,
-            ).returning(shelters_table.c.id, shelters_table.c.username, shelters_table.c.email)
+            ).returning(shelters_table.c.id, shelters_table.c.shelter_name, shelters_table.c.username, shelters_table.c.email, shelters_table.c.phone_number)
             
             row = conn.execute(ins).mappings().one()
             trans.commit()
