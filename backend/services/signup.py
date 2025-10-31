@@ -11,6 +11,20 @@ def create_donor(donor: Donor):
         with engine.connect() as conn:
             trans = conn.begin()
             
+            # Check if username already exists in donors table
+            username_check = donors_table.select().where(donors_table.c.username == donor.username)
+            existing_username = conn.execute(username_check).first()
+            if existing_username:
+                trans.rollback()
+                return {"message": "Error registering donor", "error": "Username already exists"}
+            
+            # Check if email already exists in donors table
+            email_check = donors_table.select().where(donors_table.c.email == donor.email)
+            existing_email = conn.execute(email_check).first()
+            if existing_email:
+                trans.rollback()
+                return {"message": "Error registering donor", "error": "Email already exists"}
+            
             ins = donors_table.insert().values(
                 id=uuid.uuid4(),
                 uid=donor.userID,
@@ -36,9 +50,24 @@ def create_shelter(shelter: Shelter):
         with engine.connect() as conn:
             trans = conn.begin()
             
+            # Check if shelter_name already exists in shelters table
+            shelter_name_check = shelters_table.select().where(shelters_table.c.shelter_name == shelter.shelter_name)
+            existing_shelter = conn.execute(shelter_name_check).first()
+            if existing_shelter:
+                trans.rollback()
+                return {"message": "Error registering shelter", "error": "Shelter name already exists"}
+            
+            # Check if email already exists in shelters table
+            email_check = shelters_table.select().where(shelters_table.c.email == shelter.email)
+            existing_email = conn.execute(email_check).first()
+            if existing_email:
+                trans.rollback()
+                return {"message": "Error registering shelter", "error": "Email already exists"}
+            
             ins = shelters_table.insert().values(
                 id=uuid.uuid4(),
                 uid=shelter.userID,
+                username=shelter.username,
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
                 phone_number=shelter.phone_number,

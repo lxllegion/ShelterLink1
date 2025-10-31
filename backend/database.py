@@ -36,7 +36,6 @@ shelters_table = Table(
     "shelters", metadata,
     Column("id", id_type, primary_key=True),
     Column("uid", String, unique=True),
-    Column("username", String, unique=True),
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
