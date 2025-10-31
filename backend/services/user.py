@@ -1,31 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String
-from sqlalchemy.dialects.postgresql import UUID
-
-# Database connection (same as signup.py)
-DATABASE_URL = f"postgresql://postgres.ukfpqtjwmutklagjssqp:uwcse403@aws-1-us-west-1.pooler.supabase.com:5432/postgres"
-engine = create_engine(DATABASE_URL)
-metadata = MetaData(schema="public")
-
-# Define donors table
-donors_table = Table(
-    "donors", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
-    Column("uid", String, unique=True),
-    Column("username", String, unique=True),
-    Column("email", String, unique=True),
-    Column("phone_number", String),
-)
-
-# Define shelters table
-shelters_table = Table(
-    "shelters", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
-    Column("uid", String, unique=True),
-    Column("username", String, unique=True),
-    Column("shelter_name", String),
-    Column("email", String, unique=True),
-    Column("phone_number", String),
-)
+from database import engine, donors_table, shelters_table
 
 def get_user_info_service(user_id: str):
     """

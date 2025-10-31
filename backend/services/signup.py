@@ -1,31 +1,7 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String, text
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from schemas.donor import Donor
 from schemas.shelter import Shelter
-from database import engine, metadata
-
-# Define donors table
-donors_table = Table(
-    "donors", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
-    Column("uid", String, unique=True),
-    Column("username", String, unique=True),
-    Column("email", String, unique=True),
-    Column("phone_number", String),
-)
-
-# Define shelters table
-shelters_table = Table(
-    "shelters", metadata,
-    Column("id", UUID(as_uuid=True), primary_key=True),
-    Column("uid", String, unique=True),
-    Column("username", String, unique=True),
-    Column("shelter_name", String),
-    Column("email", String, unique=True),
-    Column("phone_number", String),
-)
-
+from database import engine, donors_table, shelters_table
 
 def create_donor(donor: Donor):
     """
