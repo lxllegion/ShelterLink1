@@ -61,6 +61,8 @@ if [ ! -f "requirements.txt" ]; then
   echo "pytest" >> requirements.txt
   echo "httpx" >> requirements.txt
   echo "pydantic[email]" >> requirements.txt
+  echo "pgvector" >> requirements.txt
+  echo "sentence-transformers" >> requirements.txt
 fi
 
 # Install backend dependencies (safe cross-platform pip call)
