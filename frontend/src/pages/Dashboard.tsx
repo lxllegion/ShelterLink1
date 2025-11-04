@@ -68,7 +68,7 @@ function Dashboard() {
         } else if (userInfo.userType === 'shelter') {
           // Fetch requests for this shelter
           const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.donor_id === userId); // Note: using donor_id field for shelter_id
+          const userRequests = requestsData.filter(r => r.shelter_id === userId); // Note: using donor_id field for shelter_id
           setRequests(userRequests);
           
           // Filter matches for this shelter

@@ -1,5 +1,6 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from pgvector.sqlalchemy import Vector
 import os
 from dotenv import load_dotenv
 
@@ -39,6 +40,30 @@ shelters_table = Table(
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
+)
+
+# Donations table
+donations_table = Table(
+    "donations", metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()),
+    Column("donor_id", String, nullable=False),  # Changed to String to accept string UUIDs
+    Column("item_name", String, nullable=False),
+    Column("quantity", Integer, nullable=False),
+    Column("category", String, nullable=False),
+    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
+    Column("embedding", Vector(384))
+)
+
+# Requests table
+requests_table = Table(
+    "requests", metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()),
+    Column("shelter_id", String, nullable=False),  # Changed to String to accept string UUIDs
+    Column("item_name", String, nullable=False),
+    Column("quantity", Integer, nullable=False),
+    Column("category", String, nullable=False),
+    Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
+    Column("embedding", Vector(384))
 )
 
 # Create tables if using SQLite (for testing)

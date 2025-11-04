@@ -7,3 +7,5 @@ alembic
 pydantic[email]
 pytest
 httpx
+pgvector
+sentence-transformers
