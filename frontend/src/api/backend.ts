@@ -26,7 +26,7 @@ export interface DonationForm {
 }
 
 export interface RequestForm {
-  donor_id: string;
+  shelter_id: string;
   item_name: string;
   quantity: number;
   category: string;

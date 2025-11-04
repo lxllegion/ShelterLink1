@@ -26,18 +26,21 @@ function Form() {
 
     try {
       const userId = currentUser?.uid || '';
-      
-      const formData = {
-        donor_id: userId,
-        item_name: description,
-        quantity: quantity,
-        category: category,
-      };
 
       if (userType === 'donor') {
-        await createDonation(formData);
+        await createDonation({
+          donor_id: userId,
+          item_name: description,
+          quantity: quantity,
+          category: category,
+        });
       } else {
-        await createRequest(formData);
+        await createRequest({
+          shelter_id: userId,
+          item_name: description,
+          quantity: quantity,
+          category: category,
+        });
       }
 
       navigate('/dashboard');
