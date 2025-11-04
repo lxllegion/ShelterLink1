@@ -51,6 +51,7 @@ function Dashboard() {
         }
 
         setUserType(userInfo.userType);
+        localStorage.setItem('userType', userInfo.userType);
 
         // Fetch matches for all users
         const matchesData = await getMatches();
@@ -251,8 +252,8 @@ function Dashboard() {
                     <div>
                       <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
                         {userType === 'donor' 
-                          ? `Match with Shelter (ID: ${match.shelter_id?.substring(0, 8)}...)`
-                          : `Match with Donor (ID: ${match.donor_id?.substring(0, 8)}...)`
+                          ? `Match with ${match.shelter_name}`
+                          : `Match with ${match.donor_username}`
                         }
                       </h3>
                       <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
@@ -273,7 +274,7 @@ function Dashboard() {
                       fontWeight: '600',
                       cursor: 'pointer'
                     }}>
-                      Schedule Drop-off
+                      Resolve Match
                     </button>
                   </div>
                 ))
