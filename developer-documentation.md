@@ -193,9 +193,9 @@ npm run build
 
 The backend does not require a build step, but the backend can be run with the following commands in the terminal (from the root directory):
 ```bash
-python3 -m venv venv
-venv\Scripts\activate
-source venv/bin/activate
+cd backend
+python3 -m venv venv        // python instead of python3 if on windows
+source venv/bin/activate    // venv\Scripts\activate if on windows
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
