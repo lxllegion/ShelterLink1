@@ -67,11 +67,10 @@ def create_shelter(shelter: Shelter):
             ins = shelters_table.insert().values(
                 id=uuid.uuid4(),
                 uid=shelter.userID,
-                username=shelter.username,
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
                 phone_number=shelter.phone_number,
-            ).returning(shelters_table.c.id, shelters_table.c.shelter_name, shelters_table.c.username, shelters_table.c.email, shelters_table.c.phone_number)
+            ).returning(shelters_table.c.id, shelters_table.c.shelter_name, shelters_table.c.email, shelters_table.c.phone_number)
             
             row = conn.execute(ins).mappings().one()
             trans.commit()
