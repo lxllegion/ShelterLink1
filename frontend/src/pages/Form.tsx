@@ -34,6 +34,10 @@ function Form() {
           quantity: quantity,
           category: category,
         });
+        
+        // Increment donation counter (temporary mock functionality)
+        const currentCount = parseInt(localStorage.getItem('donationCount') || '0');
+        localStorage.setItem('donationCount', (currentCount + 1).toString());
       } else {
         await createRequest({
           shelter_id: userId,
@@ -41,6 +45,10 @@ function Form() {
           quantity: quantity,
           category: category,
         });
+        
+        // Increment request counter (temporary mock functionality)
+        const currentCount = parseInt(localStorage.getItem('requestCount') || '0');
+        localStorage.setItem('requestCount', (currentCount + 1).toString());
       }
 
       navigate('/dashboard');
