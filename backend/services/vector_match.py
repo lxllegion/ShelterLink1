@@ -38,6 +38,14 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             # Find similar requests using cosine similarity
             # <=> is the cosine distance operator (0 = identical, 2 = opposite)
             # 1 - cosine_distance = cosine_similarity (0 = opposite, 1 = identical)
+            # Convert embedding to proper format for pgvector
+            if donation.embedding is None:
+                print(f"Donation {donation_id} has no embedding")
+                return []
+            # Format embedding as comma-separated list for pgvector
+            embedding_list = donation.embedding.tolist() if hasattr(donation.embedding, 'tolist') else list(donation.embedding)
+            embedding_str = '[' + ','.join(map(str, embedding_list)) + ']'
+            
             query = text("""
                 SELECT 
                     r.id,
@@ -49,18 +57,18 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
                     s.shelter_name,
                     s.email as shelter_email,
                     s.phone_number as shelter_phone,
-                    1 - (r.embedding <=> :embedding::vector) as similarity
+                    1 - (r.embedding <=> CAST(:embedding AS vector)) as similarity
                 FROM requests r
                 LEFT JOIN shelters s ON r.shelter_id = s.uid
-                WHERE 1 - (r.embedding <=> :embedding::vector) > :threshold
-                ORDER BY r.embedding <=> :embedding::vector
+                WHERE 1 - (r.embedding <=> CAST(:embedding AS vector)) > :threshold
+                ORDER BY r.embedding <=> CAST(:embedding AS vector)
                 LIMIT :limit
             """)
             
             results = conn.execute(
                 query, 
                 {
-                    "embedding": str(donation.embedding),
+                    "embedding": embedding_str,
                     "threshold": threshold,
                     "limit": limit
                 }
@@ -120,6 +128,14 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                 return []
             
             # Find similar donations using cosine similarity
+            # Convert embedding to proper format for pgvector
+            if request.embedding is None:
+                print(f"Request {request_id} has no embedding")
+                return []
+            # Format embedding as comma-separated list for pgvector
+            embedding_list = request.embedding.tolist() if hasattr(request.embedding, 'tolist') else list(request.embedding)
+            embedding_str = '[' + ','.join(map(str, embedding_list)) + ']'
+            
             query = text("""
                 SELECT 
                     d.id,
@@ -131,18 +147,18 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                     don.name as donor_name,
                     don.email as donor_email,
                     don.phone_number as donor_phone,
-                    1 - (d.embedding <=> :embedding::vector) as similarity
+                    1 - (d.embedding <=> CAST(:embedding AS vector)) as similarity
                 FROM donations d
                 LEFT JOIN donors don ON d.donor_id = don.uid
-                WHERE 1 - (d.embedding <=> :embedding::vector) > :threshold
-                ORDER BY d.embedding <=> :embedding::vector
+                WHERE 1 - (d.embedding <=> CAST(:embedding AS vector)) > :threshold
+                ORDER BY d.embedding <=> CAST(:embedding AS vector)
                 LIMIT :limit
             """)
             
             results = conn.execute(
                 query,
                 {
-                    "embedding": str(request.embedding),
+                    "embedding": embedding_str,
                     "threshold": threshold,
                     "limit": limit
                 }
