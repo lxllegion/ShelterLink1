@@ -6,6 +6,7 @@
 - Python 3.8 or higher
 - Node.js 14.0 or higher
 - Git
+- Bash (for windows to run the ./install.sh file)
 
 ### Steps:
 
@@ -90,16 +91,20 @@ Run the install.sh file:
 ./install.sh
 ```
 
-Then to build the frontend run the following commands in the terminal (from the root directory):
+Create .env files in the backend and frontend:
+- for the frontend: email fpazaran@uw.edu for these or follow the steps to create a firebase project at https://firebase.google.com/docs/web/setup#add-sdk-and-initialize
+- for the backend: email fpazaran@uw.edu for these or create a postgreSQL database
+
+Then to build and run the frontend enter the following commands in the terminal (from the frontend folder):
 ```bash
-cd frontend
 npm run build
+npm run start
 ```
 
-The backend does not require a build step, but the backend can be run with the following commands in the terminal (from the root directory):
+The backend does not require a build step, but the backend can be run with the following commands in the terminal (from the backend folder):
 ```bash
 python3 -m venv venv
-venv\Scripts\activate
+`venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
@@ -109,17 +114,16 @@ uvicorn main:app --reload
 
 ### Backend Testing
 
-To test the backend run the following (from the root directory with the virtual environment active):
+To test the backend run the following (from the backend folder):
 ```bash
-cd backend
-source venv/bin/activate
+`venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 pytest                # For all tests
 pytest tests/*.py     # For specific tests
 ```
 
 ### Frontend Testing
 
-To test the frontend run the following (from the root directory):
+To test the frontend run the following (from the frontend folder):
 ```bash
 cd frontend
 npm test                      # Run all tests
