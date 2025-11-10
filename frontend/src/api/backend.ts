@@ -167,8 +167,10 @@ export const getRequests = async (): Promise<RequestForm[]> => {
 // Match Type
 export interface Match {
   id: string;
-  donor_id?: string;
-  shelter_id?: string;
+  donor_id: string;
+  donor_username: string;
+  shelter_id: string;
+  shelter_name: string;
   item_name: string;
   quantity: number;
   category: string;
