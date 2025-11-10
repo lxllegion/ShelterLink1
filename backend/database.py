@@ -40,6 +40,12 @@ shelters_table = Table(
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
+    Column("address", String),
+    Column("city", String),
+    Column("state", String),
+    Column("zip_code", String),
+    Column("latitude", String),
+    Column("longitude", String),
 )
 
 # Donations table

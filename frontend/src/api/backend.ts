@@ -227,3 +227,40 @@ export const getUserInfo = async (userId: string): Promise<UserInfo> => {
     throw error;
   }
 };
+
+// Shelter Type
+export interface Shelter {
+  id: string;
+  uid: string;
+  shelter_name: string;
+  email: string;
+  phone_number: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  latitude?: string;
+  longitude?: string;
+}
+
+export const getShelters = async (): Promise<Shelter[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/shelters/`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch shelters');
+    }
+
+    const data = await response.json();
+    return data.shelters || [];
+  } catch (error) {
+    console.error('Error fetching shelters:', error);
+    throw error;
+  }
+};
