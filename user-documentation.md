@@ -21,19 +21,19 @@ ShelterLink is a web application designed to connect donors with homeless shelte
 4. Run the install file in the terminal by running `./install.sh` while in the root directory (ShelterLink1/)
 5. Create Firebase and Supabase projects
 
+
+
 ## How to Run the Software
 
 ### Running the Frontend
-(Follow steps given after running install.sh or):
-1. Run `cd frontend` (from ShelterLink1/ directory)
-2. Create `.env` file with Firebase credentials
-3. Run `npm start`
-4. Then open http://localhost:3000 to view the app
+(Follow steps given after running install.sh or from the frontend folder):
+1. Create a `.env` file with Firebase credentials (Email fpazaran@uw.edu for these or follow the steps to create a firebase project at https://firebase.google.com/docs/web/setup#add-sdk-and-initialize)
+2. Run `npm start`
+3. Then open http://localhost:3000 to view the app
 
 ### Running the Backend
-(Follow steps given after running install.sh or):
-1. Run `cd backend` (from ShelterLink1/ directory)
-2. Create `.env` file with database URL/API key
+(Follow steps given after running install.sh or from the backend folder):
+2. Create a `.env` file with database URL/API key (Email fpazaran@uw.edu for these or create a postgreSQL database)
 3. Run `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 4. Run `uvicorn main:app --reload`
 
