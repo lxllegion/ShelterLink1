@@ -17,7 +17,86 @@ function Dashboard() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Mock counters for temporary functionality
+  const [donationCount, setDonationCount] = useState(0);
+  const [requestCount, setRequestCount] = useState(0);
 
+
+  const mock_matches = [
+    {
+      "id": "1",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 1",
+      "item_name": "Inhalers",
+      "quantity": 10,
+      "category": "Medical Supplies",
+      "matched_at": "2025-01-01",
+      "status": "active"
+    },
+    {
+      "id": "2",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 2",
+      "item_name": "Canned Fruit",
+      "quantity": 15,
+      "category": "Food",
+      "matched_at": "2025-01-02",
+      "status": "active"
+    },
+    {
+      "id": "3",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 3",
+      "item_name": "Blankets",
+      "quantity": 20,
+      "category": "Clothing",
+      "matched_at": "2025-01-03",
+      "status": "active"
+    },
+    {
+      "id": "4",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 4",
+      "item_name": "Books",
+      "quantity": 20,
+      "category": "Books",
+      "matched_at": "2025-01-04",
+      "status": "active"
+    },
+    {
+      "id": "5",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 5",
+      "item_name": "Toys",
+      "quantity": 20,
+      "category": "Toys",
+      "matched_at": "2025-01-05",
+      "status": "active"
+    },
+    {
+      "id": "6",
+      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
+      "donor_username": "John Doe",
+      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
+      "shelter_name": "Shelter 6",
+      "item_name": "Furniture",
+      "quantity": 20,
+      "category": "Furniture",
+      "matched_at": "2025-01-06",
+      "status": "active"
+    }
+  ];
   useEffect(() => {
     const fetchUserTypeAndData = async () => {
       if (!currentUser) return;
@@ -51,29 +130,37 @@ function Dashboard() {
         }
 
         setUserType(userInfo.userType);
+        localStorage.setItem('userType', userInfo.userType);
 
-        // Fetch matches for all users
-        const matchesData = await getMatches();
+        // Load mock counters from localStorage
+        const storedDonationCount = localStorage.getItem('donationCount');
+        const storedRequestCount = localStorage.getItem('requestCount');
+        if (storedDonationCount) setDonationCount(parseInt(storedDonationCount));
+        if (storedRequestCount) setRequestCount(parseInt(storedRequestCount));
+
+        // Fetch matches for all users (uncomment when backend is ready)
+        // const matchesData = await getMatches();
         
-        if (userInfo.userType === 'donor') {
-          // Fetch donations for this donor
-          const donationsData = await getDonations();
-          const userDonations = donationsData.filter(d => d.donor_id === userId);
-          setDonations(userDonations);
+        // if (userInfo.userType === 'donor') {
+        //   // Fetch donations for this donor
+        //   const donationsData = await getDonations();
+        //   const userDonations = donationsData.filter(d => d.donor_id === userId);
+        //   setDonations(userDonations);
           
-          // Filter matches for this donor
-          const userMatches = matchesData.filter(m => m.donor_id === userId);
-          setMatches(userMatches);
-        } else if (userInfo.userType === 'shelter') {
-          // Fetch requests for this shelter
-          const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.donor_id === userId); // Note: using donor_id field for shelter_id
-          setRequests(userRequests);
+        //   // Filter matches for this donor
+        //   const userMatches = matchesData.filter(m => m.donor_id === userId);
+        //   setMatches(userMatches);
+        // } else if (userInfo.userType === 'shelter') {
+        //   // Fetch requests for this shelter
+        //   const requestsData = await getRequests();
+        //   const userRequests = requestsData.filter(r => r.shelter_id === userId); // Note: using donor_id field for shelter_id
+        //   setRequests(userRequests);
           
-          // Filter matches for this shelter
-          const userMatches = matchesData.filter(m => m.shelter_id === userId);
-          setMatches(userMatches);
-        }
+        //   // Filter matches for this shelter
+        //   const userMatches = matchesData.filter(m => m.shelter_id === userId);
+        //   setMatches(userMatches);
+        // }
+        setMatches(mock_matches);
       } catch (error: any) {
         console.error('Error fetching data:', error);
         setError(error.message);
@@ -85,8 +172,8 @@ function Dashboard() {
     fetchUserTypeAndData();
   }, [currentUser]);
 
-  // Calculate stats
-  const totalItems = userType === 'donor' ? donations.length : requests.length;
+  // Calculate stats (using mock counters for temporary functionality)
+  const totalItems = userType === 'donor' ? donationCount : requestCount;
   const activeMatches = matches.filter(m => m.status === 'active').length;
   const completedMatches = matches.filter(m => m.status === 'completed').length;
 
@@ -251,8 +338,8 @@ function Dashboard() {
                     <div>
                       <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
                         {userType === 'donor' 
-                          ? `Match with Shelter (ID: ${match.shelter_id?.substring(0, 8)}...)`
-                          : `Match with Donor (ID: ${match.donor_id?.substring(0, 8)}...)`
+                          ? `Match with ${match.shelter_name}`
+                          : `Match with ${match.donor_username}`
                         }
                       </h3>
                       <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
@@ -273,7 +360,7 @@ function Dashboard() {
                       fontWeight: '600',
                       cursor: 'pointer'
                     }}>
-                      Schedule Drop-off
+                      Resolve Match
                     </button>
                   </div>
                 ))
