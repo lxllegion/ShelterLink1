@@ -2,11 +2,20 @@ import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
+import { useState, useEffect } from "react";
 
 function NavBar() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  
+  const [userType, setUserType] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const userType = localStorage.getItem('userType');
+    setUserType(userType);
+    setLoading(false);
+  }, [currentUser]);
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -32,17 +41,18 @@ function NavBar() {
                 Dashboard
               </button>
               <button
-                onClick={() => navigate('/form')}
+                onClick={() => navigate('/profile')}
                 className="text-sm hover:text-gray-300 transition-colors"
               >
-                Create Form
+                Profile
               </button>
+              {userType === 'shelter' ? <></> : loading ? <></> : 
               <button
                 onClick={() => navigate('/shelters')}
                 className="text-sm hover:text-gray-300 transition-colors"
               >
                 Shelters Near Me
-              </button>
+              </button>}
             </div>
           </div>
           <div className="flex items-center space-x-4">
