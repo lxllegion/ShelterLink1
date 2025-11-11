@@ -70,6 +70,12 @@ def create_shelter(shelter: Shelter):
                 shelter_name=shelter.shelter_name,
                 email=shelter.email,
                 phone_number=shelter.phone_number,
+                address=shelter.address,
+                city=shelter.city,
+                state=shelter.state,
+                zip_code=shelter.zip_code,
+                latitude=shelter.latitude,
+                longitude=shelter.longitude,
             ).returning(shelters_table.c.id, shelters_table.c.shelter_name, shelters_table.c.email, shelters_table.c.phone_number)
             
             row = conn.execute(ins).mappings().one()
