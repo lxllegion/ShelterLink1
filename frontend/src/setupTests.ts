@@ -17,3 +17,30 @@ jest.mock('firebase/auth', () => ({
     return () => {};
   },
 }));
+
+// Mock react-leaflet components
+jest.mock('react-leaflet', () => {
+  const React = require('react');
+  return {
+    MapContainer: ({ children }: any) => React.createElement('div', { 'data-testid': 'map-container' }, children),
+    TileLayer: () => React.createElement('div', { 'data-testid': 'tile-layer' }),
+    Marker: ({ children }: any) => React.createElement('div', { 'data-testid': 'marker' }, children),
+    Popup: ({ children }: any) => React.createElement('div', { 'data-testid': 'popup' }, children),
+    useMap: () => ({}),
+    useMapEvent: () => ({}),
+    useMapEvents: () => ({}),
+  };
+});
+
+// Mock leaflet
+jest.mock('leaflet', () => ({
+  Icon: {
+    Default: {
+      prototype: {},
+      mergeOptions: jest.fn(),
+    },
+  },
+  icon: jest.fn(),
+  marker: jest.fn(),
+  map: jest.fn(),
+}));
