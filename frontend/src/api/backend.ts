@@ -1,4 +1,5 @@
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+// Ensure the base URL has no trailing slash to avoid double-slash in requests
+const API_BASE_URL = (process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000').replace(/\/+$/g, '');
 
 // Registration Types
 export interface DonorRegistration {

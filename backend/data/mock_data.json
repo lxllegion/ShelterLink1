@@ -17,6 +17,20 @@
             "username": "Carl",
             "email": "carl@gmail.com",
             "phone_number": "253-333-3333"
+        },
+        {
+            "userID": "JmOk1gSjZyYRiOlaCBIXfZiEdYY2",
+            "name": "Charles",
+            "username": "Charles7777",
+            "email": "xz265@uw.edu",
+            "phone_number": "2533333333"
+        },
+        {
+            "userID": "dxKTDRClJMZTigdZs7lOQVtORlk1",
+            "name": "Charles",
+            "username": "Charles7777",
+            "email": "xz265@uw.edu",
+            "phone_number": "2533333333"
         }
     ],
     "shelters": [

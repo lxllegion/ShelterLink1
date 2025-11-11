@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String
+from sqlalchemy import create_engine, MetaData, Table, Column, String, inspect
 from sqlalchemy.dialects.postgresql import UUID
 import os
 from dotenv import load_dotenv
@@ -6,21 +6,21 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
 
 # Use SQLite for testing if no DATABASE_URL is provided
 if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///:memory:"
-
+    raise ValueError("DATABASE_URL is not set in .env")
 engine = create_engine(DATABASE_URL)
 
-is_sqlite = DATABASE_URL.startswith("sqlite")
+# is_sqlite = DATABASE_URL.startswith("sqlite")
 
-if is_sqlite:
-    id_type = String(36)
-    metadata = MetaData()
-else:
-    id_type = UUID(as_uuid=True)
-    metadata = MetaData(schema="public")
+# if is_sqlite:
+#     id_type = String(36)
+#     metadata = MetaData()
+# else:
+id_type = UUID(as_uuid=True)
+metadata = MetaData(schema="public")
 
 donors_table = Table(
     "donors", metadata,
@@ -41,6 +41,11 @@ shelters_table = Table(
     Column("phone_number", String),
 )
 
-# Create tables if using SQLite (for testing)
-if is_sqlite:
-    metadata.create_all(engine)
+# # Create tables if using SQLite (for testing)
+# if is_sqlite:
+#     metadata.create_all(DATABASE_URL)
+# from sqlalchemy import inspect
+# from database import engine
+
+inspector = inspect(engine)
+print("Tables in database:", inspector.get_table_names())
