@@ -2,10 +2,9 @@ import json
 import os
 from schemas.forms import DonationForm, RequestForm
 from typing import List
-from database import engine
+from database import engine, requests_table, donations_table
 from services.embeddings import generate_embedding
-from database import requests_table, donations_table
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 # File paths - storing data
 DONATIONS_FILE = "donations.json"
@@ -30,6 +29,7 @@ def save_donation(donation: DonationForm) -> DonationForm:
                 item_name=donation.item_name,
                 quantity=donation.quantity,
                 category=donation.category,
+                item_description=donation.item_description,
                 embedding=embedding
             ).returning(donations_table.c.id))
             conn.commit()
@@ -51,6 +51,7 @@ def save_request(request: RequestForm) -> dict:
                 item_name=request.item_name,
                 quantity=request.quantity,
                 category=request.category,
+                item_description=request.item_description,
                 embedding=embedding
             ).returning(requests_table.c.id))
             conn.commit()
@@ -70,7 +71,24 @@ def get_donations() -> List[DonationForm]:
 
 # Get all reqs
 def get_requests() -> List[RequestForm]:
-    init_files()
-    with open(REQUESTS_FILE, "r") as f:
-        requests = json.load(f)
-    return [RequestForm(**request) for request in requests]
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(select(requests_table))
+            rows = result.mappings().fetchall()
+
+        return [
+            RequestForm(
+                id=row["id"],
+                shelter_id=row["shelter_id"],
+                item_name=row["item_name"],
+                quantity=row["quantity"],
+                category=row["category"],
+                item_description=row["item_description"],
+                created_at=row["created_at"]
+            )
+            for row in rows
+        ]
+    
+    except Exception as e:
+        print(f"Error saving request: {e}")  # Add logging
+        raise e  # Re-raise to get proper error response
