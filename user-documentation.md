@@ -33,9 +33,9 @@ ShelterLink is a web application designed to connect donors with homeless shelte
 
 ### Running the Backend
 (Follow steps given after running install.sh or from the backend folder):
-2. Create a `.env` file with database URL/API key (Email fpazaran@uw.edu for these or create a postgreSQL database)
-3. Run `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
-4. Run `uvicorn main:app --reload`
+1. Create a `.env` file with database URL/API key (Email fpazaran@uw.edu for these or create a postgreSQL database)
+2. Run `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
+3. Run `uvicorn main:app --reload`
 
 ## How to Use the Software
 
