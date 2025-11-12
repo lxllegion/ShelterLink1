@@ -1,19 +1,41 @@
 from schemas.match import Match
 import json
 from typing import List, Dict, Any
+from database import engine, donors_table, shelters_table, matches_table
 
-def get_matches_service():
-    """
-    Get all matches from mock data
-    """
+def get_matches_service(user_id: str, user_type: str):
     try:
-        with open("data/mock_matches.json", "r") as f:
-            matches = json.load(f)
-            return {"matches": matches}
+        with engine.connect() as conn:
+            # get match_ids array from user table
+            if user_type == "donor":
+                result = conn.execute(
+                    donors_table.select().where(donors_table.c.uid == user_id)
+                ).fetchone()
+                if not result:
+                    return {"error": f"Donor with uid {user_id} not found"}
+                match_ids = result.match_ids
+            elif user_type == "shelter":
+                result = conn.execute(
+                    shelters_table.select().where(shelters_table.c.uid == user_id)
+                ).fetchone()
+                if not result:
+                    return {"error": f"Shelter with uid {user_id} not found"}
+                match_ids = result.match_ids
+            else:
+                return {"error": "Invalid user type"}
+            
+            # If no match_ids or empty array, return empty matches
+            if not match_ids:
+                return {"matches": []}
+            
+            # get matches from matches table with the array of match_ids
+            matches = conn.execute(matches_table.select().where(matches_table.c.id.in_(match_ids))).fetchall()
+            
+            # Convert rows to dictionaries for JSON serialization
+            matches_list = [dict(row._mapping) for row in matches]
+            return {"matches": matches_list}
     except Exception as e:
         return {"error": str(e)}
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {"matches: []"}
     
 def load_json(file_path: str) -> List[Dict[Any, Any]]:
     with open(file_path, 'r') as f:
