@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DonationForm, RequestForm, Match, /*getDonations, getRequests, getMatches,*/ getUserInfo } from '../api/backend';
+import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches, getUserInfo } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 
@@ -12,8 +12,8 @@ function Dashboard() {
   const { currentUser } = useAuth();
   const [userType, setUserType] = useState<string | null>(null);
 
-  // const [donations, setDonations] = useState<DonationForm[]>([]);
-  // const [requests, setRequests] = useState<RequestForm[]>([]);
+  const [donations, setDonations] = useState<DonationForm[]>([]);
+  const [requests, setRequests] = useState<RequestForm[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
