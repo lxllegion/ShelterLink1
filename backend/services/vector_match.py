@@ -2,7 +2,7 @@
 Vector-based matching service using pgvector for semantic similarity between donations and requests
 """
 from sqlalchemy import select, text
-from database import engine, donations_table, requests_table, donors_table, shelters_table
+from database import engine, donations_table, requests_table, donors_table, shelters_table, matches_table
 from typing import List, Dict, Any, Optional
 from services.match import save_matches
 from datetime import datetime
@@ -34,6 +34,12 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             if not donation:
                 print(f"Donation {donation_id} not found")
                 return []
+            
+            # Get donor info to include in match (required by Match schema)
+            donor = conn.execute(
+                select(donors_table).where(donors_table.c.uid == donation.donor_id)
+            ).fetchone()
+            donor_name = donor.name if donor else "Unknown"
             
             # Find similar requests using cosine similarity
             # <=> is the cosine distance operator (0 = identical, 2 = opposite)
@@ -78,6 +84,8 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             for row in results:
                 match = {
                     "request_id": str(row.id),
+                    "donor_id": donation.donor_id,
+                    "donor_name": donor_name,
                     "shelter_id": row.shelter_id,
                     "shelter_name": row.shelter_name,
                     "shelter_email": row.shelter_email,
@@ -127,6 +135,12 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                 print(f"Request {request_id} not found")
                 return []
             
+            # Get shelter info to include in match (required by Match schema)
+            shelter = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == request.shelter_id)
+            ).fetchone()
+            shelter_name = shelter.shelter_name if shelter else "Unknown"
+            
             # Find similar donations using cosine similarity
             # Convert embedding to proper format for pgvector
             if request.embedding is None:
@@ -172,6 +186,8 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                     "donor_name": row.donor_name,
                     "donor_email": row.donor_email,
                     "donor_phone": row.donor_phone,
+                    "shelter_id": request.shelter_id,
+                    "shelter_name": shelter_name,
                     "item_name": row.item_name,
                     "quantity": row.quantity,
                     "category": row.category,
@@ -364,6 +380,64 @@ def get_matches_for_shelter(shelter_id: str, limit: int = 10, threshold: float =
         print(f"Error getting matches for shelter: {e}")
         return []
 
+def user_save_match_id(match_id: str, user_id: str, user_type: str, conn):
+    """
+    Add a match ID to the user's match_ids list in their table.
+    Uses a connection from the parent transaction.
+    
+    Args:
+        match_id: The UUID of the match to add
+        user_id: The UID of the donor or shelter
+        user_type: Either "donor" or "shelter"
+        conn: SQLAlchemy connection object from parent transaction
+    """
+    try:
+        if user_type == "donor":
+            table = donors_table
+        elif user_type == "shelter":
+            table = shelters_table
+        else:
+            raise ValueError(f"Invalid user type: {user_type}")
+        
+        # Get current match_ids for this user
+        result = conn.execute(
+            select(table.c.match_ids).where(table.c.uid == user_id)
+        ).fetchone()
+        
+        if result:
+            current_match_ids = result.match_ids
+            
+            # Handle different data types (list, string, or None)
+            if current_match_ids is None:
+                match_ids_list = []
+            elif isinstance(current_match_ids, list):
+                # Already a list (PostgreSQL array) - convert all elements to strings
+                match_ids_list = [str(mid) for mid in current_match_ids]
+            elif isinstance(current_match_ids, str):
+                # String format (comma-separated or empty)
+                if current_match_ids.strip():
+                    match_ids_list = [mid.strip() for mid in current_match_ids.split(",") if mid.strip()]
+                else:
+                    match_ids_list = []
+            else:
+                match_ids_list = []
+            
+            # Ensure match_id is a string
+            match_id_str = str(match_id)
+            
+            # Add new match_id if not already present
+            if match_id_str not in match_ids_list:
+                match_ids_list.append(match_id_str)
+            
+            # Update the user's record with the list (PostgreSQL will handle array conversion)
+            conn.execute(
+                table.update()
+                .where(table.c.uid == user_id)
+                .values(match_ids=match_ids_list)
+            )
+            
+    except Exception as e:
+        print(f"Error saving match ID to {user_type} {user_id}: {e}")
 
 def save_vector_matches(
     matches: List[Dict[str, Any]],
@@ -389,10 +463,9 @@ def save_vector_matches(
 
         formatted_matches: List[Dict[str, Any]] = []
 
-        # We’ll open a transaction just once if we are saving to DB
-        conn_ctx = engine.begin() if save_to_db else nullcontext()
-
-        with conn_ctx as conn:
+        # We'll open a transaction just once if we are saving to DB
+        # Use begin() instead of connect() to auto-commit the transaction
+        with engine.begin() as conn:
             for raw_match in matches:
                 # Generate an ID and timestamp once so JSON + DB stay in sync
                 match_id = str(uuid.uuid4())
@@ -460,6 +533,15 @@ def save_vector_matches(
                             "shelter_id": formatted_match["shelter_id"]
                         }
                     )
+                    
+                    # Add match_id to both donor and shelter match_ids lists
+                    donor_id = formatted_match["donor_id"]
+                    shelter_id = formatted_match["shelter_id"]
+                    
+                    if donor_id:
+                        user_save_match_id(match_id, donor_id, "donor", conn)
+                    if shelter_id:
+                        user_save_match_id(match_id, shelter_id, "shelter", conn)
 
         # Old save to local behavior
         # if save_to_file:
