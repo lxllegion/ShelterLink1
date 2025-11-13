@@ -21,7 +21,7 @@ async def get_matches_for_donation(
     donation_id: str,
     limit: int = Query(10, ge=1, le=100, description="Maximum number of matches to return"),
     threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum similarity score (0-1)"),
-    save: bool = Query(False, description="Save matches to JSON file")
+    save: bool = True
 ) -> Dict[str, Any]:
     """
     Find shelter requests that match a specific donation using vector similarity
@@ -50,7 +50,7 @@ async def get_matches_for_request(
     request_id: str,
     limit: int = Query(10, ge=1, le=100, description="Maximum number of matches to return"),
     threshold: float = Query(0.7, ge=0.0, le=1.0, description="Minimum similarity score (0-1)"),
-    save: bool = Query(False, description="Save matches to JSON file")
+    save: bool = True
 ) -> Dict[str, Any]:
     """
     Find donations that match a specific shelter request using vector similarity
@@ -82,10 +82,17 @@ async def get_best_match_for_donation(donation_id: str) -> Dict[str, Any]:
     Returns the highest similarity match or null if no good match found
     """
     best_match = find_best_match_for_donation(donation_id)
-    return {
+    
+    result = {
         "donation_id": donation_id,
         "best_match": best_match
     }
+
+    # Save
+    save_result = save_vector_matches([best_match])
+    result["saved"] = save_result.get("saved", 0)
+
+    return result
 
 
 @router.get("/request/{request_id}/best-match")
@@ -96,10 +103,17 @@ async def get_best_match_for_request(request_id: str) -> Dict[str, Any]:
     Returns the highest similarity match or null if no good match found
     """
     best_match = find_best_match_for_request(request_id)
-    return {
+
+    result = {
         "request_id": request_id,
         "best_match": best_match
     }
+
+    # Save
+    save_result = save_vector_matches([best_match])
+    result["saved"] = save_result.get("saved", 0)
+
+    return result
 
 
 @router.get("/all-matches")
@@ -113,10 +127,17 @@ async def get_all_matches(
     Useful for getting an overview of all possible matches
     """
     matches = find_all_matches(threshold=threshold, min_quantity_match=min_quantity_match)
-    return {
+    
+    result = {
         "total_matches": len(matches),
         "matches": matches
     }
+
+    # Save
+    save_result = save_vector_matches(matches)
+    result["saved"] = save_result.get("saved", 0)
+
+    return result
 
 
 @router.get("/donor/{donor_id}/matches")
@@ -131,11 +152,18 @@ async def get_donor_matches(
     Returns all matches for this donor's donations, sorted by similarity
     """
     matches = get_matches_for_donor(donor_id, limit=limit, threshold=threshold)
-    return {
+    
+    result = {
         "donor_id": donor_id,
         "total_matches": len(matches),
         "matches": matches
     }
+
+    # Save
+    save_result = save_vector_matches(matches)
+    result["saved"] = save_result.get("saved", 0)
+
+    return result
 
 
 @router.get("/shelter/{shelter_id}/matches")
@@ -150,9 +178,16 @@ async def get_shelter_matches(
     Returns all matches for this shelter's requests, sorted by similarity
     """
     matches = get_matches_for_shelter(shelter_id, limit=limit, threshold=threshold)
-    return {
+    
+    result = {
         "shelter_id": shelter_id,
         "total_matches": len(matches),
         "matches": matches
     }
+
+    # Save
+    save_result = save_vector_matches(matches)
+    result["saved"] = save_result.get("saved", 0)
+
+    return result
 
