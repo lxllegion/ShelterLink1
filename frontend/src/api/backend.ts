@@ -168,8 +168,10 @@ export const getRequests = async (): Promise<RequestForm[]> => {
 export interface Match {
   id: string;
   donor_id: string;
+  donation_id: string;
   donor_username: string;
   shelter_id: string;
+  request_id: string;
   shelter_name: string;
   item_name: string;
   quantity: number;
@@ -178,9 +180,9 @@ export interface Match {
   status: string;
 }
 
-export const getMatches = async (): Promise<Match[]> => {
+export const getMatches = async (user_id: string, user_type: string): Promise<Match[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/match/matches`, {
+    const response = await fetch(`${API_BASE_URL}/match/matches/${user_id}/${user_type}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

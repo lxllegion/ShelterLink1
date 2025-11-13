@@ -9,5 +9,7 @@ class Match(BaseModel):
   item_name: str
   quantity: int
   category: str
+  donation_id: str
+  request_id: str
   matched_at: str
   status: str
