@@ -365,47 +365,113 @@ def get_matches_for_shelter(shelter_id: str, limit: int = 10, threshold: float =
         return []
 
 
-def save_vector_matches(matches: List[Dict[str, Any]], save_to_file: bool = True) -> Dict[str, Any]:
+def save_vector_matches(
+    matches: List[Dict[str, Any]],
+    save_to_file: bool = True,
+    save_to_db: bool = True,
+) -> Dict[str, Any]:
     """
-    Save vector-based matches to JSON file using existing match format
-    
+    Save vector-based matches:
+      - to JSON file (existing behavior via save_matches)
+      - and to the Supabase/Postgres `matches` table.
+
     Args:
-        matches: List of matches from find_similar_requests/donations
-        save_to_file: Whether to save to mock_matches.json file
-    
+        matches: List of matches from find_similar_requests/donations/find_all_matches
+        save_to_file: Whether to save to mock_matches.json via save_matches
+        save_to_db: Whether to insert into the real `matches` SQL table
+
     Returns:
         Summary of saved matches
     """
     try:
         if not matches:
             return {"saved": 0, "message": "No matches to save"}
-        
-        # Convert vector matches to Match schema format
-        formatted_matches = []
-        for match in matches:
-            formatted_match = {
-                "id": str(uuid.uuid4()),
-                "donor_id": match.get("donor_id", ""),
-                "donor_username": match.get("donor_name", "Unknown"),
-                "shelter_id": match.get("shelter_id", ""),
-                "shelter_name": match.get("shelter_name", "Unknown"),
-                "item_name": match.get("item_name", ""),
-                "quantity": match.get("quantity", 0),
-                "category": match.get("category", ""),
-                "matched_at": datetime.now().isoformat(),
-                "status": "pending"
-            }
-            formatted_matches.append(formatted_match)
-        
-        if save_to_file:
-            save_matches(formatted_matches)
-        
+
+        formatted_matches: List[Dict[str, Any]] = []
+
+        # We’ll open a transaction just once if we are saving to DB
+        conn_ctx = engine.begin() if save_to_db else nullcontext()
+
+        with conn_ctx as conn:
+            for raw_match in matches:
+                # Generate an ID and timestamp once so JSON + DB stay in sync
+                match_id = str(uuid.uuid4())
+                now = datetime.utcnow()
+
+                formatted_match = {
+                    "id": match_id,
+                    "donor_id": raw_match.get("donor_id", ""),
+                    "donor_username": raw_match.get("donor_name", "Unknown"),
+                    "shelter_id": raw_match.get("shelter_id", ""),
+                    "shelter_name": raw_match.get("shelter_name", "Unknown"),
+                    "item_name": raw_match.get("item_name", ""),
+                    "quantity": raw_match.get("quantity", 0),
+                    "category": raw_match.get("category", ""),
+                    "matched_at": now.isoformat(),
+                    "status": "pending",
+
+                    # Those two ids not stored yet
+                    # "donation_id": raw_match.get("donation_id"),
+                    # "request_id": raw_match.get("request_id"),
+                }
+                formatted_matches.append(formatted_match)
+
+                if save_to_db:
+                    # Insert into the matches table
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO matches (
+                                id,
+                                status,
+                                matched_at,
+                                category,
+                                quantity,
+                                item_name,
+                                shelter_name,
+                                donor_username,
+                                donor_id,
+                                shelter_id
+                            )
+                            VALUES (
+                                :id,
+                                :status,
+                                :matched_at,
+                                :category,
+                                :quantity,
+                                :item_name,
+                                :shelter_name,
+                                :donor_username,
+                                :donor_id,
+                                :shelter_id
+                            )
+                            """
+                        ),
+                        {
+                            "id": match_id,
+                            "status": "pending",
+                            "matched_at": now,  # datetime -> timestamptz
+                            "category": formatted_match["category"],
+                            "quantity": formatted_match["quantity"],
+                            "item_name": formatted_match["item_name"],
+                            "shelter_name": formatted_match["shelter_name"],
+                            "donor_username": formatted_match["donor_username"],
+                            "donor_id": formatted_match["donor_id"],
+                            "shelter_id": formatted_match["shelter_id"]
+                        }
+                    )
+
+        # Old save to local behavior
+        # if save_to_file:
+        #     save_matches(formatted_matches)
+
         return {
             "saved": len(formatted_matches),
-            "matches": formatted_matches
+            "matches": formatted_matches,
         }
-        
+
     except Exception as e:
         print(f"Error saving vector matches: {e}")
         return {"saved": 0, "error": str(e)}
+
 
