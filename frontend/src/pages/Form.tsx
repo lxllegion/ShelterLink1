@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import { createDonation, createRequest } from '../api/backend';
+import { createDonation, createRequest, findMatchVectorDonation, findMatchVectorRequest } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 
 function Form() {
@@ -26,25 +26,70 @@ function Form() {
 
     try {
       const userId = currentUser?.uid || '';
+      let createdId = '';
 
       if (userType === 'donor') {
-        await createDonation({
+        const result = await createDonation({
           donor_id: userId,
           item_name: description,
           quantity: quantity,
           category: category,
         });
+        createdId = result.id;
+
+        // Find best match for the donation
+        try {
+          const matchResult = await findMatchVectorDonation(createdId);
+          if (matchResult.best_match) {
+            const match = matchResult.best_match;
+            alert(
+              `Match Found! 🎉\n\n` +
+              `Shelter: ${match.shelter_name || 'Unknown'}\n` +
+              `Item: ${match.item_name}\n` +
+              `Quantity Needed: ${match.quantity}\n` +
+              `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
+              `Can Fulfill: ${match.can_fulfill}`
+            );
+          } else {
+            alert('Donation submitted successfully! No matches found yet.');
+          }
+        } catch (matchError) {
+          console.error('Error finding match:', matchError);
+          alert('Donation submitted successfully!');
+        }
         
         // Increment donation counter (temporary mock functionality)
         const currentCount = parseInt(localStorage.getItem('donationCount') || '0');
         localStorage.setItem('donationCount', (currentCount + 1).toString());
       } else {
-        await createRequest({
+        const result = await createRequest({
           shelter_id: userId,
           item_name: description,
           quantity: quantity,
           category: category,
         });
+        createdId = result.id;
+
+        // Find best match for the request
+        try {
+          const matchResult = await findMatchVectorRequest(createdId);
+          if (matchResult.best_match) {
+            const match = matchResult.best_match;
+            alert(
+              `Match Found! 🎉\n\n` +
+              `Donor: ${match.donor_name || 'Unknown'}\n` +
+              `Item: ${match.item_name}\n` +
+              `Quantity Available: ${match.quantity}\n` +
+              `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
+              `Can Fulfill: ${match.can_fulfill}`
+            );
+          } else {
+            alert('Request submitted successfully! No matches found yet.');
+          }
+        } catch (matchError) {
+          console.error('Error finding match:', matchError);
+          alert('Request submitted successfully!');
+        }
         
         // Increment request counter (temporary mock functionality)
         const currentCount = parseInt(localStorage.getItem('requestCount') || '0');

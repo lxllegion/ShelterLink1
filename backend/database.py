@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey, ARRAY, JSON
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey, ARRAY, JSON, Text
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector
 import os
@@ -20,10 +20,12 @@ if is_sqlite:
     id_type = String(36)
     array_type = JSON  # SQLite doesn't support ARRAY, use JSON instead
     metadata = MetaData()
+    uuid_array_type = String  # SQLite doesn't support arrays, use String
 else:
     id_type = UUID(as_uuid=True)
     array_type = ARRAY(UUID(as_uuid=True))  # PostgreSQL supports ARRAY
     metadata = MetaData(schema="public")
+    uuid_array_type = ARRAY(UUID(as_uuid=False))  # PostgreSQL UUID array
 
 donors_table = Table(
     "donors", metadata,
@@ -33,8 +35,8 @@ donors_table = Table(
     Column("username", String, unique=True),
     Column("email", String, unique=True),
     Column("phone_number", String),
-    Column("match_ids", array_type),
-    Column("donation_ids", array_type),
+    Column("match_ids", uuid_array_type, nullable=True),
+    Column("donation_ids", uuid_array_type, nullable=True),
 )
 
 shelters_table = Table(
@@ -44,6 +46,8 @@ shelters_table = Table(
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
+    Column("match_ids", uuid_array_type, nullable=True),
+    Column("request_ids", uuid_array_type, nullable=True),
     Column("address", String),
     Column("city", String),
     Column("state", String),

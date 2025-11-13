@@ -202,6 +202,46 @@ export const getMatches = async (user_id: string, user_type: string): Promise<Ma
   }
 };
 
+export const findMatchVectorDonation = async (donationId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vector-match/donation/${donationId}/best-match`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to find match vector donation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error finding match vector:', error);
+    throw error;
+  }
+};
+
+export const findMatchVectorRequest = async (requestId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vector-match/request/${requestId}/best-match`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to find match vector request');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error finding match vector:', error);
+    throw error;
+  }
+};
+
 // User Info Type
 export interface UserInfo {
   userType: 'donor' | 'shelter' | null;
