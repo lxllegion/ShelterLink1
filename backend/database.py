@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey, ARRAY, JSON, Text
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector
+from sqlalchemy.pool import NullPool
 import os
 from dotenv import load_dotenv
 
@@ -12,9 +13,22 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///:memory:"
 
-engine = create_engine(DATABASE_URL)
-
 is_sqlite = DATABASE_URL.startswith("sqlite")
+
+# Create engine with appropriate pooling settings
+if is_sqlite:
+    engine = create_engine(DATABASE_URL)
+else:
+    # For Supabase pooler, use NullPool to avoid connection pooling conflicts
+    # Each request gets a fresh connection from Supabase's pooler
+    engine = create_engine(
+        DATABASE_URL,
+        poolclass=NullPool,
+        echo=False,
+        connect_args={
+            "connect_timeout": 10,
+        }
+    )
 
 if is_sqlite:
     id_type = String(36)
@@ -54,8 +68,6 @@ shelters_table = Table(
     Column("zip_code", String),
     Column("latitude", String),
     Column("longitude", String),
-    Column("match_ids", array_type),
-    Column("request_ids", array_type),
 )
 
 # Donations table
