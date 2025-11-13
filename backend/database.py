@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey, ARRAY, Text
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector
 import os
@@ -19,9 +19,11 @@ is_sqlite = DATABASE_URL.startswith("sqlite")
 if is_sqlite:
     id_type = String(36)
     metadata = MetaData()
+    uuid_array_type = String  # SQLite doesn't support arrays, use String
 else:
     id_type = UUID(as_uuid=True)
     metadata = MetaData(schema="public")
+    uuid_array_type = ARRAY(UUID(as_uuid=False))  # PostgreSQL UUID array
 
 donors_table = Table(
     "donors", metadata,
@@ -31,6 +33,8 @@ donors_table = Table(
     Column("username", String, unique=True),
     Column("email", String, unique=True),
     Column("phone_number", String),
+    Column("match_ids", uuid_array_type, nullable=True),
+    Column("donation_ids", uuid_array_type, nullable=True),
 )
 
 shelters_table = Table(
@@ -40,6 +44,8 @@ shelters_table = Table(
     Column("shelter_name", String),
     Column("email", String, unique=True),
     Column("phone_number", String),
+    Column("match_ids", uuid_array_type, nullable=True),
+    Column("request_ids", uuid_array_type, nullable=True),
     Column("address", String),
     Column("city", String),
     Column("state", String),
@@ -70,6 +76,20 @@ requests_table = Table(
     Column("category", String, nullable=False),
     Column("created_at", TIMESTAMP(timezone=True), server_default=func.now()),
     Column("embedding", Vector(384))
+)
+
+matches_table = Table(
+    "matches", metadata,
+    Column("id", UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()),
+    Column("donor_id", String, nullable=False),
+    Column("donor_username", String, nullable=False),
+    Column("shelter_id", String, nullable=False),
+    Column("shelter_name", String, nullable=False),
+    Column("item_name", String, nullable=False),
+    Column("quantity", Integer, nullable=False),
+    Column("category", String, nullable=False),
+    Column("matched_at", TIMESTAMP(timezone=True), server_default=func.now()),
+    Column("status", String, nullable=False),
 )
 
 # Create tables if using SQLite (for testing)
