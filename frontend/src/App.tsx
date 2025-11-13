@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import LandingPage from "./pages/LandingPage";
 import Form from "./pages/Form";
 import SheltersNearMe from "./pages/SheltersNearMe";
+import Profile from "./pages/Profile";
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <SheltersNearMe />
+              </ProtectedRoute>
+            } 
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

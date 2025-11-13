@@ -32,6 +32,33 @@ export interface RequestForm {
   category: string;
 }
 
+export interface UpdateDonationForm {
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export interface UpdateRequestForm {
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+// Database Types
+export interface Donation {
+  donation_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export interface Request {
+  request_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
 // Registration API calls
 export const registerDonor = async (data: DonorRegistration) => {
   try {
@@ -77,6 +104,88 @@ export const registerShelter = async (data: ShelterRegistration) => {
   }
 };
 
+// Update API calls
+export const updateDonor = async (donorId: string, data: DonorRegistration) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update donor: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating donor:', error);
+    throw error;
+  }
+};
+
+export const updateShelter = async (shelterId: string, data: ShelterRegistration) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update shelter: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating shelter:', error);
+    throw error;
+  }
+};
+
+export const deleteDonor = async (donorId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete donor');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting donor:', error);
+    throw error;
+  }
+};
+
+export const deleteShelter = async (shelterId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete shelter');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting shelter:', error);
+    throw error;
+  }
+};
 // Forms API calls
 export const createDonation = async (data: DonationForm) => {
   try {
@@ -303,6 +412,90 @@ export const getShelters = async (): Promise<Shelter[]> => {
     return data.shelters || [];
   } catch (error) {
     console.error('Error fetching shelters:', error);
+    throw error;
+  }
+};
+
+export const deleteDonation = async (donationId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete donation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting donation:', error);
+    throw error;
+  }
+};
+
+export const deleteRequest = async (requestId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete request');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting request:', error);
+    throw error;
+  }
+};
+
+export const updateDonation = async (donationId: string, data: UpdateDonationForm) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update donation: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating donation:', error);
+    throw error;
+  }
+};
+
+export const updateRequest = async (requestId: string, data: UpdateRequestForm) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update request: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating request:', error);
     throw error;
   }
 };
