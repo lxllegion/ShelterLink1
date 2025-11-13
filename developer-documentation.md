@@ -6,6 +6,7 @@
 - Python 3.8 or higher
 - Node.js 14.0 or higher
 - Git
+- Bash (for windows to run the ./install.sh file)
 
 ### Steps:
 
@@ -20,9 +21,12 @@ Our directory structure is as follows:
 ShelterLink1/
 ├── backend/                  # FastAPI Python backend
 ├── frontend/                 # React TypeScript frontend
-├── reports/
+├── reports/                  # Team weekly reports
 ├── install.sh                # Automated setup script
 ├── README.md                 # Project overview
+├── SHELTERS_NEAR_ME_SETUP.md # Nearby shelters feature guide
+├── user-documentation        # User manual
+├── developer-documentation   # Developer manual
 └── coding-guidelines.md      # Code style and quality guidelines
 ```
 
@@ -33,22 +37,40 @@ backend/
 ├── requirements.txt          # Python dependencies
 ├── pytest.ini                # pytest configuration file
 ├── routers/
-│   ├── register.py
-│   └── forms.py
+│   ├── register.py           # Endpoints to POST register new accounts
+│   ├── match.py              # Endpoints to GET /match to trigger matching
+│   ├── shelters.py           # Endpoints to GET /shelters for shelter data
+│   ├── user.py               # Token verification
+│   └── forms.py              # Endpoints to GET/POST new/retrieve forms
+│ 
 ├── schemas/                  # Pydantic models for data
-│   ├── donor.py
-│   ├── shelter.py
-│   └── forms.py
+│   ├── donor.py              # Pydantic models for donor data
+│   ├── shelter.py            # Pydantic models for shelter data
+│   ├── match.py              # Pydantic models for match data
+│   └── forms.py              # Pydantic models for form data
+│ 
 ├── services/                 # Logic layer
-│   ├── signup.py
-│   ├── forms.py
-│   └── match.py              # Matching algorithm
+│   ├── embeddings.py         # Generates embeddings for the database
+│   ├── forms.py              # Saves/retrieves form data 
+│   ├── match.py              # Matching algorithm
+│   ├── shelters.py           # Retrieves shelter info from database
+│   ├── signup.py             # Saves donor/shelter info to database
+│   └── user.py               # Retrieves user info from database
+│ 
 ├── data/                     # Mock/test data files
 │   ├── mock_data.json        # Sample user data
 │   ├── mock_donations.json   # Sample donation posts
-│   └── mock_requests.json    # Sample request posts
-└── tests/                    # Test suite
-    └── test_example.py       # Example/basic tests
+│   ├── mock_requests.json    # Sample request posts
+│   └── mock_matches.json     # Sample matches
+│ 
+├── tests/                    # Test suite
+│   └── test_example.py       # Basic tests for matching algorithm
+├── firebase.py               # Firebase utilities
+├── test_supabase.py          # Database test for functionality
+└── database.py               # Database table information
+
+
+
 ```
 
 ### Frontend:
@@ -61,21 +83,28 @@ frontend/
 │   ├── firebase.ts           # Firebase SDK initialization
 │   ├── index.css
 │   ├── api/                  # Backend API integration
-│   │   ├── auth.ts
-│   │   └── backend.ts
+│   │   ├── auth.ts           # Calls backend to /register and /login
+│   │   └── backend.ts        # Calls backend
+│   │
 │   ├── components/           # Reusable React components
-│   │   ├── NavBar.tsx
-│   │   └── AuthNavBar.tsx
+│   │   ├── NavBar.tsx        # Navigation bar for authenticated flow
+│   │   └── AuthNavBar.tsx    # Navigation bar for signup/login flow
+│   │
 │   ├── contexts/             # React context providers
 │   │   └── AuthContext.tsx
+│   │
 │   ├── pages/                # Page-level components
-│   │   ├── LandingPage.tsx
-│   │   ├── Login.tsx
-│   │   ├── Register.tsx
-│   │   ├── Dashboard.tsx
-│   │   └── Form.tsx
+│   │   ├── LandingPage.tsx   # Home page
+│   │   ├── Login.tsx         # Login page
+│   │   ├── Register.tsx      # Registration page
+│   │   ├── Dashboard.tsx     # User dashboard page
+│   │   ├── Form.tsx          # Donation/request form page
+│   │   ├── SheltersNearMe.tsx# Shelters near me page
+│   │   └──  Profile.tsx      # User profile page - stretch goal
+│   │
 │   └── tests/                # Test suite
-│       └── App.test.tsx
+│       └── App.test.tsx      # Unit/integration tests
+│ 
 ├── package.json
 ├── package-lock.json
 ├── tsconfig.json
@@ -90,17 +119,20 @@ Run the install.sh file:
 ./install.sh
 ```
 
-Then to build the frontend run the following commands in the terminal (from the root directory):
+Create .env files in the backend and frontend:
+- for the frontend: email fpazaran@uw.edu for these or follow the steps to create a firebase project at https://firebase.google.com/docs/web/setup#add-sdk-and-initialize
+- for the backend: email fpazaran@uw.edu for these or create a postgreSQL database
+
+Then to build and run the frontend enter the following commands in the terminal (from the frontend folder):
 ```bash
-cd frontend
 npm run build
+npm run start
 ```
 
-The backend does not require a build step, but the backend can be run with the following commands in the terminal (from the root directory):
+The backend does not require a build step, but the backend can be run with the following commands in the terminal (from the backend folder):
 ```bash
 python3 -m venv venv
-venv\Scripts\activate
-source venv/bin/activate
+`venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
@@ -109,17 +141,16 @@ uvicorn main:app --reload
 
 ### Backend Testing
 
-To test the backend run the following (from the root directory with the virtual environment active):
+To test the backend run the following (from the backend folder):
 ```bash
-cd backend
-source venv/bin/activate
+`venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 pytest                # For all tests
 pytest tests/*.py     # For specific tests
 ```
 
 ### Frontend Testing
 
-To test the frontend run the following (from the root directory):
+To test the frontend run the following (from the frontend folder):
 ```bash
 cd frontend
 npm test                      # Run all tests

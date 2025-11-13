@@ -57,6 +57,10 @@ function Form() {
           console.error('Error finding match:', matchError);
           alert('Donation submitted successfully!');
         }
+        
+        // Increment donation counter (temporary mock functionality)
+        const currentCount = parseInt(localStorage.getItem('donationCount') || '0');
+        localStorage.setItem('donationCount', (currentCount + 1).toString());
       } else {
         const result = await createRequest({
           shelter_id: userId,
@@ -86,6 +90,10 @@ function Form() {
           console.error('Error finding match:', matchError);
           alert('Request submitted successfully!');
         }
+        
+        // Increment request counter (temporary mock functionality)
+        const currentCount = parseInt(localStorage.getItem('requestCount') || '0');
+        localStorage.setItem('requestCount', (currentCount + 1).toString());
       }
 
       navigate('/dashboard');

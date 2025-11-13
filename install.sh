@@ -107,6 +107,16 @@ else
   echo "✅ React Router DOM already listed in package.json"
 fi
 
+# --- Install Leaflet (Map library) ---
+if ! grep -q "\"leaflet\"" package.json; then
+  echo ""
+  echo "🗺️  Installing Leaflet map library..."
+  npm install leaflet react-leaflet
+  npm install --save-dev @types/leaflet
+else
+  echo "✅ Leaflet already listed in package.json"
+fi
+
 # --- Install Tailwind CSS v3 (compatible version) ---
 echo ""
 echo "🎨 Installing Tailwind CSS v3..."

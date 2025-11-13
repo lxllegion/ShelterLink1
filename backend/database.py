@@ -46,6 +46,12 @@ shelters_table = Table(
     Column("phone_number", String),
     Column("match_ids", uuid_array_type, nullable=True),
     Column("request_ids", uuid_array_type, nullable=True),
+    Column("address", String),
+    Column("city", String),
+    Column("state", String),
+    Column("zip_code", String),
+    Column("latitude", String),
+    Column("longitude", String),
 )
 
 # Donations table
