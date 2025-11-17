@@ -82,13 +82,13 @@ def get_donations() -> List[DonationForm]:
         ))
     return donations
 
-# Get all reqs
-def get_requests() -> List[RequestForm]:
-    init_files()
-    with open(REQUESTS_FILE, "r") as f:
-        requests = json.load(f)
-    return [RequestForm(**request) for request in requests]
-
+# # Get all reqs
+# def get_requests() -> List[RequestForm]:
+#     init_files()
+#     with open(REQUESTS_FILE, "r") as f:
+#         requests = json.load(f)
+#     return [RequestForm(**request) for request in requests]
+#get all reqs
 def get_requests() -> List[RequestForm]:
     with engine.connect() as conn:
         result = conn.execute(select(requests_table)).fetchall()
