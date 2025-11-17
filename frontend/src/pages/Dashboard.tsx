@@ -19,7 +19,7 @@ function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   
   // Mock counters for temporary functionality
-  const [donationCount, setDonationCount] = useState(0);
+  // const [donationCount, setDonationCount] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
 
 
@@ -133,33 +133,33 @@ function Dashboard() {
         localStorage.setItem('userType', userInfo.userType);
 
         // Load mock counters from localStorage
-        const storedDonationCount = localStorage.getItem('donationCount');
+        // const storedDonationCount = localStorage.getItem('donationCount');
         const storedRequestCount = localStorage.getItem('requestCount');
-        if (storedDonationCount) setDonationCount(parseInt(storedDonationCount));
+        // if (storedDonationCount) setDonationCount(parseInt(storedDonationCount));
         if (storedRequestCount) setRequestCount(parseInt(storedRequestCount));
 
         // Fetch matches for all users (uncomment when backend is ready)
         // const matchesData = await getMatches();
         
-        // if (userInfo.userType === 'donor') {
-        //   // Fetch donations for this donor
-        //   const donationsData = await getDonations();
-        //   const userDonations = donationsData.filter(d => d.donor_id === userId);
-        //   setDonations(userDonations);
+        if (userInfo.userType === 'donor') {
+          // Fetch donations for this donor
+          const donationsData = await getDonations();
+          const userDonations = donationsData.filter(d => d.donor_id === userId);
+          setDonations(userDonations);
           
         //   // Filter matches for this donor
         //   const userMatches = matchesData.filter(m => m.donor_id === userId);
         //   setMatches(userMatches);
-        // } else if (userInfo.userType === 'shelter') {
-        //   // Fetch requests for this shelter
-        //   const requestsData = await getRequests();
-        //   const userRequests = requestsData.filter(r => r.shelter_id === userId); // Note: using donor_id field for shelter_id
-        //   setRequests(userRequests);
+        } else if (userInfo.userType === 'shelter') {
+          // Fetch requests for this shelter
+          const requestsData = await getRequests();
+          const userRequests = requestsData.filter(r => r.shelter_id === userId); // Note: using donor_id field for shelter_id
+          setRequests(userRequests);
           
         //   // Filter matches for this shelter
         //   const userMatches = matchesData.filter(m => m.shelter_id === userId);
         //   setMatches(userMatches);
-        // }
+        }
         setMatches(mock_matches);
       } catch (error: any) {
         console.error('Error fetching data:', error);
@@ -173,7 +173,9 @@ function Dashboard() {
   }, [currentUser]);
 
   // Calculate stats (using mock counters for temporary functionality)
-  const totalItems = userType === 'donor' ? donationCount : requestCount;
+  const totalItems = userType === 'donor'
+    ? donations.length
+    : requests.length;
   const activeMatches = matches.filter(m => m.status === 'active').length;
   const completedMatches = matches.filter(m => m.status === 'completed').length;
 

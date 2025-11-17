@@ -62,11 +62,7 @@ def save_request(request: RequestForm) -> dict:
         raise e  # Re-raise to get proper error response
 
 # Get all donations
-# def get_donations() -> List[DonationForm]:
-#     init_files()
-#     with open(DONATIONS_FILE, "r") as f:
-#         donations = json.load(f)
-#     return [DonationForm(**donation) for donation in donations]
+#tested with FastAPI
 def get_donations() -> List[DonationForm]:
     with engine.connect() as conn:
         result = conn.execute(select(donations_table)).fetchall()
@@ -83,12 +79,7 @@ def get_donations() -> List[DonationForm]:
     return donations
 
 # # Get all reqs
-# def get_requests() -> List[RequestForm]:
-#     init_files()
-#     with open(REQUESTS_FILE, "r") as f:
-#         requests = json.load(f)
-#     return [RequestForm(**request) for request in requests]
-#get all reqs
+
 def get_requests() -> List[RequestForm]:
     with engine.connect() as conn:
         result = conn.execute(select(requests_table)).fetchall()
