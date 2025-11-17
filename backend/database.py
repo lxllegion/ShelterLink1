@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey
+from sqlalchemy import create_engine, MetaData, Table, Column, String, Integer, TIMESTAMP, func, ForeignKey, inspect
 from sqlalchemy.dialects.postgresql import UUID
 from pgvector.sqlalchemy import Vector
 import os

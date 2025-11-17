@@ -19,7 +19,6 @@
             "phone_number": "253-333-3333"
         },
         {
-
             "userID": "f5mAv8yIY2YMi94vySLt1ZZY6FR2",
             "name": "Justin Huynh",
             "username": "jus.huy206@gmail.com",
@@ -32,6 +31,13 @@
             "username": "jus.huy206@gmail.com",
             "email": "jus.huy206@gmail.com",
             "phone_number": "2064687164"
+        },
+        {
+            "userID": "CUgyTTFublWajDz7keKjMLqkFDm2",
+            "name": "Charles",
+            "username": "Charles7777",
+            "email": "xz265@uw.edu",
+            "phone_number": "2533333333"
         }
     ],
     "shelters": [

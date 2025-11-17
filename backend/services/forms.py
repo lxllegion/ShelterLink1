@@ -74,3 +74,5 @@ def get_requests() -> List[RequestForm]:
     with open(REQUESTS_FILE, "r") as f:
         requests = json.load(f)
     return [RequestForm(**request) for request in requests]
+
+#work on showing up a list of donations on the profile page.
