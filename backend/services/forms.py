@@ -5,7 +5,7 @@ from typing import List
 from database import engine
 from services.embeddings import generate_embedding
 from database import requests_table, donations_table
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 
 # File paths - storing data
 DONATIONS_FILE = "donations.json"
@@ -62,11 +62,25 @@ def save_request(request: RequestForm) -> dict:
         raise e  # Re-raise to get proper error response
 
 # Get all donations
+# def get_donations() -> List[DonationForm]:
+#     init_files()
+#     with open(DONATIONS_FILE, "r") as f:
+#         donations = json.load(f)
+#     return [DonationForm(**donation) for donation in donations]
 def get_donations() -> List[DonationForm]:
-    init_files()
-    with open(DONATIONS_FILE, "r") as f:
-        donations = json.load(f)
-    return [DonationForm(**donation) for donation in donations]
+    with engine.connect() as conn:
+        result = conn.execute(select(donations_table)).fetchall()
+
+    # Convert rows to Pydantic models
+    donations = []
+    for row in result:
+        donations.append(DonationForm(
+            donor_id=row.donor_id,
+            item_name=row.item_name,
+            quantity=row.quantity,
+            category=row.category,
+        ))
+    return donations
 
 # Get all reqs
 def get_requests() -> List[RequestForm]:
@@ -74,5 +88,19 @@ def get_requests() -> List[RequestForm]:
     with open(REQUESTS_FILE, "r") as f:
         requests = json.load(f)
     return [RequestForm(**request) for request in requests]
+
+def get_requests() -> List[RequestForm]:
+    with engine.connect() as conn:
+        result = conn.execute(select(requests_table)).fetchall()
+
+    requests = []
+    for row in result:
+        requests.append(RequestForm(
+            shelter_id=row.shelter_id,
+            item_name=row.item_name,
+            quantity=row.quantity,
+            category=row.category,
+        ))
+    return requests
 
 #work on showing up a list of donations on the profile page.
