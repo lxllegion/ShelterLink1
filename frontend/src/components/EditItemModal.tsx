@@ -100,36 +100,6 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* Item Name */}
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: 'bold',
-                  marginBottom: '8px',
-                  color: '#374151'
-                }}
-              >
-                Item Name
-              </label>
-              <input
-                type="text"
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-                required
-                placeholder="e.g., Winter Coats"
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  border: '2px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  boxSizing: 'border-box'
-                }}
-              />
-            </div>
-
             {/* Category */}
             <div>
               <label
@@ -164,6 +134,36 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Item Description */}
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  marginBottom: '8px',
+                  color: '#374151'
+                }}
+              >
+                Item Description
+              </label>
+              <input
+                type="text"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                required
+                placeholder="e.g., Winter Coats"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: '2px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  boxSizing: 'border-box'
+                }}
+              />
             </div>
 
             {/* Quantity */}
