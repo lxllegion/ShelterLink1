@@ -283,19 +283,20 @@ function Profile() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
+    <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <NavBar />
 
-      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 32px' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 32px', width: '100%', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '32px'
+          marginBottom: '16px',
+          flexShrink: 0
         }}>
           <h1 style={{
-            fontSize: '36px',
+            fontSize: '28px',
             fontWeight: 'bold',
             color: '#1f2937'
           }}>
@@ -322,7 +323,7 @@ function Profile() {
 
         {/* Loading State */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '48px' }}>
+          <div style={{ textAlign: 'center', padding: '48px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ fontSize: '18px', color: '#6b7280' }}>Loading...</p>
           </div>
         )}
@@ -334,7 +335,7 @@ function Profile() {
             border: '2px solid #ef4444',
             borderRadius: '12px',
             padding: '16px',
-            marginBottom: '32px'
+            flexShrink: 0
           }}>
             <p style={{ color: '#991b1b', fontWeight: '600' }}>Error: {error}</p>
           </div>
@@ -346,23 +347,26 @@ function Profile() {
             backgroundColor: 'white',
             borderRadius: '12px',
             border: '2px solid black',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
           }}>
             {/* User Type Badge */}
             <div style={{
-              padding: '24px',
+              padding: '16px',
               borderBottom: '1px solid #e5e7eb',
-              backgroundColor: userInfo.userType === 'donor' ? '#fef2f2' : '#eff6ff'
+              backgroundColor: userInfo.userType === 'donor' ? '#fef2f2' : '#eff6ff',
+              flexShrink: 0
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ fontSize: '40px' }}>
+                <div style={{ fontSize: '32px' }}>
                   {userInfo.userType === 'donor' ? '❤️' : '🏠'}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
                     {userInfo.userType === 'donor' ? 'Donor Account' : 'Shelter Account'}
                   </h2>
-                  <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                  <p style={{ fontSize: '13px', color: '#6b7280' }}>
                     {userInfo.userType === 'donor' 
                       ? 'Making a difference through donations'
                       : 'Helping those in need'
@@ -373,15 +377,15 @@ function Profile() {
             </div>
 
             {/* Profile Information */}
-            <div style={{ padding: '32px' }}>
+            <div style={{ padding: '20px' }}>
               {isEditing ? (
                 // Edit Mode
                 <form onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {/* Name (Donor only) */}
                     {userInfo.userType === 'donor' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
                           Full Name
                         </label>
                         <input
@@ -391,10 +395,10 @@ function Profile() {
                           required
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: '8px 12px',
                             border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            fontSize: '16px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
                             boxSizing: 'border-box'
                           }}
                         />
@@ -404,7 +408,7 @@ function Profile() {
                     {/* Username (Donor only) */}
                     {userInfo.userType === 'donor' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
                           Username
                         </label>
                         <input
@@ -414,10 +418,10 @@ function Profile() {
                           required
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: '8px 12px',
                             border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            fontSize: '16px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
                             boxSizing: 'border-box'
                           }}
                         />
@@ -427,7 +431,7 @@ function Profile() {
                     {/* Shelter Name (Shelter only) */}
                     {userInfo.userType === 'shelter' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
                           Shelter Name
                         </label>
                         <input
@@ -437,10 +441,10 @@ function Profile() {
                           required
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: '8px 12px',
                             border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            fontSize: '16px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
                             boxSizing: 'border-box'
                           }}
                         />
@@ -449,7 +453,7 @@ function Profile() {
 
                     {/* Phone Number */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
                         Phone Number
                       </label>
                       <input
@@ -459,10 +463,10 @@ function Profile() {
                         required
                         style={{
                           width: '100%',
-                          padding: '12px 16px',
+                          padding: '8px 12px',
                           border: '2px solid #e5e7eb',
-                          borderRadius: '8px',
-                          fontSize: '16px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
                           boxSizing: 'border-box'
                         }}
                       />
@@ -554,17 +558,17 @@ function Profile() {
                     )}
 
                     {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                       <button
                         type="submit"
                         style={{
                           flex: 1,
                           backgroundColor: 'black',
                           color: 'white',
-                          padding: '14px',
+                          padding: '10px',
                           border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '16px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
                           fontWeight: 'bold',
                           cursor: 'pointer'
                         }}
@@ -578,10 +582,10 @@ function Profile() {
                           flex: 1,
                           backgroundColor: 'white',
                           color: 'black',
-                          padding: '14px',
+                          padding: '10px',
                           border: '2px solid black',
-                          borderRadius: '8px',
-                          fontSize: '16px',
+                          borderRadius: '6px',
+                          fontSize: '14px',
                           fontWeight: 'bold',
                           cursor: 'pointer'
                         }}
@@ -593,14 +597,14 @@ function Profile() {
                 </form>
               ) : (
                 // View Mode
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Name (Donor only) */}
                   {userInfo.userType === 'donor' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Full Name
                       </label>
-                      <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                         {userInfo.userData?.name || 'Not provided'}
                       </p>
                     </div>
@@ -609,10 +613,10 @@ function Profile() {
                   {/* Username (Donor only) */}
                   {userInfo.userType === 'donor' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Username
                       </label>
-                      <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                         {userInfo.userData?.username || 'Not provided'}
                       </p>
                     </div>
@@ -621,10 +625,10 @@ function Profile() {
                   {/* Shelter Name (Shelter only) */}
                   {userInfo.userType === 'shelter' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Shelter Name
                       </label>
-                      <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                         {userInfo.userData?.shelter_name || 'Not provided'}
                       </p>
                     </div>
@@ -632,20 +636,20 @@ function Profile() {
 
                   {/* Email */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                       Email Address
                     </label>
-                    <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                    <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                       {userInfo.userData?.email || currentUser?.email || 'Not provided'}
                     </p>
                   </div>
 
                   {/* Phone Number */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                       Phone Number
                     </label>
-                    <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                    <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                       {userInfo.userData?.phone_number || 'Not provided'}
                     </p>
                   </div>
@@ -653,10 +657,10 @@ function Profile() {
                   {/* Address (Shelter only) */}
                   {userInfo.userType === 'shelter' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', color: '#6b7280', marginBottom: '4px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Address
                       </label>
-                      <p style={{ fontSize: '18px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
                         {userInfo.userData?.address && userInfo.userData?.city && userInfo.userData?.state ? (
                           <>
                             {userInfo.userData.address}<br />
@@ -670,16 +674,16 @@ function Profile() {
                   )}
 
                   {/* Delete Account Button */}
-                  <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid #e5e7eb' }}>
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
                       style={{
                         backgroundColor: 'white',
                         color: '#dc2626',
-                        padding: '12px 24px',
+                        padding: '10px 20px',
                         border: '2px solid #dc2626',
                         borderRadius: '6px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 'bold',
                         cursor: 'pointer',
                         width: '100%'
@@ -694,165 +698,6 @@ function Profile() {
           </div>
         )}
 
-        {/* Donations/Requests List */}
-        {!loading && !error && userInfo && (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            border: '2px solid black',
-            overflow: 'hidden',
-            marginTop: '32px'
-          }}>
-            {/* Header */}
-            <div style={{
-              padding: '24px',
-              borderBottom: '1px solid #e5e7eb'
-            }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                {userInfo.userType === 'donor' ? 'My Donations' : 'My Requests'}
-              </h2>
-              <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '4px' }}>
-                {userInfo.userType === 'donor' 
-                  ? 'Items you have donated'
-                  : 'Items your shelter has requested'
-                }
-              </p>
-            </div>
-
-            {/* Items List */}
-            <div>
-              {itemsLoading ? (
-                <div style={{ padding: '48px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '16px', color: '#6b7280' }}>Loading...</p>
-                </div>
-              ) : userInfo.userType === 'donor' ? (
-                donations.length === 0 ? (
-                  <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>
-                      No donations yet. Visit the dashboard to create your first donation!
-                    </p>
-                  </div>
-                ) : (
-                  donations.map((donation, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: '20px 24px',
-                        borderBottom: index < donations.length - 1 ? '1px solid #e5e7eb' : 'none',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                          {donation.item_name}
-                        </h3>
-                        <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                          {donation.category} • Quantity: {donation.quantity}
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={() => handleEditItem(index, 'donation')}
-                          style={{
-                            backgroundColor: 'white',
-                            color: 'black',
-                            padding: '8px 16px',
-                            border: '2px solid black',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem(index, 'donation')}
-                          style={{
-                            backgroundColor: 'white',
-                            color: '#dc2626',
-                            padding: '8px 16px',
-                            border: '2px solid #dc2626',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )
-              ) : (
-                requests.length === 0 ? (
-                  <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>
-                      No requests yet. Visit the dashboard to create your first request!
-                    </p>
-                  </div>
-                ) : (
-                  requests.map((request, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        padding: '20px 24px',
-                        borderBottom: index < requests.length - 1 ? '1px solid #e5e7eb' : 'none',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                          {request.item_name}
-                        </h3>
-                        <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                          {request.category} • Quantity: {request.quantity}
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button
-                          onClick={() => handleEditItem(index, 'request')}
-                          style={{
-                            backgroundColor: 'white',
-                            color: 'black',
-                            padding: '8px 16px',
-                            border: '2px solid black',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteItem(index, 'request')}
-                          style={{
-                            backgroundColor: 'white',
-                            color: '#dc2626',
-                            padding: '8px 16px',
-                            border: '2px solid #dc2626',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )
-              )}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Edit Item Modal */}
