@@ -51,10 +51,7 @@ def save_donation(donation: DonationForm) -> DonationRead:
         category=donation.category
     )
 
-
-# -----------------------------
-# Save request
-# -----------------------------
+# Save request form
 def save_request(request: RequestForm) -> RequestRead:
     embedding = generate_embedding(
         request.category,
@@ -87,7 +84,6 @@ def save_request(request: RequestForm) -> RequestRead:
 
 
 # Get all donations
-#tested with FastAPI
 def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
     with engine.connect() as conn:
         if user_id:
@@ -109,7 +105,6 @@ def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
     return donations
 
 # # Get all reqs
-
 def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
     with engine.connect() as conn:
         if user_id:
