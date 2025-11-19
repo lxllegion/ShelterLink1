@@ -1,6 +1,5 @@
-# TODO: Implement donation and request submissions
 from fastapi import APIRouter, Depends
-from schemas.forms import DonationForm, RequestForm
+from schemas.forms import DonationForm, RequestForm, DonationRead, RequestRead
 from services.forms import save_donation, save_request, get_donations, get_requests
 from typing import List
 
