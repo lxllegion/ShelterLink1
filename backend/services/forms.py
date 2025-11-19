@@ -21,45 +21,70 @@ def init_files():
             json.dump([], f)
 
 # Save donation form
-def save_donation(donation: DonationForm) -> DonationForm:
-    try:
-        embedding = generate_embedding(donation.category, donation.item_name, donation.quantity)
-        with engine.connect() as conn:
-            result = conn.execute(insert(donations_table).values(
+def save_donation(donation: DonationForm) -> DonationRead:
+    embedding = generate_embedding(
+        donation.category,
+        donation.item_name,
+        donation.quantity
+    )
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            insert(donations_table)
+            .values(
                 donor_id=donation.donor_id,
                 item_name=donation.item_name,
                 quantity=donation.quantity,
                 category=donation.category,
                 embedding=embedding
-            ).returning(donations_table.c.id))
-            conn.commit()
-            donation_id = result.fetchone()[0]
-        return {"id": str(donation_id), **donation.model_dump()}
+            )
+            .returning(donations_table.c.id)
+        )
+        conn.commit()
+        donation_id = result.scalar()
 
-    except Exception as e:
-        print(f"Error saving request: {e}")  # Add logging
-        raise e  # Re-raise to get proper error response
+    return DonationRead(
+        id=donation_id,
+        donor_id=donation.donor_id,
+        item_name=donation.item_name,
+        quantity=donation.quantity,
+        category=donation.category
+    )
 
 
-# Save req form
-def save_request(request: RequestForm) -> dict:
-    try:
-        embedding = generate_embedding(request.category, request.item_name, request.quantity)
-        with engine.connect() as conn:
-            result = conn.execute(insert(requests_table).values(
+# -----------------------------
+# Save request
+# -----------------------------
+def save_request(request: RequestForm) -> RequestRead:
+    embedding = generate_embedding(
+        request.category,
+        request.item_name,
+        request.quantity
+    )
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            insert(requests_table)
+            .values(
                 shelter_id=request.shelter_id,
                 item_name=request.item_name,
                 quantity=request.quantity,
                 category=request.category,
                 embedding=embedding
-            ).returning(requests_table.c.id))
-            conn.commit()
-            request_id = result.fetchone()[0]
-        return {"id": str(request_id), **request.model_dump()}
+            )
+            .returning(requests_table.c.id)
+        )
+        conn.commit()
+        request_id = result.scalar()
 
-    except Exception as e:
-        print(f"Error saving request: {e}")  # Add logging
-        raise e  # Re-raise to get proper error response
+    return RequestRead(
+        id=request_id,
+        shelter_id=request.shelter_id,
+        item_name=request.item_name,
+        quantity=request.quantity,
+        category=request.category
+    )
+
 
 # Get all donations
 #tested with FastAPI
