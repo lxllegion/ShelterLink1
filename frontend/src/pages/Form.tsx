@@ -8,7 +8,7 @@ function Form() {
   const [userType, setUserType] = useState<string | null>(null);
   const [category, setCategory] = useState('Food');
   const [description, setDescription] = useState('');
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState<number | ''>(1);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -27,12 +27,13 @@ function Form() {
     try {
       const userId = currentUser?.uid || '';
       let createdId = '';
+      const quantityValue = typeof quantity === 'number' ? quantity : parseInt(quantity) || 1;
 
       if (userType === 'donor') {
         const result = await createDonation({
           donor_id: userId,
           item_name: description,
-          quantity: quantity,
+          quantity: quantityValue,
           category: category,
         });
         createdId = result.id;
@@ -65,7 +66,7 @@ function Form() {
         const result = await createRequest({
           shelter_id: userId,
           item_name: description,
-          quantity: quantity,
+          quantity: quantityValue,
           category: category,
         });
         createdId = result.id;
@@ -186,8 +187,8 @@ function Form() {
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
-                  min="0"
+                  onChange={(e) => setQuantity(e.target.value === '' ? '' : parseInt(e.target.value))}
+                  min="1"
                   className="w-full px-3 py-2.5 border-2 border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:border-black focus:ring-2 focus:ring-black focus:ring-opacity-10 transition-all text-sm"
                   required
                 />
