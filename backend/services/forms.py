@@ -95,3 +95,5 @@ def get_requests() -> List[RequestForm]:
     return requests
 
 #work on showing up a list of donations on the profile page.
+#save request and donation functions save id
+#EDIT or DELETE requests and donations functions to be added later

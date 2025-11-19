@@ -13,3 +13,18 @@ class RequestForm(BaseModel):
     item_name: str
     quantity: int
     category: str
+
+
+class DonationRead(BaseModel):
+    id: int
+    donor_id: str
+    item_name: str
+    quantity: int
+    category: str
+
+class RequestRead(BaseModel):
+    id: int
+    shelter_id: str
+    item_name: str
+    quantity: int
+    category: str
