@@ -5,22 +5,35 @@ from typing import List
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 
-# Endpoint to create a donation
-@router.post("/donation")
+@router.post("/donation", response_model=DonationRead)
 async def create_donation(donation: DonationForm):
+    """
+    Create a new donation.
+    Returns the full donation including the ID.
+    """
     return save_donation(donation)
 
-# Endpoint to create a request
-@router.post("/request")
+
+@router.post("/request", response_model=RequestRead)
 async def create_request(request: RequestForm):
+    """
+    Create a new request.
+    Returns the full request including the ID.
+    """
     return save_request(request)
 
 # Endpoint to get all donations
-@router.get("/donations", response_model=List[DonationForm])
+@router.get("/donations", response_model=List[DonationRead])
 async def list_donations():
+    """
+    Get all donations with IDs included.
+    """
     return get_donations()
 
 # Endpoint to get all requests
-@router.get("/requests", response_model=List[RequestForm])
+@router.get("/requests", response_model=List[RequestRead])
 async def list_requests():
+    """
+    Get all requests with IDs included.
+    """
     return get_requests()
