@@ -1,6 +1,6 @@
 import json
 import os
-from schemas.forms import DonationForm, RequestForm
+from schemas.forms import DonationForm, RequestForm,DonationRead, RequestRead
 from typing import List
 from database import engine
 from services.embeddings import generate_embedding
