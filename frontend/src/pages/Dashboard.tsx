@@ -1,8 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches, getUserInfo } from '../api/backend';
+import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
+import ItemList from '../components/ItemList';
+import EditItemModal, { ItemData } from '../components/EditItemModal';
+
+// Extended types with IDs for items stored in state
+interface DonationWithId extends DonationForm {
+  donation_id: string;
+}
+
+interface RequestWithId extends RequestForm {
+  request_id: string;
+}
 
 const RETRY_DELAY = 1500;
 const MAX_RETRIES = 3;
@@ -12,91 +23,92 @@ function Dashboard() {
   const { currentUser } = useAuth();
   const [userType, setUserType] = useState<string | null>(null);
 
-  const [donations, setDonations] = useState<DonationForm[]>([]);
-  const [requests, setRequests] = useState<RequestForm[]>([]);
+  const [donations, setDonations] = useState<DonationWithId[]>([]);
+  const [requests, setRequests] = useState<RequestWithId[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Modal state for editing items
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
   
-  // Mock counters for temporary functionality
-  // const [donationCount, setDonationCount] = useState(0);
-  const [requestCount, setRequestCount] = useState(0);
+  const mockDonations = [
+    {
+      donation_id: '1',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
+    },
+    
+    {
+      donation_id: '2',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
+    },
 
+    {
+      donation_id: '3',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
+    },
 
-  const mock_matches = [
     {
-      "id": "1",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 1",
-      "item_name": "Inhalers",
-      "quantity": 10,
-      "category": "Medical Supplies",
-      "matched_at": "2025-01-01",
-      "status": "active"
+      donation_id: '4',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
     },
+
     {
-      "id": "2",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 2",
-      "item_name": "Canned Fruit",
-      "quantity": 15,
-      "category": "Food",
-      "matched_at": "2025-01-02",
-      "status": "active"
+      donation_id: '5',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
     },
+
     {
-      "id": "3",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 3",
-      "item_name": "Blankets",
-      "quantity": 20,
-      "category": "Clothing",
-      "matched_at": "2025-01-03",
-      "status": "active"
+      donation_id: '6',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
     },
+
     {
-      "id": "4",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 4",
-      "item_name": "Books",
-      "quantity": 20,
-      "category": "Books",
-      "matched_at": "2025-01-04",
-      "status": "active"
+      donation_id: '7',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
     },
+
     {
-      "id": "5",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 5",
-      "item_name": "Toys",
-      "quantity": 20,
-      "category": "Toys",
-      "matched_at": "2025-01-05",
-      "status": "active"
+      donation_id: '8',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
     },
-    {
-      "id": "6",
-      "donor_id": "HgaXAICklCZ48C7onW1kS2qjwdw1",
-      "donor_username": "John Doe",
-      "shelter_id": "7PXD4X81bkh3r1b8drPAkSMIdTo2",
-      "shelter_name": "Shelter 6",
-      "item_name": "Furniture",
-      "quantity": 20,
-      "category": "Furniture",
-      "matched_at": "2025-01-06",
-      "status": "active"
-    }
   ];
+
+  const mockRequests = [
+    {
+      request_id: '1',
+      item_name: 'Sleeping Bags',
+      quantity: 15,
+      category: 'Clothing'
+    },
+    
+    {
+      request_id: '2',
+      item_name: 'Winter Coats',
+      quantity: 15,
+      category: 'Clothing'
+    },
+    
+  ];
+
   useEffect(() => {
     const fetchUserTypeAndData = async () => {
       if (!currentUser) return;
@@ -132,35 +144,35 @@ function Dashboard() {
         setUserType(userInfo.userType);
         localStorage.setItem('userType', userInfo.userType);
 
-        // Load mock counters from localStorage
-        // const storedDonationCount = localStorage.getItem('donationCount');
-        const storedRequestCount = localStorage.getItem('requestCount');
-        // if (storedDonationCount) setDonationCount(parseInt(storedDonationCount));
-        if (storedRequestCount) setRequestCount(parseInt(storedRequestCount));
+        // Fetch matches for all users
+        const matchesData = await getMatches(userId, userInfo.userType);
+        setMatches(matchesData);
 
-        // Fetch matches for all users (uncomment when backend is ready)
-        // const matchesData = await getMatches();
-        
         if (userInfo.userType === 'donor') {
           // Fetch donations for this donor
           const donationsData = await getDonations();
-          const userDonations = donationsData.filter(d => d.donor_id === userId);
+          const userDonations = donationsData.filter(d => d.donor_id === userId) as DonationWithId[];
           setDonations(userDonations);
           
-        //   // Filter matches for this donor
-        //   const userMatches = matchesData.filter(m => m.donor_id === userId);
-        //   setMatches(userMatches);
+          // Filter matches for this donor
+          const userMatches = matchesData.filter(m => m.donor_id === userId);
+          setMatches(userMatches);
         } else if (userInfo.userType === 'shelter') {
           // Fetch requests for this shelter
           const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.shelter_id === userId); // Note: using donor_id field for shelter_id
+          const userRequests = requestsData.filter(r => r.shelter_id === userId) as RequestWithId[]; // Note: using donor_id field for shelter_id
           setRequests(userRequests);
           
-        //   // Filter matches for this shelter
-        //   const userMatches = matchesData.filter(m => m.shelter_id === userId);
-        //   setMatches(userMatches);
+          // Filter matches for this shelter
+          const userMatches = matchesData.filter(m => m.shelter_id === userId);
+          setMatches(userMatches);
         }
-        setMatches(mock_matches);
+
+        if (userInfo.userType === 'donor') {
+          setDonations(mockDonations as DonationWithId[]);
+        } else if (userInfo.userType === 'shelter') {
+          setRequests(mockRequests as RequestWithId[]);
+        }
       } catch (error: any) {
         console.error('Error fetching data:', error);
         setError(error.message);
@@ -172,12 +184,8 @@ function Dashboard() {
     fetchUserTypeAndData();
   }, [currentUser]);
 
-  // Calculate stats (using mock counters for temporary functionality)
-  const totalItems = userType === 'donor'
-    ? donations.length
-    : requests.length;
-  const activeMatches = matches.filter(m => m.status === 'active').length;
-  const completedMatches = matches.filter(m => m.status === 'completed').length;
+  // Calculate stats
+  const activeMatches = matches.filter(m => m.status === 'pending').length;
 
   // Format time ago
   const formatTimeAgo = (dateString: string) => {
@@ -191,22 +199,102 @@ function Dashboard() {
     return `${diffDays} days ago`;
   };
 
+  // Handler functions for ItemList
+  const handleDeleteItem = async (index: number, type: 'donation' | 'request') => {
+    if (window.confirm('Are you sure you want to delete this item?')) {
+      try {
+        if (type === 'donation') {
+          await deleteDonation(donations[index].donation_id);
+          setDonations(donations.filter((_, i) => i !== index));
+        } else if (type === 'request') {
+          await deleteRequest(requests[index].request_id);
+          setRequests(requests.filter((_, i) => i !== index));
+        }
+      } catch (error) {
+        alert('Error deleting item: ' + error);
+      }
+    }
+  };
+
+  const handleEditItem = (index: number, type: 'donation' | 'request') => {
+    setEditingIndex(index);
+    setEditingType(type);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveItem = async (itemData: ItemData) => {
+    if (editingIndex === null) return;
+    try {
+      if (editingType === 'donation') {
+        await updateDonation(donations[editingIndex].donation_id, {
+          item_name: itemData.item_name,
+          quantity: itemData.quantity,
+          category: itemData.category
+        });
+        const updatedDonations = [...donations];
+        updatedDonations[editingIndex] = {
+          ...updatedDonations[editingIndex],
+          item_name: itemData.item_name,
+          quantity: itemData.quantity,
+          category: itemData.category
+        };
+        setDonations(updatedDonations);
+      } else {
+        await updateRequest(requests[editingIndex].request_id, {
+          item_name: itemData.item_name,
+          quantity: itemData.quantity,
+          category: itemData.category 
+        });
+        const updatedRequests = [...requests];
+        updatedRequests[editingIndex] = {
+          ...updatedRequests[editingIndex],
+          item_name: itemData.item_name,
+          quantity: itemData.quantity,
+          category: itemData.category
+        };
+        setRequests(updatedRequests);
+      }
+
+      setIsModalOpen(false);
+      setEditingIndex(null);
+    } catch (error) {
+      alert('Error updating item: ' + error);
+    }
+  };
+
+  const getCurrentItemData = (): ItemData | null => {
+    if (editingIndex === null) return null;
+
+    const item = editingType === 'donation' 
+      ? donations[editingIndex] 
+      : requests[editingIndex];
+
+    if (!item) return null;
+
+    return {
+      item_name: item.item_name,
+      quantity: item.quantity,
+      category: item.category
+    };
+  };
+
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
+    <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Navigation Bar */}
       <NavBar />
 
       {/* Main Content */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '48px 32px' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px 32px', width: '100%', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Header */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '32px'
+          marginBottom: '16px',
+          flexShrink: 0
         }}>
           <h1 style={{
-            fontSize: '36px',
+            fontSize: '28px',
             fontWeight: 'bold',
             color: '#1f2937'
           }}>
@@ -249,127 +337,104 @@ function Dashboard() {
           </div>
         )}
 
-        {/* Stats Cards */}
-        {!loading && !error && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
-            {/* Total Donations/Requests */}
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', flex: 1, overflow: 'hidden' }}>
+          {/* Active Matches List */}
+          {!loading && !error && (
             <div style={{
               backgroundColor: 'white',
-              padding: '24px',
               borderRadius: '12px',
-              border: '2px solid black'
+              border: '2px solid black',
+              overflow: 'hidden',
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                {userType === 'donor' ? 'Total Donations' : 'Total Requests'}
-              </p>
-              <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-                {totalItems}
-              </p>
-            </div>
+              {/* Header */}
+              <div style={{
+                padding: '16px 24px',
+                borderBottom: '1px solid #e5e7eb',
+                flexShrink: 0
+              }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                  Active Matches ({activeMatches})
+                </h2>
+              </div>
 
-            {/* Active Matches */}
-            <div style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '12px',
-              border: '2px solid black'
-            }}>
-              <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                Active Matches
-              </p>
-              <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-                {activeMatches}
-              </p>
-            </div>
-
-            {/* Completed */}
-            <div style={{
-              backgroundColor: 'white',
-              padding: '24px',
-              borderRadius: '12px',
-              border: '2px solid black'
-            }}>
-              <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>
-                Completed
-              </p>
-              <p style={{ fontSize: '48px', fontWeight: 'bold', color: '#1f2937' }}>
-                {completedMatches}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Active Matches List */}
-        {!loading && !error && (
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '12px',
-            border: '2px solid black',
-            overflow: 'hidden'
-          }}>
-            {/* Header */}
-            <div style={{
-              padding: '24px',
-              borderBottom: '1px solid #e5e7eb'
-            }}>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937' }}>
-                Active Matches
-              </h2>
-            </div>
-
-            {/* Matches List */}
-            <div>
-              {matches.filter(m => m.status === 'active').length === 0 ? (
-                <div style={{ padding: '48px', textAlign: 'center' }}>
-                  <p style={{ fontSize: '16px', color: '#6b7280' }}>
-                    No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
-                  </p>
-                </div>
-              ) : (
-                matches.filter(m => m.status === 'active').map((match, index) => (
-                  <div
-                    key={match.id}
-                    style={{
-                      padding: '24px',
-                      borderBottom: index < matches.filter(m => m.status === 'active').length - 1 ? '1px solid #e5e7eb' : 'none',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <div>
-                      <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                        {userType === 'donor' 
-                          ? `Match with ${match.shelter_name}`
-                          : `Match with ${match.donor_username}`
-                        }
-                      </h3>
-                      <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
-                        {match.category} • {match.item_name} • Quantity: {match.quantity}
-                      </p>
-                      <p style={{ fontSize: '12px', color: '#9ca3af' }}>
-                        Matched {formatTimeAgo(match.matched_at)}
-                      </p>
-                    </div>
-
-                    <button style={{
-                      backgroundColor: 'white',
-                      color: 'black',
-                      padding: '10px 20px',
-                      border: '2px solid black',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer'
-                    }}>
-                      Resolve Match
-                    </button>
+              {/* Matches List */}
+              <div style={{ overflow: 'auto', flex: 1 }}>
+                {matches.filter(m => m.status === 'pending').length === 0 ? (
+                  <div style={{ padding: '48px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280' }}>
+                      No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
+                    </p>
                   </div>
-                ))
-              )}
+                ) : (
+                  matches.filter(m => m.status === 'pending').map((match, index) => (
+                    <div
+                      key={match.id}
+                      style={{
+                        padding: '24px',
+                        borderBottom: index < matches.filter(m => m.status === 'pending').length - 1 ? '1px solid #e5e7eb' : 'none',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <div>
+                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+                          {userType === 'donor' 
+                            ? `Match with ${match.shelter_name}`
+                            : `Match with ${match.donor_username}`
+                          }
+                        </h3>
+                        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
+                          {match.category} • {match.item_name} • Quantity: {match.quantity}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#9ca3af' }}>
+                          Matched {formatTimeAgo(match.matched_at)}
+                        </p>
+                      </div>
+
+                      <button style={{
+                        backgroundColor: 'white',
+                        color: 'black',
+                        padding: '10px 20px',
+                        border: '2px solid black',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        cursor: 'pointer'
+                      }}>
+                        Resolve Match
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+              
             </div>
-          </div>
-        )}
+          )}
+          {/* Donations/Requests List */}
+          {!loading && !error && userType && (userType === 'donor' || userType === 'shelter') && (
+            <ItemList
+              items={userType === 'donor' ? donations : requests}
+              itemType={userType === 'donor' ? 'donation' : 'request'}
+              userType={userType}
+              isLoading={false}
+              onEditItem={handleEditItem}
+              onDeleteItem={handleDeleteItem}
+            />
+          )}
+        </div>
+
+        {/* Edit Item Modal */}
+        <EditItemModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveItem}
+          itemType={editingType}
+          initialData={getCurrentItemData()}
+        />
       </div>
     </div>
   );
