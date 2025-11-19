@@ -1,7 +1,7 @@
 import json
 import os
 from schemas.forms import DonationForm, RequestForm,DonationRead, RequestRead
-from typing import List
+from typing import List, Optional
 from database import engine
 from services.embeddings import generate_embedding
 from database import requests_table, donations_table
@@ -88,37 +88,57 @@ def save_request(request: RequestForm) -> RequestRead:
 
 # Get all donations
 #tested with FastAPI
-def get_donations() -> List[DonationForm]:
+def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
     with engine.connect() as conn:
-        result = conn.execute(select(donations_table)).fetchall()
+        if user_id:
+            result = conn.execute(
+                select(donations_table).where(donations_table.c.donor_id == user_id)
+            ).fetchall()
+        else:
+            result = conn.execute(select(donations_table)).fetchall()
 
-    # Convert rows to Pydantic models
-    donations = []
-    for row in result:
-        donations.append(DonationForm(
+    donations = [
+        DonationForm(
             donor_id=row.donor_id,
             item_name=row.item_name,
             quantity=row.quantity,
-            category=row.category,
-        ))
+            category=row.category
+        )
+        for row in result
+    ]
     return donations
 
 # # Get all reqs
 
-def get_requests() -> List[RequestForm]:
+def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
     with engine.connect() as conn:
-        result = conn.execute(select(requests_table)).fetchall()
+        if user_id:
+            result = conn.execute(
+                select(requests_table).where(requests_table.c.shelter_id == user_id)
+            ).fetchall()
+        else:
+            result = conn.execute(select(requests_table)).fetchall()
 
-    requests = []
-    for row in result:
-        requests.append(RequestForm(
+    requests = [
+        RequestForm(
             shelter_id=row.shelter_id,
             item_name=row.item_name,
             quantity=row.quantity,
-            category=row.category,
-        ))
+            category=row.category
+        )
+        for row in result
+    ]
     return requests
 
 #work on showing up a list of donations on the profile page.
+#awaiting frontend implementation
+
+
+
+
 #save request and donation functions save id
+#awaiting frontend implementation
+
+
+
 #EDIT or DELETE requests and donations functions to be added later
