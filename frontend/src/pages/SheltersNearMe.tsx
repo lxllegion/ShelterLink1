@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import NavBar from '../components/NavBar';
-import { getShelters, Shelter } from '../api/backend';
+import { getShelters, Shelter, getShelterRequests, ShelterRequest } from '../api/backend';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
@@ -22,6 +22,7 @@ function SheltersNearMe() {
   const [error, setError] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
+  const [shelterRequests, setShelterRequests] = useState<{[key: string]: ShelterRequest[]}>({});
 
   // Default center (San Francisco, CA)
   const defaultCenter: [number, number] = [37.7749, -122.4194];
@@ -45,6 +46,21 @@ function SheltersNearMe() {
         setLoading(true);
         const data = await getShelters();
         setShelters(data);
+
+        // Fetch requests for each shelter
+        const requestsMap: {[key: string]: ShelterRequest[]} = {};
+        await Promise.all(
+          data.map(async (shelter) => {
+            try {
+              const requests = await getShelterRequests(shelter.uid);
+              requestsMap[shelter.uid] = requests;
+            } catch (error) {
+              console.error(`Failed to fetch requests for shelter ${shelter.uid}:`, error);
+              requestsMap[shelter.uid] = [];
+            }
+          })
+        );
+        setShelterRequests(requestsMap);
         setError(null);
       } catch (err) {
         setError('Failed to load shelters. Please try again later.');
@@ -253,6 +269,8 @@ function SheltersNearMe() {
                         )
                       : null;
 
+                    const requests = shelterRequests[shelter.uid] || [];
+
                     return (
                       <div
                         key={shelter.id}
@@ -273,7 +291,7 @@ function SheltersNearMe() {
                           </p>
                         )}
 
-                        <div style={{ color: '#4b5563', fontSize: '0.875rem' }}>
+                        <div style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
                           {shelter.address && (
                             <p style={{ marginBottom: '0.25rem' }}>
                               {shelter.address}
@@ -289,6 +307,31 @@ function SheltersNearMe() {
                           </p>
                           <p>Email: {shelter.email}</p>
                         </div>
+
+                        {/* Items Needed Section */}
+                        {requests.length > 0 && (
+                          <div style={{
+                            marginTop: '0.75rem',
+                            paddingTop: '0.75rem',
+                            borderTop: '1px solid #e5e7eb'
+                          }}>
+                            <h4 style={{ fontWeight: '600', fontSize: '0.875rem', marginBottom: '0.5rem', color: '#374151' }}>
+                              Items Needed:
+                            </h4>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                              {requests.slice(0, 3).map((request) => (
+                                <div key={request.id} style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                                  • {request.item_name} - Qty: {request.quantity} ({request.category})
+                                </div>
+                              ))}
+                              {requests.length > 3 && (
+                                <div style={{ fontSize: '0.875rem', color: '#9ca3af', fontStyle: 'italic' }}>
+                                  +{requests.length - 3} more items
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
