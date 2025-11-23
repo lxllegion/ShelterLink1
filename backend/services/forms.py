@@ -4,8 +4,8 @@ from schemas.forms import DonationForm, RequestForm,DonationRead, RequestRead
 from typing import List, Optional
 from database import engine
 from services.embeddings import generate_embedding
-from database import requests_table, donations_table
-from sqlalchemy import insert, select
+from database import requests_table, donations_table, donors_table
+from sqlalchemy import insert, select, update
 
 # File paths - storing data
 DONATIONS_FILE = "donations.json"
@@ -20,14 +20,9 @@ def init_files():
         with open(REQUESTS_FILE, "w") as f:
             json.dump([], f)
 
-def save_donation(donation: DonationForm) -> DonationRead:
+def save_donation(donation: DonationForm) -> DonationForm:
     try:
-        embedding = generate_embedding(
-            donation.category,
-            donation.item_name,
-            donation.quantity
-        )
-
+        # Step 1: Insert donation
         with engine.connect() as conn:
             result = conn.execute(
                 insert(donations_table)
@@ -36,25 +31,43 @@ def save_donation(donation: DonationForm) -> DonationRead:
                     item_name=donation.item_name,
                     quantity=donation.quantity,
                     category=donation.category,
-                    embedding=embedding
+                    embedding=generate_embedding(donation.category, donation.item_name, donation.quantity)
                 )
                 .returning(donations_table.c.id)
             )
             conn.commit()
             donation_id = result.scalar()
 
-        return DonationRead(
-            id=donation_id,
+            # Step 2: Update donor's donation_ids
+            donor_row = conn.execute(
+                select(donors_table.c.donation_ids)
+                .where(donors_table.c.uid == donation.donor_id)
+            ).fetchone()
+
+            if donor_row:
+                updated_ids = donor_row.donation_ids or []
+                updated_ids.append(donation_id)
+
+                conn.execute(
+                    update(donors_table)
+                    .where(donors_table.c.uid == donation.donor_id)
+                    .values(donation_ids=updated_ids)
+                )
+                conn.commit()
+
+        # Step 3: Return the donation form
+        return DonationForm(
             donor_id=donation.donor_id,
             item_name=donation.item_name,
             quantity=donation.quantity,
             category=donation.category
         )
+
     except Exception as e:
         print(f"Error saving donation: {e}")
-        return None
+        raise e
 
-
+#problemmatic, missing embedding?
 def save_request(request: RequestForm) -> RequestRead:
     try:
         with engine.connect() as conn:
