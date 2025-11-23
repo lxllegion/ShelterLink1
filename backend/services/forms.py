@@ -96,19 +96,41 @@ def save_request(request: RequestForm) -> RequestRead:
         raise e
 
 # Get all donations
-def get_donations(user_id: Optional[str] = None) -> List[DonationRead]:
-
-    with engine.connect() as conn:
-        if user_id:
-            result = conn.execute(
-                select(donations_table).where(donations_table.c.donor_id == user_id)
-            ).fetchall()
-        else:
+def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
+    if not user_id:
+        # If no user_id is provided, return all donations
+        with engine.connect() as conn:
             result = conn.execute(select(donations_table)).fetchall()
+        return [
+            DonationForm(
+                donor_id=row.donor_id,
+                item_name=row.item_name,
+                quantity=row.quantity,
+                category=row.category
+            )
+            for row in result
+        ]
 
-    donations = [
-        DonationRead(
-            id=row.id,
+    # Step 1: get donation_ids for this donor
+    with engine.connect() as conn:
+        donor_row = conn.execute(
+            select(donors_table.c.donation_ids)
+            .where(donors_table.c.uid == user_id)
+        ).fetchone()
+
+        if not donor_row or not donor_row.donation_ids:
+            return []
+
+        donation_ids = donor_row.donation_ids
+
+        # Step 2: fetch donations matching those IDs
+        result = conn.execute(
+            select(donations_table)
+            .where(donations_table.c.id.in_(donation_ids))
+        ).fetchall()
+
+    return [
+        DonationForm(
             donor_id=row.donor_id,
             item_name=row.item_name,
             quantity=row.quantity,
@@ -116,21 +138,39 @@ def get_donations(user_id: Optional[str] = None) -> List[DonationRead]:
         )
         for row in result
     ]
-    return donations
 
-# # Get all reqs
-def get_requests(user_id: Optional[str] = None) -> List[RequestRead]:
-    with engine.connect() as conn:
-        if user_id:
-            result = conn.execute(
-                select(requests_table).where(requests_table.c.shelter_id == user_id)
-            ).fetchall()
-        else:
+
+def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
+    if not user_id:
+        with engine.connect() as conn:
             result = conn.execute(select(requests_table)).fetchall()
+        return [
+            RequestForm(
+                shelter_id=row.shelter_id,
+                item_name=row.item_name,
+                quantity=row.quantity,
+                category=row.category
+            )
+            for row in result
+        ]
 
-    requests = [
-        RequestRead(
-            id=row.id,
+    with engine.connect() as conn:
+        shelter_row = conn.execute(
+            select(donors_table.c.request_ids)  # or whatever column tracks requests per shelter
+            .where(donors_table.c.uid == user_id)
+        ).fetchone()
+
+        if not shelter_row or not shelter_row.request_ids:
+            return []
+
+        request_ids = shelter_row.request_ids
+        result = conn.execute(
+            select(requests_table)
+            .where(requests_table.c.id.in_(request_ids))
+        ).fetchall()
+
+    return [
+        RequestForm(
             shelter_id=row.shelter_id,
             item_name=row.item_name,
             quantity=row.quantity,
@@ -138,7 +178,6 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestRead]:
         )
         for row in result
     ]
-    return requests
 #work on showing up a list of donations on the profile page.
 #awaiting frontend implementation
 

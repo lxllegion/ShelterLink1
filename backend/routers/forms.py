@@ -19,11 +19,11 @@ async def create_request(request: RequestForm):
     """
     return save_request(request)
 # Endpoint to get all donations
-@router.get("/donations", response_model=List[DonationRead])
+@router.get("/donations", response_model=List[DonationForm])
 async def list_donations(user_id: Optional[str] = Query(None)):
     return get_donations(user_id=user_id)
 
 # Endpoint to get all requests
-@router.get("/requests", response_model=List[RequestRead])
+@router.get("/requests", response_model=List[RequestForm])
 async def list_requests(user_id: Optional[str] = Query(None)):
     return get_requests(user_id=user_id)
