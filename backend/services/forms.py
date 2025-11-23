@@ -67,7 +67,7 @@ def save_donation(donation: DonationForm) -> DonationForm:
         print(f"Error saving donation: {e}")
         raise e
 
-#problemmatic, missing embedding?
+#problemmatic, missing embedding?Still not fixed
 def save_request(request: RequestForm) -> RequestRead:
     try:
         with engine.connect() as conn:
