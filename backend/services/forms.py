@@ -20,71 +20,71 @@ def init_files():
         with open(REQUESTS_FILE, "w") as f:
             json.dump([], f)
 
-# Save donation form
 def save_donation(donation: DonationForm) -> DonationRead:
-    embedding = generate_embedding(
-        donation.category,
-        donation.item_name,
-        donation.quantity
-    )
-
-    with engine.connect() as conn:
-        result = conn.execute(
-            insert(donations_table)
-            .values(
-                donor_id=donation.donor_id,
-                item_name=donation.item_name,
-                quantity=donation.quantity,
-                category=donation.category,
-                embedding=embedding
-            )
-            .returning(donations_table.c.id)
+    try:
+        embedding = generate_embedding(
+            donation.category,
+            donation.item_name,
+            donation.quantity
         )
-        conn.commit()
-        donation_id = result.scalar()
 
-    return DonationRead(
-        id=donation_id,
-        donor_id=donation.donor_id,
-        item_name=donation.item_name,
-        quantity=donation.quantity,
-        category=donation.category
-    )
+        with engine.connect() as conn:
+            result = conn.execute(
+                insert(donations_table)
+                .values(
+                    donor_id=donation.donor_id,
+                    item_name=donation.item_name,
+                    quantity=donation.quantity,
+                    category=donation.category,
+                    embedding=embedding
+                )
+                .returning(donations_table.c.id)
+            )
+            conn.commit()
+            donation_id = result.scalar()
 
-# Save request form
+        return DonationRead(
+            id=donation_id,
+            donor_id=donation.donor_id,
+            item_name=donation.item_name,
+            quantity=donation.quantity,
+            category=donation.category
+        )
+    except Exception as e:
+        print(f"Error saving donation: {e}")
+        return None
+
+
 def save_request(request: RequestForm) -> RequestRead:
-    embedding = generate_embedding(
-        request.category,
-        request.item_name,
-        request.quantity
-    )
-
-    with engine.connect() as conn:
-        result = conn.execute(
-            insert(requests_table)
-            .values(
-                shelter_id=request.shelter_id,
-                item_name=request.item_name,
-                quantity=request.quantity,
-                category=request.category,
-                embedding=embedding
+    try:
+        with engine.connect() as conn:
+            result = conn.execute(
+                insert(requests_table)
+                .values(
+                    shelter_id=request.shelter_id,
+                    item_name=request.item_name,
+                    quantity=request.quantity,
+                    category=request.category
+                )
+                .returning(requests_table.c.id)
             )
-            .returning(requests_table.c.id)
+            conn.commit()
+            request_id = result.scalar()
+
+        return RequestRead(
+            id=request_id,
+            shelter_id=request.shelter_id,
+            item_name=request.item_name,
+            quantity=request.quantity,
+            category=request.category
         )
-        conn.commit()
-        request_id = result.scalar()
-
-    return RequestRead(
-        id=request_id,
-        shelter_id=request.shelter_id,
-        item_name=request.item_name,
-        quantity=request.quantity,
-        category=request.category
-    )
-
+    except Exception as e:
+        print("Error saving request:", e)
+        raise e
 
 # Get all donations
-def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
+def get_donations(user_id: Optional[str] = None) -> List[DonationRead]:
+
     with engine.connect() as conn:
         if user_id:
             result = conn.execute(
@@ -94,7 +94,8 @@ def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
             result = conn.execute(select(donations_table)).fetchall()
 
     donations = [
-        DonationForm(
+        DonationRead(
+            id=row.id,
             donor_id=row.donor_id,
             item_name=row.item_name,
             quantity=row.quantity,
@@ -105,7 +106,7 @@ def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
     return donations
 
 # # Get all reqs
-def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
+def get_requests(user_id: Optional[str] = None) -> List[RequestRead]:
     with engine.connect() as conn:
         if user_id:
             result = conn.execute(
@@ -115,7 +116,8 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
             result = conn.execute(select(requests_table)).fetchall()
 
     requests = [
-        RequestForm(
+        RequestRead(
+            id=row.id,
             shelter_id=row.shelter_id,
             item_name=row.item_name,
             quantity=row.quantity,
@@ -124,7 +126,6 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
         for row in result
     ]
     return requests
-
 #work on showing up a list of donations on the profile page.
 #awaiting frontend implementation
 

@@ -1,3 +1,4 @@
+from uuid import UUID
 from pydantic import BaseModel
 
 # Donation Form
@@ -16,14 +17,14 @@ class RequestForm(BaseModel):
 
 
 class DonationRead(BaseModel):
-    id: int
+    id: UUID
     donor_id: str
     item_name: str
     quantity: int
     category: str
 
 class RequestRead(BaseModel):
-    id: int
+    id: UUID
     shelter_id: str
     item_name: str
     quantity: int
