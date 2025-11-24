@@ -27,17 +27,17 @@ async def list_donations():
 async def list_requests():
     return get_requests()
 
-@router.delete("/donation/{donation_id}")
-async def delete_donation(donation_id: UUID):
-    result = delete_donation_service(donation_id)
+@router.delete("/donation/{donation_id}/{donor_id}")
+async def delete_donation(donation_id: UUID, donor_id: str):
+    result = delete_donation_service(donation_id, donor_id)
     if result:
         return JSONResponse(status_code=200, content={"message": "Donation deleted successfully"})
     else:
         raise HTTPException(status_code=404, detail="Donation not found")
 
-@router.delete("/request/{request_id}")
-async def delete_request(request_id: UUID):
-    result = delete_request_service(request_id)
+@router.delete("/request/{request_id}/{shelter_id}")
+async def delete_request(request_id: UUID, shelter_id: str):
+    result = delete_request_service(request_id, shelter_id)
     if result:
         return JSONResponse(status_code=200, content={"message": "Request deleted successfully"})
     else:
