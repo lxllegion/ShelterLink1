@@ -23,6 +23,7 @@ function SheltersNearMe() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [shelterRequests, setShelterRequests] = useState<{[key: string]: ShelterRequest[]}>({});
+  const [expandedShelter, setExpandedShelter] = useState<string | null>(null);
 
   // Default center (San Francisco, CA)
   const defaultCenter: [number, number] = [37.7749, -122.4194];
@@ -270,20 +271,47 @@ function SheltersNearMe() {
                       : null;
 
                     const requests = shelterRequests[shelter.uid] || [];
+                    const isExpanded = expandedShelter === shelter.id;
 
                     return (
                       <div
                         key={shelter.id}
+                        onClick={() => setExpandedShelter(isExpanded ? null : shelter.id)}
                         style={{
                           backgroundColor: 'white',
-                          border: '2px solid black',
+                          border: isExpanded ? '2px solid #3b82f6' : '2px solid black',
                           padding: '1rem',
-                          borderRadius: '0.5rem'
+                          borderRadius: '0.5rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease-in-out',
+                          boxShadow: isExpanded ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isExpanded) {
+                            e.currentTarget.style.borderColor = '#3b82f6';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.2)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isExpanded) {
+                            e.currentTarget.style.borderColor = 'black';
+                            e.currentTarget.style.boxShadow = 'none';
+                          }
                         }}
                       >
-                        <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.5rem' }}>
-                          {shelter.shelter_name}
-                        </h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.5rem' }}>
+                            {shelter.shelter_name}
+                          </h3>
+                          <span style={{
+                            color: '#6b7280',
+                            fontSize: '1.25rem',
+                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease-in-out'
+                          }}>
+                            ▼
+                          </span>
+                        </div>
 
                         {distance !== null && (
                           <p style={{ color: '#059669', fontWeight: '500', marginBottom: '0.5rem' }}>
@@ -319,17 +347,28 @@ function SheltersNearMe() {
                               Items Needed:
                             </h4>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                              {requests.slice(0, 3).map((request) => (
+                              {(isExpanded ? requests : requests.slice(0, 3)).map((request) => (
                                 <div key={request.id} style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                                   • {request.item_name} - Qty: {request.quantity} ({request.category})
                                 </div>
                               ))}
-                              {requests.length > 3 && (
-                                <div style={{ fontSize: '0.875rem', color: '#9ca3af', fontStyle: 'italic' }}>
-                                  +{requests.length - 3} more items
+                              {!isExpanded && requests.length > 3 && (
+                                <div style={{ fontSize: '0.875rem', color: '#3b82f6', fontStyle: 'italic' }}>
+                                  Click to see {requests.length - 3} more items
                                 </div>
                               )}
                             </div>
+                          </div>
+                        )}
+
+                        {isExpanded && (
+                          <div style={{
+                            marginTop: '0.75rem',
+                            fontSize: '0.75rem',
+                            color: '#9ca3af',
+                            textAlign: 'center'
+                          }}>
+                            Click to collapse
                           </div>
                         )}
                       </div>
