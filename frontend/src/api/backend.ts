@@ -416,9 +416,9 @@ export const getShelters = async (): Promise<Shelter[]> => {
   }
 };
 
-export const deleteDonation = async (donationId: string) => {
+export const deleteDonation = async (donationId: string, donorId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -437,9 +437,9 @@ export const deleteDonation = async (donationId: string) => {
   }
 };
 
-export const deleteRequest = async (requestId: string) => {
+export const deleteRequest = async (requestId: string, shelterId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}/${shelterId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
