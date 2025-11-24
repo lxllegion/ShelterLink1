@@ -1,7 +1,7 @@
 """
 Vector-based matching service using pgvector for semantic similarity between donations and requests
 """
-from sqlalchemy import select, text
+from sqlalchemy import select, text, insert
 from database import engine, donations_table, requests_table, donors_table, shelters_table, matches_table
 from typing import List, Dict, Any, Optional
 from services.match import save_matches
@@ -82,8 +82,10 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             
             matches = []
             for row in results:
+                print("donation_id: ", donation.id)
+                print("request_id: ", row.id)
                 match = {
-                    "request_id": str(row.id),
+                    "request_id": row.id,
                     "donor_id": donation.donor_id,
                     "donor_name": donor_name,
                     "shelter_id": row.shelter_id,
@@ -97,7 +99,8 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
                     "similarity_score": round(float(row.similarity), 4),
                     "donation_has": donation.quantity,
                     "shelter_needs": row.quantity,
-                    "can_fulfill": "full" if donation.quantity >= row.quantity else "partial"
+                    "can_fulfill": "full" if donation.quantity >= row.quantity else "partial",
+                    "donation_id": donation.id,
                 }
                 matches.append(match)
             
@@ -181,7 +184,7 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
             matches = []
             for row in results:
                 match = {
-                    "donation_id": str(row.id),
+                    "donation_id": row.id,
                     "donor_id": row.donor_id,
                     "donor_name": row.donor_name,
                     "donor_email": row.donor_email,
@@ -195,7 +198,8 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                     "similarity_score": round(float(row.similarity), 4),
                     "donor_has": row.quantity,
                     "shelter_needs": request.quantity,
-                    "can_fulfill": "full" if row.quantity >= request.quantity else "partial"
+                    "can_fulfill": "full" if row.quantity >= request.quantity else "partial",
+                    "request_id": row.request_id,
                 }
                 matches.append(match)
             
@@ -255,13 +259,13 @@ def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -
             matches = []
             for row in results:
                 match = {
-                    "donation_id": str(row.donation_id),
+                    "donation_id": row.donation_id,
                     "donor_id": row.donor_id,
                     "donor_name": row.donor_name,
                     "donation_item": row.donation_item,
                     "donation_quantity": row.donation_quantity,
                     "donation_category": row.donation_category,
-                    "request_id": str(row.request_id),
+                    "request_id": row.request_id,
                     "shelter_id": row.shelter_id,
                     "shelter_name": row.shelter_name,
                     "request_item": row.request_item,
@@ -482,56 +486,28 @@ def save_vector_matches(
                     "category": raw_match.get("category", ""),
                     "matched_at": now.isoformat(),
                     "status": "pending",
-
-                    # Those two ids not stored yet
-                    # "donation_id": raw_match.get("donation_id"),
-                    # "request_id": raw_match.get("request_id"),
+                    "donation_id": raw_match.get("donation_id", ""),
+                    "request_id": raw_match.get("request_id", ""),
                 }
                 formatted_matches.append(formatted_match)
 
                 if save_to_db:
                     # Insert into the matches table
                     conn.execute(
-                        text(
-                            """
-                            INSERT INTO matches (
-                                id,
-                                status,
-                                matched_at,
-                                category,
-                                quantity,
-                                item_name,
-                                shelter_name,
-                                donor_username,
-                                donor_id,
-                                shelter_id
-                            )
-                            VALUES (
-                                :id,
-                                :status,
-                                :matched_at,
-                                :category,
-                                :quantity,
-                                :item_name,
-                                :shelter_name,
-                                :donor_username,
-                                :donor_id,
-                                :shelter_id
-                            )
-                            """
-                        ),
-                        {
-                            "id": match_id,
-                            "status": "pending",
-                            "matched_at": now,  # datetime -> timestamptz
-                            "category": formatted_match["category"],
-                            "quantity": formatted_match["quantity"],
-                            "item_name": formatted_match["item_name"],
-                            "shelter_name": formatted_match["shelter_name"],
-                            "donor_username": formatted_match["donor_username"],
-                            "donor_id": formatted_match["donor_id"],
-                            "shelter_id": formatted_match["shelter_id"]
-                        }
+                        insert(matches_table).values(
+                            id=match_id,
+                            status="pending",
+                            matched_at=now,
+                            category=formatted_match["category"],
+                            quantity=formatted_match["quantity"],
+                            item_name=formatted_match["item_name"],
+                            shelter_name=formatted_match["shelter_name"],
+                            donor_username=formatted_match["donor_username"],
+                            donor_id=formatted_match["donor_id"],
+                            shelter_id=formatted_match["shelter_id"],
+                            donation_id=formatted_match["donation_id"],
+                            request_id=formatted_match["request_id"],
+                        )
                     )
                     
                     # Add match_id to both donor and shelter match_ids lists
