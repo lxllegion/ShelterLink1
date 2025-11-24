@@ -33,12 +33,14 @@ export interface RequestForm {
 }
 
 export interface UpdateDonationForm {
+  donor_id: string;
   item_name: string;
   quantity: number;
   category: string;
 }
 
 export interface UpdateRequestForm {
+  shelter_id: string;
   item_name: string;
   quantity: number;
   category: string;
@@ -47,6 +49,7 @@ export interface UpdateRequestForm {
 // Database Types
 export interface Donation {
   donation_id: string;
+  donor_id: string;
   item_name: string;
   quantity: number;
   category: string;
@@ -54,6 +57,7 @@ export interface Donation {
 
 export interface Request {
   request_id: string;
+  shelter_id: string;
   item_name: string;
   quantity: number;
   category: string;
