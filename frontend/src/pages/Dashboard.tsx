@@ -36,7 +36,7 @@ function Dashboard() {
   
   const mockDonations = [
     {
-      donation_id: '1',
+      donation_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       item_name: 'Winter Coats',
       quantity: 15,
       category: 'Clothing'
@@ -204,10 +204,10 @@ function Dashboard() {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         if (type === 'donation') {
-          await deleteDonation(donations[index].donation_id);
+          await deleteDonation(donations[index].donation_id, currentUser?.uid || '');
           setDonations(donations.filter((_, i) => i !== index));
         } else if (type === 'request') {
-          await deleteRequest(requests[index].request_id);
+          await deleteRequest(requests[index].request_id, currentUser?.uid || '');
           setRequests(requests.filter((_, i) => i !== index));
         }
       } catch (error) {

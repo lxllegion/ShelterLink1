@@ -185,28 +185,6 @@ function Profile() {
     setIsEditing(false);
   };
 
-  const handleDeleteItem = async (index: number, type: 'donation' | 'request') => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-        try {
-          if (type === 'donation') {
-            await deleteDonation(donations[index].donation_id);
-            setDonations(donations.filter((_, i) => i !== index));
-          } else if (type === 'request') {
-            await deleteRequest(requests[index].request_id);
-            setRequests(requests.filter((_, i) => i !== index));
-          }
-        } catch (error) {
-          alert('Error deleting donation: ' + error);
-        }
-    }
-  };
-
-  const handleEditItem = (index: number, type: 'donation' | 'request') => {
-    setEditingIndex(index);
-    setEditingType(type);
-    setIsModalOpen(true);
-  };
-
   const handleSaveItem = async (itemData: ItemData) => {
     if (editingIndex === null) return;
     try {
