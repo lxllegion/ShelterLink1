@@ -24,6 +24,7 @@ function SheltersNearMe() {
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [shelterRequests, setShelterRequests] = useState<{[key: string]: ShelterRequest[]}>({});
   const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
+  const [loadingRequests, setLoadingRequests] = useState(false);
 
   // Default center (San Francisco, CA)
   const defaultCenter: [number, number] = [37.7749, -122.4194];
@@ -47,21 +48,6 @@ function SheltersNearMe() {
         setLoading(true);
         const data = await getShelters();
         setShelters(data);
-
-        // Fetch requests for each shelter
-        const requestsMap: {[key: string]: ShelterRequest[]} = {};
-        await Promise.all(
-          data.map(async (shelter) => {
-            try {
-              const requests = await getShelterRequests(shelter.uid);
-              requestsMap[shelter.uid] = requests;
-            } catch (error) {
-              console.error(`Failed to fetch requests for shelter ${shelter.uid}:`, error);
-              requestsMap[shelter.uid] = [];
-            }
-          })
-        );
-        setShelterRequests(requestsMap);
         setError(null);
       } catch (err) {
         setError('Failed to load shelters. Please try again later.');
@@ -73,6 +59,31 @@ function SheltersNearMe() {
 
     fetchShelters();
   }, []);
+
+  // Handle shelter click - fetch requests on demand
+  const handleShelterClick = async (shelter: Shelter) => {
+    setSelectedShelter(shelter);
+
+    // Only fetch if we haven't already cached this shelter's requests
+    if (!shelterRequests[shelter.uid]) {
+      setLoadingRequests(true);
+      try {
+        const requests = await getShelterRequests(shelter.uid);
+        setShelterRequests(prev => ({
+          ...prev,
+          [shelter.uid]: requests
+        }));
+      } catch (error) {
+        console.error(`Failed to fetch requests for shelter ${shelter.uid}:`, error);
+        setShelterRequests(prev => ({
+          ...prev,
+          [shelter.uid]: []
+        }));
+      } finally {
+        setLoadingRequests(false);
+      }
+    }
+  };
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -270,12 +281,10 @@ function SheltersNearMe() {
                         )
                       : null;
 
-                    const requests = shelterRequests[shelter.uid] || [];
-
                     return (
                       <div
                         key={shelter.id}
-                        onClick={() => setSelectedShelter(shelter)}
+                        onClick={() => handleShelterClick(shelter)}
                         style={{
                           backgroundColor: 'white',
                           border: '2px solid black',
@@ -311,12 +320,6 @@ function SheltersNearMe() {
                             <p>{shelter.city}, {shelter.state}</p>
                           )}
                         </div>
-
-                        {requests.length > 0 && (
-                          <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
-                            {requests.length} item{requests.length !== 1 ? 's' : ''} needed
-                          </p>
-                        )}
                       </div>
                     );
                   })}
@@ -427,7 +430,9 @@ function SheltersNearMe() {
               <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
                 Items Needed
               </h3>
-              {(shelterRequests[selectedShelter.uid] || []).length > 0 ? (
+              {loadingRequests ? (
+                <p style={{ color: '#6b7280', textAlign: 'center', padding: '1rem' }}>Loading items...</p>
+              ) : (shelterRequests[selectedShelter.uid] || []).length > 0 ? (
                 <div style={{ display: 'grid', gap: '0.75rem' }}>
                   {(shelterRequests[selectedShelter.uid] || []).map((request) => (
                     <div
