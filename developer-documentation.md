@@ -178,11 +178,16 @@ client = TestClient(app)
 
 Write functions:
 ```python
-def sample_donor():
-    return {
-        "email": "donor@example.com",
-        "userType": "donor"
-    }
+def test_donor():
+    response = client.post("/donor", json={
+        "userID": "1234567890",
+        "name": "John Doe",
+        "username": "johndoe",
+        "email": "johndoe@example.com",
+        "phone_number": "1234567890",
+    })
+    assert response.status_code == 200
+    assert response.json() == {"message": "Donor registered successfully"}
 ```
 
 ### Frontend:
