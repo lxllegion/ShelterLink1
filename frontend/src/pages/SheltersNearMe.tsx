@@ -23,7 +23,7 @@ function SheltersNearMe() {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
   const [shelterRequests, setShelterRequests] = useState<{[key: string]: ShelterRequest[]}>({});
-  const [expandedShelter, setExpandedShelter] = useState<string | null>(null);
+  const [selectedShelter, setSelectedShelter] = useState<Shelter | null>(null);
 
   // Default center (San Francisco, CA)
   const defaultCenter: [number, number] = [37.7749, -122.4194];
@@ -271,46 +271,33 @@ function SheltersNearMe() {
                       : null;
 
                     const requests = shelterRequests[shelter.uid] || [];
-                    const isExpanded = expandedShelter === shelter.id;
 
                     return (
                       <div
                         key={shelter.id}
-                        onClick={() => setExpandedShelter(isExpanded ? null : shelter.id)}
+                        onClick={() => setSelectedShelter(shelter)}
                         style={{
                           backgroundColor: 'white',
-                          border: isExpanded ? '2px solid #3b82f6' : '2px solid black',
+                          border: '2px solid black',
                           padding: '1rem',
                           borderRadius: '0.5rem',
                           cursor: 'pointer',
-                          transition: 'all 0.2s ease-in-out',
-                          boxShadow: isExpanded ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none'
+                          transition: 'all 0.2s ease-in-out'
                         }}
                         onMouseEnter={(e) => {
-                          if (!isExpanded) {
-                            e.currentTarget.style.borderColor = '#3b82f6';
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.2)';
-                          }
+                          e.currentTarget.style.borderColor = '#3b82f6';
+                          e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.2)';
                         }}
                         onMouseLeave={(e) => {
-                          if (!isExpanded) {
-                            e.currentTarget.style.borderColor = 'black';
-                            e.currentTarget.style.boxShadow = 'none';
-                          }
+                          e.currentTarget.style.borderColor = 'black';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem', marginBottom: '0.5rem' }}>
                             {shelter.shelter_name}
                           </h3>
-                          <span style={{
-                            color: '#6b7280',
-                            fontSize: '1.25rem',
-                            transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease-in-out'
-                          }}>
-                            ▼
-                          </span>
+                          <span style={{ color: '#3b82f6', fontSize: '0.875rem' }}>View Details →</span>
                         </div>
 
                         {distance !== null && (
@@ -319,57 +306,16 @@ function SheltersNearMe() {
                           </p>
                         )}
 
-                        <div style={{ color: '#4b5563', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-                          {shelter.address && (
-                            <p style={{ marginBottom: '0.25rem' }}>
-                              {shelter.address}
-                            </p>
-                          )}
+                        <div style={{ color: '#4b5563', fontSize: '0.875rem' }}>
                           {shelter.city && shelter.state && (
-                            <p style={{ marginBottom: '0.25rem' }}>
-                              {shelter.city}, {shelter.state} {shelter.zip_code}
-                            </p>
+                            <p>{shelter.city}, {shelter.state}</p>
                           )}
-                          <p style={{ marginBottom: '0.25rem' }}>
-                            Phone: {shelter.phone_number}
-                          </p>
-                          <p>Email: {shelter.email}</p>
                         </div>
 
-                        {/* Items Needed Section */}
                         {requests.length > 0 && (
-                          <div style={{
-                            marginTop: '0.75rem',
-                            paddingTop: '0.75rem',
-                            borderTop: '1px solid #e5e7eb'
-                          }}>
-                            <h4 style={{ fontWeight: '600', fontSize: '0.875rem', marginBottom: '0.5rem', color: '#374151' }}>
-                              Items Needed:
-                            </h4>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                              {(isExpanded ? requests : requests.slice(0, 3)).map((request) => (
-                                <div key={request.id} style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                                  • {request.item_name} - Qty: {request.quantity} ({request.category})
-                                </div>
-                              ))}
-                              {!isExpanded && requests.length > 3 && (
-                                <div style={{ fontSize: '0.875rem', color: '#3b82f6', fontStyle: 'italic' }}>
-                                  Click to see {requests.length - 3} more items
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {isExpanded && (
-                          <div style={{
-                            marginTop: '0.75rem',
-                            fontSize: '0.75rem',
-                            color: '#9ca3af',
-                            textAlign: 'center'
-                          }}>
-                            Click to collapse
-                          </div>
+                          <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                            {requests.length} item{requests.length !== 1 ? 's' : ''} needed
+                          </p>
                         )}
                       </div>
                     );
@@ -380,6 +326,186 @@ function SheltersNearMe() {
           </div>
         )}
       </div>
+
+      {/* Shelter Detail Modal */}
+      {selectedShelter && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}
+          onClick={() => setSelectedShelter(null)}
+        >
+          <div
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '0.75rem',
+              padding: '2rem',
+              maxWidth: '600px',
+              width: '90%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.3)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#111827' }}>
+                {selectedShelter.shelter_name}
+              </h2>
+              <button
+                onClick={() => setSelectedShelter(null)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  cursor: 'pointer',
+                  color: '#6b7280',
+                  padding: '0.25rem'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Distance */}
+            {userLocation && selectedShelter.latitude && selectedShelter.longitude && (
+              <p style={{ color: '#059669', fontWeight: '600', fontSize: '1rem', marginBottom: '1rem' }}>
+                {calculateDistance(
+                  userLocation[0],
+                  userLocation[1],
+                  parseFloat(selectedShelter.latitude),
+                  parseFloat(selectedShelter.longitude)
+                ).toFixed(1)} miles away
+              </p>
+            )}
+
+            {/* Contact Information Section */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+                Contact Information
+              </h3>
+              <div style={{ display: 'grid', gap: '0.5rem', color: '#4b5563' }}>
+                {selectedShelter.address && (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span style={{ fontWeight: '500' }}>Address:</span>
+                    <span>{selectedShelter.address}</span>
+                  </div>
+                )}
+                {selectedShelter.city && selectedShelter.state && (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <span style={{ fontWeight: '500' }}>City:</span>
+                    <span>{selectedShelter.city}, {selectedShelter.state} {selectedShelter.zip_code}</span>
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: '500' }}>Phone:</span>
+                  <a href={`tel:${selectedShelter.phone_number}`} style={{ color: '#3b82f6', textDecoration: 'none' }}>
+                    {selectedShelter.phone_number}
+                  </a>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: '500' }}>Email:</span>
+                  <a href={`mailto:${selectedShelter.email}`} style={{ color: '#3b82f6', textDecoration: 'none' }}>
+                    {selectedShelter.email}
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Items Needed Section */}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#374151', marginBottom: '0.75rem', borderBottom: '2px solid #e5e7eb', paddingBottom: '0.5rem' }}>
+                Items Needed
+              </h3>
+              {(shelterRequests[selectedShelter.uid] || []).length > 0 ? (
+                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                  {(shelterRequests[selectedShelter.uid] || []).map((request) => (
+                    <div
+                      key={request.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '0.75rem',
+                        backgroundColor: '#f9fafb',
+                        borderRadius: '0.5rem',
+                        border: '1px solid #e5e7eb'
+                      }}
+                    >
+                      <div>
+                        <p style={{ fontWeight: '500', color: '#111827' }}>{request.item_name}</p>
+                        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>{request.category}</p>
+                      </div>
+                      <div style={{
+                        backgroundColor: '#dbeafe',
+                        color: '#1d4ed8',
+                        padding: '0.25rem 0.75rem',
+                        borderRadius: '9999px',
+                        fontWeight: '600',
+                        fontSize: '0.875rem'
+                      }}>
+                        Qty: {request.quantity}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: '#6b7280', fontStyle: 'italic' }}>No items currently needed</p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+              {selectedShelter.latitude && selectedShelter.longitude && (
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedShelter.latitude},${selectedShelter.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '0.5rem',
+                    fontWeight: '600',
+                    textAlign: 'center',
+                    textDecoration: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Get Directions
+                </a>
+              )}
+              <button
+                onClick={() => setSelectedShelter(null)}
+                style={{
+                  flex: 1,
+                  padding: '0.75rem 1rem',
+                  backgroundColor: 'white',
+                  color: '#374151',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '0.5rem',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
