@@ -126,12 +126,13 @@ def get_donations(user_id: Optional[str] = None) -> List[dict]:
         with engine.connect() as conn:
             result = conn.execute(select(donations_table)).fetchall()
         return [
-            DonationForm(
-                donor_id=row.donor_id,
-                item_name=row.item_name,
-                quantity=row.quantity,
-                category=row.category
-            )
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
             for row in result
         ]
 
@@ -170,12 +171,13 @@ def get_requests(user_id: Optional[str] = None) -> List[dict]:
         with engine.connect() as conn:
             result = conn.execute(select(requests_table)).fetchall()
         return [
-            RequestForm(
-                shelter_id=row.shelter_id,
-                item_name=row.item_name,
-                quantity=row.quantity,
-                category=row.category
-            )
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
             for row in result
           ]
 
