@@ -22,7 +22,7 @@ def init_files():
         with open(REQUESTS_FILE, "w") as f:
             json.dump([], f)
 
-def save_donation(donation: DonationForm) -> dict[str, str | int]:
+def save_donation(donation: DonationForm) -> dict:
     try:
         with engine.connect() as conn:
             result = conn.execute(
@@ -68,7 +68,7 @@ def save_donation(donation: DonationForm) -> dict[str, str | int]:
         print(f"Error saving donation: {e}")
         raise e
 
-def save_request(request: RequestForm) -> RequestForm:
+def save_request(request: RequestForm) -> dict:
     try:
         with engine.connect() as conn:
 
@@ -120,18 +120,19 @@ def save_request(request: RequestForm) -> RequestForm:
         raise e
 
 # Get all donations
-def get_donations(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
+def get_donations(user_id: Optional[str] = None) -> List[dict]:
     if not user_id:
         # If no user_id is provided, return all donations
         with engine.connect() as conn:
             result = conn.execute(select(donations_table)).fetchall()
         return [
-            DonationForm(
-                donor_id=row.donor_id,
-                item_name=row.item_name,
-                quantity=row.quantity,
-                category=row.category
-            )
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
             for row in result
         ]
 
@@ -165,17 +166,18 @@ def get_donations(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
     ]
 
 
-def get_requests(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
+def get_requests(user_id: Optional[str] = None) -> List[dict]:
     if not user_id:
         with engine.connect() as conn:
             result = conn.execute(select(requests_table)).fetchall()
         return [
-            RequestForm(
-                shelter_id=row.shelter_id,
-                item_name=row.item_name,
-                quantity=row.quantity,
-                category=row.category
-            )
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
             for row in result
           ]
 
