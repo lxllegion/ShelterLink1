@@ -1,19 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DonationForm, RequestForm, Match, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
+import { Donation, Request, Match, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
-
-// Extended types with IDs for items stored in state
-interface DonationWithId extends DonationForm {
-  donation_id: string;
-}
-
-interface RequestWithId extends RequestForm {
-  request_id: string;
-}
 
 const RETRY_DELAY = 1500;
 const MAX_RETRIES = 3;
@@ -23,8 +14,8 @@ function Dashboard() {
   const { currentUser } = useAuth();
   const [userType, setUserType] = useState<string | null>(null);
 
-  const [donations, setDonations] = useState<DonationWithId[]>([]);
-  const [requests, setRequests] = useState<RequestWithId[]>([]);
+  const [donations, setDonations] = useState<Donation[]>([]);
+  const [requests, setRequests] = useState<Request[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,91 +24,6 @@ function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
-  
-  const mockDonations = [
-    {
-      donation_id: '2b97cf15-1cc9-43f1-9fe8-eb1535b6d9ef',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-    
-    {
-      donation_id: '2',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '3',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '4',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '5',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '6',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '7',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-
-    {
-      donation_id: '8',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-  ];
-
-  const mockRequests = [
-    {
-      request_id: '1',
-      item_name: 'Sleeping Bags',
-      quantity: 15,
-      shelter_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-    
-    {
-      request_id: '2',
-      item_name: 'Winter Coats',
-      quantity: 15,
-      shelter_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
-      category: 'Clothing'
-    },
-    
-  ];
 
   useEffect(() => {
     const fetchUserTypeAndData = async () => {
@@ -161,7 +67,7 @@ function Dashboard() {
         if (userInfo.userType === 'donor') {
           // Fetch donations for this donor
           const donationsData = await getDonations();
-          const userDonations = donationsData.filter(d => d.donor_id === userId) as DonationWithId[];
+          const userDonations = donationsData.filter(d => d.donor_id === userId) as Donation[];
           setDonations(userDonations);
           
           // Filter matches for this donor
@@ -170,18 +76,12 @@ function Dashboard() {
         } else if (userInfo.userType === 'shelter') {
           // Fetch requests for this shelter
           const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.shelter_id === userId) as RequestWithId[]; // Note: using donor_id field for shelter_id
+          const userRequests = requestsData.filter(r => r.shelter_id === userId) as  Request[]; // Note: using donor_id field for shelter_id
           setRequests(userRequests);
           
           // Filter matches for this shelter
           const userMatches = matchesData.filter(m => m.shelter_id === userId);
           setMatches(userMatches);
-        }
-
-        if (userInfo.userType === 'donor') {
-          setDonations(mockDonations as DonationWithId[]);
-        } else if (userInfo.userType === 'shelter') {
-          setRequests(mockRequests as RequestWithId[]);
         }
       } catch (error: any) {
         console.error('Error fetching data:', error);
