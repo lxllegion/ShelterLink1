@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional
 from services.match import save_matches
 from datetime import datetime
 import uuid
+from services.email_utils import send_match_emails
 
 def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """
@@ -443,6 +444,42 @@ def user_save_match_id(match_id: str, user_id: str, user_type: str, conn):
     except Exception as e:
         print(f"Error saving match ID to {user_type} {user_id}: {e}")
 
+def get_donor_email(conn, donor_uid: str) -> str | None:
+    """
+    Retrieves user email from donor table.
+
+    Args:
+        conn: The current connection to database. 
+        donor_uid: The uid of the donor.
+
+    Returns:
+        The email of the donor with the given id, if it exists.
+    """
+    if not donor_uid:
+        return None
+    result = conn.execute(
+        select(donors_table.c.email).where(donors_table.c.uid == donor_uid)
+    ).scalar_one_or_none()
+    return result
+
+def get_shelter_email(conn, shelter_uid: str) -> str | None:
+    """
+    Retrieves user email from shelter table.
+
+    Args:
+        conn: The current connection to database. 
+        shelter_uid: The uid of the shelter.
+
+    Returns:
+        The email of the shelter with the given id, if it exists.
+    """
+    if not shelter_uid:
+        return None
+    result = conn.execute(
+        select(shelters_table.c.email).where(shelters_table.c.uid == shelter_uid)
+    ).scalar_one_or_none()
+    return result
+
 def save_vector_matches(
     matches: List[Dict[str, Any]],
     save_to_file: bool = True,
@@ -490,6 +527,13 @@ def save_vector_matches(
                     "request_id": raw_match.get("request_id", ""),
                 }
                 formatted_matches.append(formatted_match)
+
+                # Send email
+                donor_id_email = formatted_match["donor_id"]
+                shelter_id_email = formatted_match["shelter_id"]
+                donor_email = get_donor_email(conn, donor_id_email)
+                shelter_email = get_shelter_email(conn, shelter_id_email)
+                send_match_emails(donor_email, shelter_email, formatted_match)
 
                 if save_to_db:
                     # Insert into the matches table
