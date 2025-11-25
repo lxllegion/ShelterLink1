@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserInfo, UserInfo, getDonations, getRequests, deleteDonation, deleteRequest, Donation, Request, updateDonation, updateRequest, updateDonor, updateShelter, deleteDonor, deleteShelter } from '../api/backend';
+import { getUserInfo, UserInfo, updateDonor, updateShelter, deleteDonor, deleteShelter } from '../api/backend';
 import NavBar from '../components/NavBar';
-import EditItemModal, { ItemData } from '../components/EditItemModal';
 import DeleteAccountModal from '../components/DeleteAccountModal';
 import { useNavigate } from 'react-router-dom';
 import { deleteUser } from 'firebase/auth';
@@ -15,16 +14,6 @@ function Profile() {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
-  // Donations/Requests state
-  const [donations, setDonations] = useState<Donation[]>([]);
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [itemsLoading, setItemsLoading] = useState(true);
-  
-  // Modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
   
   // Form states for editing
   const [editName, setEditName] = useState('');
@@ -56,85 +45,6 @@ function Profile() {
           setEditState(data.userData.state || '');
           setEditZipCode(data.userData.zip_code || '');
         }
-
-        // Use mock data for now
-        setItemsLoading(true);
-        setTimeout(() => {
-          if (data.userType === 'donor') {
-            setDonations([
-              {
-                donation_id: currentUser.uid,
-                item_name: 'Winter Coats',
-                quantity: 15,
-                category: 'Clothing'
-              },
-              {
-                donation_id: currentUser.uid,
-                item_name: 'Canned Food',
-                quantity: 50,
-                category: 'Food'
-              },
-              {
-                donation_id: currentUser.uid,
-                item_name: 'Blankets',
-                quantity: 20,
-                category: 'Bedding'
-              },
-              {
-                donation_id: currentUser.uid,
-                item_name: 'First Aid Kits',
-                quantity: 10,
-                category: 'Medical Supplies'
-              },
-              {
-                donation_id: currentUser.uid,
-                item_name: 'Children\'s Books',
-                quantity: 30,
-                category: 'Educational'
-              }
-            ]);
-          } else if (data.userType === 'shelter') {
-            setRequests([
-              {
-                request_id: currentUser.uid,
-                item_name: 'Sleeping Bags',
-                quantity: 25,
-                category: 'Bedding'
-              },
-              {
-                request_id: currentUser.uid,
-                item_name: 'Non-Perishable Food',
-                quantity: 100,
-                category: 'Food'
-              },
-              {
-                request_id: currentUser.uid,
-                item_name: 'Toiletries',
-                quantity: 40,
-                category: 'Hygiene'
-              },
-              {
-                request_id: currentUser.uid,
-                item_name: 'Baby Diapers',
-                quantity: 60,
-                category: 'Baby Care'
-              },
-              {
-                request_id: currentUser.uid,
-                item_name: 'Work Boots',
-                quantity: 15,
-                category: 'Clothing'
-              },
-              {
-                request_id: currentUser.uid,
-                item_name: 'Flashlights',
-                quantity: 12,
-                category: 'Emergency Supplies'
-              }
-            ]);
-          }
-          setItemsLoading(false);
-        }, 500); // Simulate loading delay
       } catch (err: any) {
         setError(err.message || 'Failed to load user information');
       } finally {
@@ -183,84 +93,6 @@ function Profile() {
       setEditZipCode(userInfo.userData.zip_code || '');
     }
     setIsEditing(false);
-  };
-
-  const handleDeleteItem = async (index: number, type: 'donation' | 'request') => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-        try {
-          if (type === 'donation') {
-            await deleteDonation(donations[index].donation_id);
-            setDonations(donations.filter((_, i) => i !== index));
-          } else if (type === 'request') {
-            await deleteRequest(requests[index].request_id);
-            setRequests(requests.filter((_, i) => i !== index));
-          }
-        } catch (error) {
-          alert('Error deleting donation: ' + error);
-        }
-    }
-  };
-
-  const handleEditItem = (index: number, type: 'donation' | 'request') => {
-    setEditingIndex(index);
-    setEditingType(type);
-    setIsModalOpen(true);
-  };
-
-  const handleSaveItem = async (itemData: ItemData) => {
-    if (editingIndex === null) return;
-    try {
-      if (editingType === 'donation') {
-        await updateDonation(donations[editingIndex].donation_id, {
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
-        });
-        const updatedDonations = [...donations];
-        updatedDonations[editingIndex] = {
-          ...updatedDonations[editingIndex],
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
-        };
-        setDonations(updatedDonations);
-      } else {
-        await updateRequest(requests[editingIndex].request_id, {
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category 
-        });
-        const updatedRequests = [...requests];
-        updatedRequests[editingIndex] = {
-          ...updatedRequests[editingIndex],
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
-        };
-        setRequests(updatedRequests);
-      }
-
-      setIsModalOpen(false);
-      setEditingIndex(null);
-    } catch (error) {
-      alert('Error updating item: ' + error);
-    }
-  };
-
-  const getCurrentItemData = (): ItemData | null => {
-    if (editingIndex === null) return null;
-
-    const item = editingType === 'donation' 
-      ? donations[editingIndex] 
-      : requests[editingIndex];
-
-    if (!item) return null;
-
-    return {
-      item_name: item.item_name,
-      quantity: item.quantity,
-      category: item.category
-    };
   };
 
   const handleDeleteAccount = async () => {
@@ -699,15 +531,6 @@ function Profile() {
         )}
 
       </div>
-
-      {/* Edit Item Modal */}
-      <EditItemModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveItem}
-        itemType={editingType}
-        initialData={getCurrentItemData()}
-      />
 
       {/* Delete Account Confirmation Modal */}
       <DeleteAccountModal

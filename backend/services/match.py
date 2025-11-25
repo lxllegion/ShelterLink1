@@ -4,7 +4,8 @@ from typing import List, Dict, Any
 from database import engine, donors_table, shelters_table, matches_table
 from schemas.forms import DonationForm
 from schemas.forms import RequestForm
-from sqlalchemy import text
+from sqlalchemy import text, delete, update, select, func
+from uuid import UUID
 
 def get_matches_service(user_id: str, user_type: str):
     try:
@@ -118,3 +119,23 @@ def save_matches(new_matches: list):
             json.dump(existing, f, indent=2)
     except Exception as e:
         print(f"Error saving matches: {e}")
+
+def delete_match(match_id: UUID):
+    """
+    Delete a match
+    """
+    try:
+        with engine.connect() as conn:
+            # delete match_id from donor and shelter match_ids arrays
+            match = conn.execute(select(matches_table).where(matches_table.c.id == match_id)).fetchone()
+            donor_id = match.donor_id
+            shelter_id = match.shelter_id
+            # delete match_id from donor and shelter match_ids arrays
+            conn.execute(update(donors_table).where(donors_table.c.uid == donor_id).values(match_ids=func.array_remove(donors_table.c.match_ids, match_id)))
+            conn.execute(update(shelters_table).where(shelters_table.c.uid == shelter_id).values(match_ids=func.array_remove(shelters_table.c.match_ids, match_id)))
+            conn.execute(delete(matches_table).where(matches_table.c.id == match_id))
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Error deleting match: {e}")
+        return False

@@ -33,12 +33,14 @@ export interface RequestForm {
 }
 
 export interface UpdateDonationForm {
+  donor_id: string;
   item_name: string;
   quantity: number;
   category: string;
 }
 
 export interface UpdateRequestForm {
+  shelter_id: string;
   item_name: string;
   quantity: number;
   category: string;
@@ -47,6 +49,7 @@ export interface UpdateRequestForm {
 // Database Types
 export interface Donation {
   donation_id: string;
+  donor_id: string;
   item_name: string;
   quantity: number;
   category: string;
@@ -54,6 +57,7 @@ export interface Donation {
 
 export interface Request {
   request_id: string;
+  shelter_id: string;
   item_name: string;
   quantity: number;
   category: string;
@@ -447,8 +451,9 @@ export const getShelterRequests = async (shelterId: string): Promise<ShelterRequ
 };
 
 export const deleteDonation = async (donationId: string) => {
+export const deleteDonation = async (donationId: string, donorId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -467,9 +472,9 @@ export const deleteDonation = async (donationId: string) => {
   }
 };
 
-export const deleteRequest = async (requestId: string) => {
+export const deleteRequest = async (requestId: string, shelterId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}/${shelterId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',

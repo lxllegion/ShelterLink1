@@ -36,9 +36,10 @@ function Dashboard() {
   
   const mockDonations = [
     {
-      donation_id: '1',
+      donation_id: '2b97cf15-1cc9-43f1-9fe8-eb1535b6d9ef',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
     
@@ -46,6 +47,7 @@ function Dashboard() {
       donation_id: '2',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -53,6 +55,7 @@ function Dashboard() {
       donation_id: '3',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -60,6 +63,7 @@ function Dashboard() {
       donation_id: '4',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -67,6 +71,7 @@ function Dashboard() {
       donation_id: '5',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -74,6 +79,7 @@ function Dashboard() {
       donation_id: '6',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -81,6 +87,7 @@ function Dashboard() {
       donation_id: '7',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
 
@@ -88,6 +95,7 @@ function Dashboard() {
       donation_id: '8',
       item_name: 'Winter Coats',
       quantity: 15,
+      donor_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
   ];
@@ -97,6 +105,7 @@ function Dashboard() {
       request_id: '1',
       item_name: 'Sleeping Bags',
       quantity: 15,
+      shelter_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
     
@@ -104,6 +113,7 @@ function Dashboard() {
       request_id: '2',
       item_name: 'Winter Coats',
       quantity: 15,
+      shelter_id: '0a50ac41-d922-4497-a7ba-4ba4510476c7',
       category: 'Clothing'
     },
     
@@ -204,10 +214,10 @@ function Dashboard() {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         if (type === 'donation') {
-          await deleteDonation(donations[index].donation_id);
+          await deleteDonation(donations[index].donation_id, currentUser?.uid || '');
           setDonations(donations.filter((_, i) => i !== index));
         } else if (type === 'request') {
-          await deleteRequest(requests[index].request_id);
+          await deleteRequest(requests[index].request_id, currentUser?.uid || '');
           setRequests(requests.filter((_, i) => i !== index));
         }
       } catch (error) {
@@ -226,11 +236,13 @@ function Dashboard() {
     if (editingIndex === null) return;
     try {
       if (editingType === 'donation') {
-        await updateDonation(donations[editingIndex].donation_id, {
+        const result = await updateDonation(donations[editingIndex].donation_id, {
+          donor_id: donations[editingIndex].donor_id,
           item_name: itemData.item_name,
           quantity: itemData.quantity,
           category: itemData.category
         });
+        
         const updatedDonations = [...donations];
         updatedDonations[editingIndex] = {
           ...updatedDonations[editingIndex],
@@ -239,12 +251,29 @@ function Dashboard() {
           category: itemData.category
         };
         setDonations(updatedDonations);
+        
+        // Show match result if found
+        if (result.best_match) {
+          const match = result.best_match;
+          alert(
+            `Donation Updated! Match Found! 🎉\n\n` +
+            `Shelter: ${match.shelter_name || 'Unknown'}\n` +
+            `Item: ${match.item_name}\n` +
+            `Quantity Needed: ${match.quantity}\n` +
+            `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
+            `Can Fulfill: ${match.can_fulfill}`
+          );
+        } else {
+          alert('Donation updated successfully! No matches found yet.');
+        }
       } else {
-        await updateRequest(requests[editingIndex].request_id, {
+        const result = await updateRequest(requests[editingIndex].request_id, {
+          shelter_id: requests[editingIndex].shelter_id,
           item_name: itemData.item_name,
           quantity: itemData.quantity,
           category: itemData.category 
         });
+        
         const updatedRequests = [...requests];
         updatedRequests[editingIndex] = {
           ...updatedRequests[editingIndex],
@@ -253,6 +282,21 @@ function Dashboard() {
           category: itemData.category
         };
         setRequests(updatedRequests);
+        
+        // Show match result if found
+        if (result.best_match) {
+          const match = result.best_match;
+          alert(
+            `Request Updated! Match Found! 🎉\n\n` +
+            `Donor: ${match.donor_name || 'Unknown'}\n` +
+            `Item: ${match.item_name}\n` +
+            `Quantity Available: ${match.quantity}\n` +
+            `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
+            `Can Fulfill: ${match.can_fulfill}`
+          );
+        } else {
+          alert('Request updated successfully! No matches found yet.');
+        }
       }
 
       setIsModalOpen(false);
