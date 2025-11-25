@@ -420,6 +420,37 @@ export const getShelters = async (): Promise<Shelter[]> => {
   }
 };
 
+export interface ShelterRequest {
+  id: string;
+  shelter_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export const getShelterRequests = async (shelterId: string): Promise<ShelterRequest[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/shelters/${shelterId}/requests`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch shelter requests');
+    }
+
+    const data = await response.json();
+    return data.requests || [];
+  } catch (error) {
+    console.error('Error fetching shelter requests:', error);
+    throw error;
+  }
+};
+
+export const deleteDonation = async (donationId: string) => {
 export const deleteDonation = async (donationId: string, donorId: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {
