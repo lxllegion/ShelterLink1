@@ -22,7 +22,7 @@ def init_files():
         with open(REQUESTS_FILE, "w") as f:
             json.dump([], f)
 
-def save_donation(donation: DonationForm) -> DonationForm:
+def save_donation(donation: DonationForm) -> dict[str, str | int]:
     try:
         with engine.connect() as conn:
             result = conn.execute(
@@ -55,12 +55,13 @@ def save_donation(donation: DonationForm) -> DonationForm:
                 )
                 conn.commit()
 
-        return DonationForm(
-            donor_id=donation.donor_id,
-            item_name=donation.item_name,
-            quantity=donation.quantity,
-            category=donation.category
-        )
+        return {
+            "donor_id": donation.donor_id,
+            "item_name": donation.item_name,
+            "quantity": donation.quantity,
+            "category": donation.category
+        }
+
 
     except Exception as e:
         print(f"Error saving donation: {e}")
@@ -106,19 +107,18 @@ def save_request(request: RequestForm) -> RequestForm:
                 )
                 conn.commit()
 
-        return RequestForm(
-            shelter_id=request.shelter_id,
-            item_name=request.item_name,
-            quantity=request.quantity,
-            category=request.category
-        )
-
+        return {
+            "shelter_id": request.shelter_id,
+            "item_name": request.item_name,
+            "quantity": request.quantity,
+            "category": request.category
+        }
     except Exception as e:
         print(f"Error saving request: {e}")
         raise e
 
 # Get all donations
-def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
+def get_donations(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
     if not user_id:
         # If no user_id is provided, return all donations
         with engine.connect() as conn:
@@ -152,17 +152,17 @@ def get_donations(user_id: Optional[str] = None) -> List[DonationForm]:
         ).fetchall()
 
     return [
-        DonationForm(
-            donor_id=row.donor_id,
-            item_name=row.item_name,
-            quantity=row.quantity,
-            category=row.category
-        )
+        {
+            "donor_id": row.donor_id,
+            "item_name": row.item_name,
+            "quantity": row.quantity,
+            "category": row.category
+        }
         for row in result
     ]
 
 
-def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
+def get_requests(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
     if not user_id:
         with engine.connect() as conn:
             result = conn.execute(select(requests_table)).fetchall()
@@ -192,12 +192,12 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
         ).fetchall()
 
     return [
-        RequestForm(
-            shelter_id=row.shelter_id,
-            item_name=row.item_name,
-            quantity=row.quantity,
-            category=row.category
-        )
+        {
+            "shelter_id": row.shelter_id,
+            "item_name": row.item_name,
+            "quantity": row.quantity,
+            "category": row.category
+        }
         for row in result
     ]
 
