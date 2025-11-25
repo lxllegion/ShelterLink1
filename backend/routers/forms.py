@@ -63,12 +63,12 @@ async def update_request(request_id: UUID, request: RequestForm):
             "best_match": None
         }
 
-@router.get("/donations", response_model=List[DonationForm])
+@router.get("/donations", response_model=List[dict])
 async def list_donations(user_id: Optional[str] = Query(None)):
     return get_donations(user_id=user_id)
 
 # Endpoint to get all requests
-@router.get("/requests", response_model=List[RequestForm])
+@router.get("/requests", response_model=List[dict])
 async def list_requests(user_id: Optional[str] = Query(None)):
     return get_requests(user_id=user_id)
 
