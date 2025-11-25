@@ -36,7 +36,7 @@ function Form() {
           quantity: quantityValue,
           category: category,
         });
-        createdId = result.id;
+        createdId = result.donation_id;
 
         // Find best match for the donation
         try {
@@ -69,7 +69,7 @@ function Form() {
           quantity: quantityValue,
           category: category,
         });
-        createdId = result.id;
+        createdId = result.request_id;
 
         // Find best match for the request
         try {
