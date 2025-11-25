@@ -235,7 +235,7 @@ export const createRequest = async (data: RequestForm) => {
   }
 };
 
-export const getDonations = async (): Promise<DonationForm[]> => {
+export const getDonations = async (): Promise<Donation[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/forms/donations`, {
       method: 'GET',
@@ -256,7 +256,7 @@ export const getDonations = async (): Promise<DonationForm[]> => {
   }
 };
 
-export const getRequests = async (): Promise<RequestForm[]> => {
+export const getRequests = async (): Promise<Request[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/forms/requests`, {
       method: 'GET',
