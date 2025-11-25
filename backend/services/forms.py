@@ -56,6 +56,7 @@ def save_donation(donation: DonationForm) -> dict[str, str | int]:
                 conn.commit()
 
         return {
+            "donation_id": str(donation_id),
             "donor_id": donation.donor_id,
             "item_name": donation.item_name,
             "quantity": donation.quantity,
@@ -108,6 +109,7 @@ def save_request(request: RequestForm) -> RequestForm:
                 conn.commit()
 
         return {
+            "request_id": str(request_id),
             "shelter_id": request.shelter_id,
             "item_name": request.item_name,
             "quantity": request.quantity,
@@ -153,6 +155,7 @@ def get_donations(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
 
     return [
         {
+            "donation_id": str(row.id),
             "donor_id": row.donor_id,
             "item_name": row.item_name,
             "quantity": row.quantity,
@@ -193,6 +196,7 @@ def get_requests(user_id: Optional[str] = None) -> List[dict[str, str | int]]:
 
     return [
         {
+            "request_id": str(row.id),
             "shelter_id": row.shelter_id,
             "item_name": row.item_name,
             "quantity": row.quantity,
