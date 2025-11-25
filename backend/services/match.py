@@ -5,6 +5,7 @@ from database import engine, donors_table, shelters_table, matches_table
 from schemas.forms import DonationForm
 from schemas.forms import RequestForm
 from sqlalchemy import text, delete, update, select, func
+from sqlalchemy.orm import sessionmaker
 from uuid import UUID
 
 def get_matches_service(user_id: str, user_type: str):
@@ -139,3 +140,62 @@ def delete_match(match_id: UUID):
     except Exception as e:
         print(f"Error deleting match: {e}")
         return False
+    
+SessionLocal = sessionmaker(bind=engine)
+
+def resolve_match_db(match_id: UUID, user_uid: UUID) -> str:
+    """
+    Resolves matches based on donor/shelter confirmation
+    """
+    session = SessionLocal()
+    try:
+        # Get current match record
+        match = session.execute(
+            matches_table.select().where(matches_table.c.id == match_id)
+        ).first()
+
+        if not match:
+            raise ValueError(f"No match found with id {match_id}")
+
+        match_dict = match._asdict()
+        current_status = match_dict["status"]
+
+        # Determine if the user who confirmed is a shelter/donor
+        if user_uid == match_dict.donor_id:
+            user_is_donor = True
+        elif user_uid == match_dict.shelter_id:
+            user_is_donor = False
+        else:
+            raise PermissionError("User is not part of this match")
+
+        new_status = resolve_match_status(current_status, user_is_donor)
+
+        # Update only if changed
+        if new_status != current_status:
+            session.execute(
+                update(matches_table)
+                .where(matches_table.c.id == match_id)
+                .values(status=new_status)
+            )
+            session.commit()
+
+        return new_status
+
+    finally:
+        session.close()
+
+def resolve_match_status(current_status: str, user_is_donor: bool) -> str:
+    """
+    Pure logic: given current status and whether current user is donor,
+    decide the new match status.
+    """
+    if current_status == "pending":
+        return "donor" if user_is_donor else "shelter"
+
+    if current_status == "donor" and not user_is_donor:
+        return "both"  # shelter confirms after donor
+
+    if current_status == "shelter" and user_is_donor:
+        return "both"  # donor confirms after shelter
+
+    return current_status  # No change if both or same user confirms
