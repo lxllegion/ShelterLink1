@@ -2,7 +2,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from schemas.forms import DonationForm, RequestForm
-from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service
+from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service
+from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
 from typing import List
 from uuid import UUID
 router = APIRouter(prefix="/forms", tags=["forms"])
@@ -16,6 +17,50 @@ async def create_donation(donation: DonationForm):
 @router.post("/request")
 async def create_request(request: RequestForm):
     return save_request(request)
+
+# Endpoint to update a donation
+@router.put("/donation/{donation_id}")
+async def update_donation(donation_id: UUID, donation: DonationForm):
+    # Update the donation
+    updated_donation = update_donation_service(donation_id, donation)
+    
+    # Find new best match
+    try:
+        best_match = find_best_match_for_donation(str(donation_id))
+        save_vector_matches([best_match])
+        return {
+            "donation": updated_donation,
+            "best_match": best_match
+        }
+    except Exception as e:
+        print(f"Error finding match after update: {e}")
+        # Return without match if matching fails
+        return {
+            "donation": updated_donation,
+            "best_match": None
+        }
+
+# Endpoint to update a request
+@router.put("/request/{request_id}")
+async def update_request(request_id: UUID, request: RequestForm):
+    # Update the request
+    updated_request = update_request_service(request_id, request)
+    
+    # Find new best match
+    try:
+        best_match = find_best_match_for_request(str(request_id))
+        save_vector_matches([best_match])
+        return {
+            "request": updated_request,
+            "best_match": best_match
+        }
+    except Exception as e:
+        print(f"Error finding match after update: {e}")
+        # Return without match if matching fails
+        return {
+            "request": updated_request,
+            "best_match": None
+        }
 
 # Endpoint to get all donations
 @router.get("/donations", response_model=List[DonationForm])

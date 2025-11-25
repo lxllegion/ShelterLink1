@@ -169,13 +169,6 @@ def delete_donation(donation_id: UUID, donor_id: str) -> bool:
             if match_id:
                 print(f"Found match {match_id} with donation {donation_id}, deleting...")
                 delete_match(match_id)
-                
-                # Remove the match_id from donor's match_ids array (query by uid, not id)
-                conn.execute(
-                    update(donors_table)
-                    .where(donors_table.c.uid == donor_id)
-                    .values(match_ids=func.array_remove(donors_table.c.match_ids, match_id))
-                )
             else:
                 print(f"No matches found with donation {donation_id}")
             
@@ -219,13 +212,6 @@ def delete_request(request_id: UUID, shelter_id: str) -> bool:
             if match_id:
                 print(f"Found match {match_id} with request {request_id}, deleting...")
                 delete_match(match_id)
-                
-                # Remove the match_id from shelter's match_ids array (query by uid, not id)
-                conn.execute(
-                    update(shelters_table)
-                    .where(shelters_table.c.uid == shelter_id)
-                    .values(match_ids=func.array_remove(shelters_table.c.match_ids, match_id))
-                )
             else:
                 print(f"No matches found with request {request_id}")
             
@@ -244,3 +230,79 @@ def delete_request(request_id: UUID, shelter_id: str) -> bool:
         import traceback
         traceback.print_exc()
         return False
+
+def update_donation(donation_id: UUID, donation: RequestForm) -> DonationForm:
+    try:
+        with engine.connect() as conn:
+            # First, get the actual donation from the database to get the real donor_id
+            donation_result = conn.execute(
+                select(donations_table).where(donations_table.c.id == donation_id)
+            ).fetchone()
+            
+            if not donation_result:
+                raise ValueError(f"Donation {donation_id} not found")
+            
+            actual_donor_id = donation_result.donor_id
+            
+            # Generate new embedding with updated data
+            new_embedding = generate_embedding(donation.category, donation.item_name, donation.quantity)
+            
+            # Update the donation with new data and embedding
+            conn.execute(update(donations_table).where(donations_table.c.id == donation_id).values(
+                item_name=donation.item_name,
+                quantity=donation.quantity,
+                category=donation.category,
+                embedding=new_embedding
+            ))
+            
+            # Use the actual donor_id from the database, not from the request
+            match_id = get_match_from_donation_id(actual_donor_id, donation_id)
+            if match_id:
+                print(f"Found match {match_id}, deleting...")
+                delete_match(match_id)
+            else:
+                print(f"No matches found with donation {donation_id}")
+            
+            conn.commit()
+            return {"id": donation_id, **donation.model_dump()}
+    except Exception as e:
+        print(f"Error updating donation: {e}")
+        raise e
+
+def update_request(request_id: str, request: RequestForm) -> RequestForm:
+    try:
+        with engine.connect() as conn:
+            # First, get the actual request from the database to get the real shelter_id
+            request_result = conn.execute(
+                select(requests_table).where(requests_table.c.id == request_id)
+            ).fetchone()
+            
+            if not request_result:
+                raise ValueError(f"Request {request_id} not found")
+            
+            actual_shelter_id = request_result.shelter_id
+            
+            # Generate new embedding with updated data
+            new_embedding = generate_embedding(request.category, request.item_name, request.quantity)
+            
+            # Update the request with new data and embedding
+            conn.execute(update(requests_table).where(requests_table.c.id == request_id).values(
+                item_name=request.item_name,
+                quantity=request.quantity,
+                category=request.category,
+                embedding=new_embedding
+            ))
+            
+            # Use the actual shelter_id from the database, not from the request
+            match_id = get_match_from_request_id(actual_shelter_id, request_id)
+            if match_id:
+                print(f"Found match {match_id}, deleting...")
+                delete_match(match_id)
+
+            else:
+                print(f"No matches found with request {request_id}")
+            conn.commit()
+            return {"id": request_id, **request.model_dump()}
+    except Exception as e:
+        print(f"Error updating request: {e}")
+        raise e
