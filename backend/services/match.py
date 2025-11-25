@@ -1,19 +1,45 @@
 from schemas.match import Match
 import json
 from typing import List, Dict, Any
+from database import engine, donors_table, shelters_table, matches_table
+from schemas.forms import DonationForm
+from schemas.forms import RequestForm
+from sqlalchemy import text, delete, update, select, func
+from uuid import UUID
 
-def get_matches_service():
-    """
-    Get all matches from mock data
-    """
+def get_matches_service(user_id: str, user_type: str):
     try:
-        with open("data/mock_matches.json", "r") as f:
-            matches = json.load(f)
-            return {"matches": matches}
+        with engine.connect() as conn:
+            # get match_ids array from user table
+            if user_type == "donor":
+                result = conn.execute(
+                    donors_table.select().where(donors_table.c.uid == user_id)
+                ).fetchone()
+                if not result:
+                    return {"error": f"Donor with uid {user_id} not found"}
+                match_ids = result.match_ids
+            elif user_type == "shelter":
+                result = conn.execute(
+                    shelters_table.select().where(shelters_table.c.uid == user_id)
+                ).fetchone()
+                if not result:
+                    return {"error": f"Shelter with uid {user_id} not found"}
+                match_ids = result.match_ids
+            else:
+                return {"error": "Invalid user type"}
+            
+            # If no match_ids or empty array, return empty matches
+            if not match_ids:
+                return {"matches": []}
+            
+            # get matches from matches table with the array of match_ids
+            matches = conn.execute(matches_table.select().where(matches_table.c.id.in_(match_ids))).fetchall()
+            
+            # Convert rows to dictionaries for JSON serialization
+            matches_list = [dict(row._mapping) for row in matches]
+            return {"matches": matches_list}
     except Exception as e:
         return {"error": str(e)}
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {"matches: []"}
     
 def load_json(file_path: str) -> List[Dict[Any, Any]]:
     with open(file_path, 'r') as f:
@@ -93,3 +119,23 @@ def save_matches(new_matches: list):
             json.dump(existing, f, indent=2)
     except Exception as e:
         print(f"Error saving matches: {e}")
+
+def delete_match(match_id: UUID):
+    """
+    Delete a match
+    """
+    try:
+        with engine.connect() as conn:
+            # delete match_id from donor and shelter match_ids arrays
+            match = conn.execute(select(matches_table).where(matches_table.c.id == match_id)).fetchone()
+            donor_id = match.donor_id
+            shelter_id = match.shelter_id
+            # delete match_id from donor and shelter match_ids arrays
+            conn.execute(update(donors_table).where(donors_table.c.uid == donor_id).values(match_ids=func.array_remove(donors_table.c.match_ids, match_id)))
+            conn.execute(update(shelters_table).where(shelters_table.c.uid == shelter_id).values(match_ids=func.array_remove(shelters_table.c.match_ids, match_id)))
+            conn.execute(delete(matches_table).where(matches_table.c.id == match_id))
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Error deleting match: {e}")
+        return False

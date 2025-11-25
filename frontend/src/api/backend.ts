@@ -33,6 +33,37 @@ export interface RequestForm {
   category: string;
 }
 
+export interface UpdateDonationForm {
+  donor_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export interface UpdateRequestForm {
+  shelter_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+// Database Types
+export interface Donation {
+  donation_id: string;
+  donor_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export interface Request {
+  request_id: string;
+  shelter_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
 // Registration API calls
 export const registerDonor = async (data: DonorRegistration) => {
   try {
@@ -78,6 +109,88 @@ export const registerShelter = async (data: ShelterRegistration) => {
   }
 };
 
+// Update API calls
+export const updateDonor = async (donorId: string, data: DonorRegistration) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update donor: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating donor:', error);
+    throw error;
+  }
+};
+
+export const updateShelter = async (shelterId: string, data: ShelterRegistration) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update shelter: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating shelter:', error);
+    throw error;
+  }
+};
+
+export const deleteDonor = async (donorId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete donor');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting donor:', error);
+    throw error;
+  }
+};
+
+export const deleteShelter = async (shelterId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete shelter');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting shelter:', error);
+    throw error;
+  }
+};
 // Forms API calls
 export const createDonation = async (data: DonationForm) => {
   try {
@@ -169,8 +282,10 @@ export const getRequests = async (): Promise<RequestForm[]> => {
 export interface Match {
   id: string;
   donor_id: string;
+  donation_id: string;
   donor_username: string;
   shelter_id: string;
+  request_id: string;
   shelter_name: string;
   item_name: string;
   quantity: number;
@@ -179,9 +294,9 @@ export interface Match {
   status: string;
 }
 
-export const getMatches = async (): Promise<Match[]> => {
+export const getMatches = async (user_id: string, user_type: string): Promise<Match[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/match/matches`, {
+    const response = await fetch(`${API_BASE_URL}/match/matches/${user_id}/${user_type}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -197,6 +312,46 @@ export const getMatches = async (): Promise<Match[]> => {
     return data.matches || [];
   } catch (error) {
     console.error('Error fetching matches:', error);
+    throw error;
+  }
+};
+
+export const findMatchVectorDonation = async (donationId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vector-match/donation/${donationId}/best-match`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to find match vector donation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error finding match vector:', error);
+    throw error;
+  }
+};
+
+export const findMatchVectorRequest = async (requestId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/vector-match/request/${requestId}/best-match`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to find match vector request');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error finding match vector:', error);
     throw error;
   }
 };
@@ -262,6 +417,120 @@ export const getShelters = async (): Promise<Shelter[]> => {
     return data.shelters || [];
   } catch (error) {
     console.error('Error fetching shelters:', error);
+    throw error;
+  }
+};
+
+export interface ShelterRequest {
+  id: string;
+  shelter_id: string;
+  item_name: string;
+  quantity: number;
+  category: string;
+}
+
+export const getShelterRequests = async (shelterId: string): Promise<ShelterRequest[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/shelters/${shelterId}/requests`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to fetch shelter requests');
+    }
+
+    const data = await response.json();
+    return data.requests || [];
+  } catch (error) {
+    console.error('Error fetching shelter requests:', error);
+    throw error;
+  }
+};
+
+export const deleteDonation = async (donationId: string, donorId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete donation');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting donation:', error);
+    throw error;
+  }
+};
+
+export const deleteRequest = async (requestId: string, shelterId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}/${shelterId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to delete request');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting request:', error);
+    throw error;
+  }
+};
+
+export const updateDonation = async (donationId: string, data: UpdateDonationForm) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update donation: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating donation:', error);
+    throw error;
+  }
+};
+
+export const updateRequest = async (requestId: string, data: UpdateRequestForm) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/forms/request/${requestId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to update request: ' + error.detail);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating request:', error);
     throw error;
   }
 };
