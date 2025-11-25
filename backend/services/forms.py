@@ -91,8 +91,8 @@ def save_request(request: RequestForm) -> RequestForm:
             request_id = result.scalar()
 
             shelter_row = conn.execute(
-                select(donors_table.c.request_ids)
-                .where(donors_table.c.uid == request.shelter_id)
+                select(shelters_table.c.request_ids)
+                .where(shelters_table.c.uid == request.shelter_id)
             ).fetchone()
 
             if shelter_row:
@@ -100,8 +100,8 @@ def save_request(request: RequestForm) -> RequestForm:
                 updated_ids.append(request_id)
 
                 conn.execute(
-                    update(donors_table)
-                    .where(donors_table.c.uid == request.shelter_id)
+                    update(shelters_table)
+                    .where(shelters_table.c.uid == request.shelter_id)
                     .values(request_ids=updated_ids)
                 )
                 conn.commit()
@@ -178,8 +178,8 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
 
     with engine.connect() as conn:
         shelter_row = conn.execute(
-            select(donors_table.c.request_ids)  # or whatever column tracks requests per shelter
-            .where(donors_table.c.uid == user_id)
+            select(shelters_table.c.request_ids)  # or whatever column tracks requests per shelter
+            .where(shelters_table.c.uid == user_id)
         ).fetchone()
 
         if not shelter_row or not shelter_row.request_ids:
