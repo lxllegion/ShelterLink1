@@ -4,7 +4,8 @@ from fastapi.responses import JSONResponse
 from schemas.forms import DonationForm, RequestForm
 from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service
 from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
-from typing import List
+from typing import List, Optional
+from fastapi import Query
 from uuid import UUID
 router = APIRouter(prefix="/forms", tags=["forms"])
 
@@ -45,7 +46,7 @@ async def update_donation(donation_id: UUID, donation: DonationForm):
 async def update_request(request_id: UUID, request: RequestForm):
     # Update the request
     updated_request = update_request_service(request_id, request)
-    
+
     # Find new best match
     try:
         best_match = find_best_match_for_request(str(request_id))
@@ -62,15 +63,14 @@ async def update_request(request_id: UUID, request: RequestForm):
             "best_match": None
         }
 
-# Endpoint to get all donations
 @router.get("/donations", response_model=List[DonationForm])
-async def list_donations():
-    return get_donations()
+async def list_donations(user_id: Optional[str] = Query(None)):
+    return get_donations(user_id=user_id)
 
 # Endpoint to get all requests
 @router.get("/requests", response_model=List[RequestForm])
-async def list_requests():
-    return get_requests()
+async def list_requests(user_id: Optional[str] = Query(None)):
+    return get_requests(user_id=user_id)
 
 @router.delete("/donation/{donation_id}/{donor_id}")
 async def delete_donation(donation_id: UUID, donor_id: str):

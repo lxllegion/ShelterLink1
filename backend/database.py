@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL:", os.getenv("DATABASE_URL"))
 
 # Use SQLite for testing if no DATABASE_URL is provided
 if not DATABASE_URL:
