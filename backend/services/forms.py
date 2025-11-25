@@ -174,11 +174,11 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
                 category=row.category
             )
             for row in result
-        ]
+          ]
 
     with engine.connect() as conn:
         shelter_row = conn.execute(
-            select(shelters_table.c.request_ids)  # or whatever column tracks requests per shelter
+            select(shelters_table.c.request_ids)
             .where(shelters_table.c.uid == user_id)
         ).fetchone()
 
