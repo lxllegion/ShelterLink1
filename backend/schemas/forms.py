@@ -29,3 +29,10 @@ class RequestRead(BaseModel):
     item_name: str
     quantity: int
     category: str
+
+
+class DonorForm(BaseModel):
+    uid: str
+    name: str
+    username: str
+    phone_number: str
