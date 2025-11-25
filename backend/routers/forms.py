@@ -46,7 +46,7 @@ async def update_donation(donation_id: UUID, donation: DonationForm):
 async def update_request(request_id: UUID, request: RequestForm):
     # Update the request
     updated_request = update_request_service(request_id, request)
-    
+
     # Find new best match
     try:
         best_match = find_best_match_for_request(str(request_id))
