@@ -1,6 +1,6 @@
 import json
 import os
-from schemas.forms import DonationForm, RequestForm,DonationRead, RequestRead
+from schemas.forms import DonationForm, RequestForm,DonationRead, RequestRead, DonorForm
 from typing import List, Optional
 from database import engine
 from services.embeddings import generate_embedding
@@ -68,31 +68,58 @@ def save_donation(donation: DonationForm) -> DonationForm:
         raise e
 
 #problemmatic, missing embedding?Still not fixed
-def save_request(request: RequestForm) -> RequestRead:
+def save_request(request: RequestForm) -> RequestForm:
     try:
         with engine.connect() as conn:
+
+            # Step 1: Insert request with embedding
+            embedding = generate_embedding(
+                request.category,
+                request.item_name,
+                request.quantity
+            )
+
             result = conn.execute(
                 insert(requests_table)
                 .values(
                     shelter_id=request.shelter_id,
                     item_name=request.item_name,
                     quantity=request.quantity,
-                    category=request.category
+                    category=request.category,
+                    embedding=embedding
                 )
                 .returning(requests_table.c.id)
             )
             conn.commit()
             request_id = result.scalar()
 
-        return RequestRead(
-            id=request_id,
+            # Step 2: Update shelter's request_ids
+            shelter_row = conn.execute(
+                select(donors_table.c.request_ids)
+                .where(donors_table.c.uid == request.shelter_id)
+            ).fetchone()
+
+            if shelter_row:
+                updated_ids = shelter_row.request_ids or []
+                updated_ids.append(request_id)
+
+                conn.execute(
+                    update(donors_table)
+                    .where(donors_table.c.uid == request.shelter_id)
+                    .values(request_ids=updated_ids)
+                )
+                conn.commit()
+
+        # Step 3: Return the request form
+        return RequestForm(
             shelter_id=request.shelter_id,
             item_name=request.item_name,
             quantity=request.quantity,
             category=request.category
         )
+
     except Exception as e:
-        print("Error saving request:", e)
+        print(f"Error saving request: {e}")
         raise e
 
 # Get all donations
@@ -190,3 +217,4 @@ def get_requests(user_id: Optional[str] = None) -> List[RequestForm]:
 
 
 #EDIT or DELETE requests and donations functions to be added later
+

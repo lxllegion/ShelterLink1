@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from schemas.forms import DonationForm, RequestForm, DonationRead, RequestRead
+from schemas.forms import DonationForm, DonorForm, RequestForm, DonationRead, RequestRead
 from services.forms import save_donation, save_request, get_donations, get_requests
 from typing import List, Optional
 
@@ -27,3 +27,4 @@ async def list_donations(user_id: Optional[str] = Query(None)):
 @router.get("/requests", response_model=List[RequestForm])
 async def list_requests(user_id: Optional[str] = Query(None)):
     return get_requests(user_id=user_id)
+
