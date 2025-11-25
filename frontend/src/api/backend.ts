@@ -450,7 +450,6 @@ export const getShelterRequests = async (shelterId: string): Promise<ShelterRequ
   }
 };
 
-export const deleteDonation = async (donationId: string) => {
 export const deleteDonation = async (donationId: string, donorId: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {
