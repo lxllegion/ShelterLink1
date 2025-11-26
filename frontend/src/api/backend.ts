@@ -315,6 +315,27 @@ export const getMatches = async (user_id: string, user_type: string): Promise<Ma
   }
 };
 
+export const resolveMatch = async (matchId: string, user_id: string): Promise<string> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/match/resolve/${matchId}/${user_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: user_id }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to resolve match');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error resolving match:', error);
+    throw error;
+  }
+};
+
 export const findMatchVectorDonation = async (donationId: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/vector-match/donation/${donationId}/best-match`, {

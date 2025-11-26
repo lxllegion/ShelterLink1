@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
+import ResolveMatchModal from '../components/ResolveMatchModal';
 
 const RETRY_DELAY = 1500;
 const MAX_RETRIES = 3;
@@ -24,6 +25,10 @@ function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
+
+  // Modal state for resolving matches
+  const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
+  const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
 
   useEffect(() => {
     const fetchUserTypeAndData = async () => {
@@ -222,6 +227,18 @@ function Dashboard() {
     };
   };
 
+  const handleResolveMatch = (match: Match) => {
+    setResolvingMatch(match);
+    setIsResolveModalOpen(true);
+  };
+
+  const handleResolveSuccess = (matchId: string, newStatus: string) => {
+    // Update the match status in the local state
+    setMatches(matches.map(m => 
+      m.id === matchId ? { ...m, status: newStatus } : m
+    ));
+  };
+
   return (
     <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Navigation Bar */}
@@ -339,16 +356,19 @@ function Dashboard() {
                         </p>
                       </div>
 
-                      <button style={{
-                        backgroundColor: 'white',
-                        color: 'black',
-                        padding: '10px 20px',
-                        border: '2px solid black',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        cursor: 'pointer'
-                      }}>
+                      <button 
+                        onClick={() => handleResolveMatch(match)}
+                        style={{
+                          backgroundColor: 'white',
+                          color: 'black',
+                          padding: '10px 20px',
+                          border: '2px solid black',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          cursor: 'pointer'
+                        }}
+                      >
                         Resolve Match
                       </button>
                     </div>
@@ -378,6 +398,15 @@ function Dashboard() {
           onSave={handleSaveItem}
           itemType={editingType}
           initialData={getCurrentItemData()}
+        />
+
+        {/* Resolve Match Modal */}
+        <ResolveMatchModal
+          isOpen={isResolveModalOpen}
+          onClose={() => setIsResolveModalOpen(false)}
+          match={resolvingMatch}
+          userId={currentUser?.uid || ''}
+          onResolveSuccess={handleResolveSuccess}
         />
       </div>
     </div>
