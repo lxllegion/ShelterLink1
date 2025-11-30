@@ -87,3 +87,46 @@ async def delete_request(request_id: UUID, shelter_id: str):
         return JSONResponse(status_code=200, content={"message": "Request deleted successfully"})
     else:
         raise HTTPException(status_code=404, detail="Request not found")
+
+# @router.put("/donor/{uid}")
+# async def modify_shelter(
+#     uid: str,
+#     name: Optional[str] = None,
+#     username: Optional[str] = None,
+#     phone_number: Optional[str] = None
+# ):
+#     """
+#     Update donor information.
+#     Only the fields provided will be updated.
+#     Returns the full donor info (without donation_ids).
+#     """
+#     return update_donor(uid=uid, name=name, username=username, phone_number=phone_number)
+
+# @router.put("/shelter/{uid}")
+# async def modify_shelter(
+#     uid: str,
+#     shelter_name: Optional[str] = None,
+#     phone_number: Optional[str] = None,
+#     address: Optional[str] = None,
+#     city: Optional[str] = None,
+#     state: Optional[str] = None,
+#     zip_code: Optional[str] = None,
+#     latitude: Optional[float] = None,
+#     longitude: Optional[float] = None
+# ):
+#     """
+#     Update shelter information.
+#     Only the fields provided will be updated.
+#     Returns the full shelter info.
+#     """
+#     return update_shelter(
+#         uid=uid,
+#         shelter_name=shelter_name,
+#         phone_number=phone_number,
+#         address=address,
+#         city=city,
+#         state=state,
+#         zip_code=zip_code,
+#         latitude=latitude,
+#         longitude=longitude
+#     )
