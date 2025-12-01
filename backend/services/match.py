@@ -161,9 +161,9 @@ def resolve_match_db(match_id: UUID, user_uid: UUID) -> str:
         current_status = match_dict["status"]
 
         # Determine if the user who confirmed is a shelter/donor
-        if user_uid == match_dict.donor_id:
+        if user_uid == match_dict["donor_id"]:
             user_is_donor = True
-        elif user_uid == match_dict.shelter_id:
+        elif user_uid == match_dict["shelter_id"]:
             user_is_donor = False
         else:
             raise PermissionError("User is not part of this match")
