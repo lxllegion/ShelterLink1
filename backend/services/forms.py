@@ -436,3 +436,122 @@ def update_request(request_id: str, request: RequestForm) -> RequestForm:
     except Exception as e:
         print(f"Error updating request: {e}")
         raise e
+
+#update info for donor
+def update_donor(
+    uid: str,
+    name: Optional[str] = None,
+    username: Optional[str] = None,
+    phone_number: Optional[str] = None
+) -> dict:
+    if not any([name, username, phone_number]):
+        raise ValueError("At least one field to update must be provided")
+
+    try:
+        with engine.connect() as conn:
+            # Check if donor exists
+            donor_row = conn.execute(
+                select(donors_table).where(donors_table.c.uid == uid)
+            ).fetchone()
+
+            if not donor_row:
+                raise ValueError(f"No donor found with uid {uid}")
+
+            # Build update values
+            update_values = {
+                key: value for key, value in {
+                    "name": name,
+                    "username": username,
+                    "phone_number": phone_number,
+                }.items() if value is not None
+            }
+
+            if update_values:
+                conn.execute(
+                    update(donors_table)
+                    .where(donors_table.c.uid == uid)
+                    .values(**update_values)
+                )
+                conn.commit()
+
+            # Fetch updated row
+            updated = conn.execute(
+                select(donors_table).where(donors_table.c.uid == uid)
+            ).fetchone()
+
+            # Return dictionary
+            return {
+                "uid": updated.uid,
+                "name": updated.name,
+                "username": updated.username,
+                "phone_number": updated.phone_number
+            }
+
+    except Exception as e:
+        print(f"Error updating donor: {e}")
+        raise e
+
+#update info for shelter
+def update_shelter(
+    uid: str,
+    shelter_name: Optional[str] = None,
+    phone_number: Optional[str] = None,
+    address: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    zip_code: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None
+) -> dict:
+    if not any([shelter_name, phone_number, address, city, state, zip_code, latitude, longitude]):
+        raise ValueError("At least one field to update must be provided")
+
+    try:
+        with engine.connect() as conn:
+            shelter_row = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == uid)
+            ).fetchone()
+
+            if not shelter_row:
+                raise ValueError(f"No shelter found with uid {uid}")
+
+            update_values = {
+                key: value for key, value in {
+                    "shelter_name": shelter_name,
+                    "phone_number": phone_number,
+                    "address": address,
+                    "city": city,
+                    "state": state,
+                    "zip_code": zip_code,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                }.items() if value is not None
+            }
+
+            if update_values:
+                conn.execute(
+                    update(shelters_table)
+                    .where(shelters_table.c.uid == uid)
+                    .values(**update_values)
+                )
+                conn.commit()
+
+            updated = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == uid)
+            ).fetchone()
+
+            return {
+                "uid": updated.uid,
+                "shelter_name": updated.shelter_name,
+                "phone_number": updated.phone_number,
+                "address": updated.address,
+                "city": updated.city,
+                "state": updated.state,
+                "zip_code": updated.zip_code,
+                "latitude": updated.latitude,
+                "longitude": updated.longitude
+            }
+
+    except Exception as e:
+        print(f"Error updating shelter: {e}")
+        raise e

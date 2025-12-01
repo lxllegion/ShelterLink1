@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from schemas.forms import DonationForm, RequestForm
-from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service
+from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter
 from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
 from typing import List, Optional
 from fastapi import Query
@@ -88,45 +88,45 @@ async def delete_request(request_id: UUID, shelter_id: str):
     else:
         raise HTTPException(status_code=404, detail="Request not found")
 
-# @router.put("/donor/{uid}")
-# async def modify_shelter(
-#     uid: str,
-#     name: Optional[str] = None,
-#     username: Optional[str] = None,
-#     phone_number: Optional[str] = None
-# ):
-#     """
-#     Update donor information.
-#     Only the fields provided will be updated.
-#     Returns the full donor info (without donation_ids).
-#     """
-#     return update_donor(uid=uid, name=name, username=username, phone_number=phone_number)
+@router.put("/donor/{uid}")
+async def modify_donor(
+    uid: str,
+    name: Optional[str] = None,
+    username: Optional[str] = None,
+    phone_number: Optional[str] = None
+):
+    """
+    Update donor information.
+    Only the fields provided will be updated.
+    Returns the full donor info (without donation_ids).
+    """
+    return update_donor(uid=uid, name=name, username=username, phone_number=phone_number)
 
-# @router.put("/shelter/{uid}")
-# async def modify_shelter(
-#     uid: str,
-#     shelter_name: Optional[str] = None,
-#     phone_number: Optional[str] = None,
-#     address: Optional[str] = None,
-#     city: Optional[str] = None,
-#     state: Optional[str] = None,
-#     zip_code: Optional[str] = None,
-#     latitude: Optional[float] = None,
-#     longitude: Optional[float] = None
-# ):
-#     """
-#     Update shelter information.
-#     Only the fields provided will be updated.
-#     Returns the full shelter info.
-#     """
-#     return update_shelter(
-#         uid=uid,
-#         shelter_name=shelter_name,
-#         phone_number=phone_number,
-#         address=address,
-#         city=city,
-#         state=state,
-#         zip_code=zip_code,
-#         latitude=latitude,
-#         longitude=longitude
-#     )
+@router.put("/shelter/{uid}")
+async def modify_shelter(
+    uid: str,
+    shelter_name: Optional[str] = None,
+    phone_number: Optional[str] = None,
+    address: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    zip_code: Optional[str] = None,
+    latitude: Optional[float] = None,
+    longitude: Optional[float] = None
+):
+    """
+    Update shelter information.
+    Only the fields provided will be updated.
+    Returns the full shelter info.
+    """
+    return update_shelter(
+        uid=uid,
+        shelter_name=shelter_name,
+        phone_number=phone_number,
+        address=address,
+        city=city,
+        state=state,
+        zip_code=zip_code,
+        latitude=latitude,
+        longitude=longitude
+    )
