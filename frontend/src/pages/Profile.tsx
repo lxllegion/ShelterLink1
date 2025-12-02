@@ -24,6 +24,8 @@ function Profile() {
   const [editCity, setEditCity] = useState('');
   const [editState, setEditState] = useState('');
   const [editZipCode, setEditZipCode] = useState('');
+  const [editLatitude, setEditLatitude] = useState('');
+  const [editLongitude, setEditLongitude] = useState('');
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -44,6 +46,8 @@ function Profile() {
           setEditCity(data.userData.city || '');
           setEditState(data.userData.state || '');
           setEditZipCode(data.userData.zip_code || '');
+          setEditLatitude(data.userData.latitude || '');
+          setEditLongitude(data.userData.longitude || '');
         }
       } catch (err: any) {
         setError(err.message || 'Failed to load user information');
@@ -59,19 +63,20 @@ function Profile() {
     try {
       if (userInfo?.userType === 'donor') { 
         await updateDonor(currentUser?.uid || '', {
-          userID: currentUser?.uid || '',
           name: editName,
-          email: currentUser?.email || '',
           phone_number: editPhoneNumber,
           username: editUsername,
         });
       } else if (userInfo?.userType === 'shelter') {
         await updateShelter(currentUser?.uid || '', {
-          userID: currentUser?.uid || '',
-          username: editUsername,
           shelter_name: editShelterName,
-          email: currentUser?.email || '',
           phone_number: editPhoneNumber,
+          address: editAddress,
+          city: editCity,
+          state: editState,
+          zip_code: editZipCode,
+          latitude: editLatitude,
+          longitude: editLongitude,
         });
       }
     } catch (error) {
@@ -91,6 +96,8 @@ function Profile() {
       setEditCity(userInfo.userData.city || '');
       setEditState(userInfo.userData.state || '');
       setEditZipCode(userInfo.userData.zip_code || '');
+      setEditLatitude(userInfo.userData.latitude || '');
+      setEditLongitude(userInfo.userData.longitude || '');
     }
     setIsEditing(false);
   };
