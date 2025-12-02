@@ -12,7 +12,7 @@ async def get_matches(user_id: str, user_type: str):
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-@router.post("/resolve/{match_id}/{user_uid}")
+@router.put("/resolve/{match_id}/{user_uid}")
 def resolve_match(match_id: UUID, user_uid: str):
     try:
         new_status = resolve_match_db(match_id, user_uid)
