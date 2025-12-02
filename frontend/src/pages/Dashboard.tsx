@@ -18,7 +18,8 @@ function Dashboard() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+  const [loadingItems, setLoadingItems] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Modal state for editing items
@@ -31,11 +32,10 @@ function Dashboard() {
   const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
 
   useEffect(() => {
-    const fetchUserTypeAndData = async () => {
+    const fetchUserType = async () => {
       if (!currentUser) return;
       
       try {
-        setLoading(true);
         const userId = currentUser.uid;
 
         // Fetch user type from backend with retry logic
@@ -58,46 +58,79 @@ function Dashboard() {
         
         if (userInfo?.error || !userInfo?.userType) {
           setError('User not found in system. Please try logging out and back in.');
-          setLoading(false);
+          setLoadingMatches(false);
+          setLoadingItems(false);
           return;
         }
 
         setUserType(userInfo.userType);
         localStorage.setItem('userType', userInfo.userType);
+      } catch (error: any) {
+        console.error('Error fetching user type:', error);
+        setError(error.message);
+        setLoadingMatches(false);
+        setLoadingItems(false);
+      }
+    };
 
-        // Fetch matches for all users
-        const matchesData = await getMatches(userId, userInfo.userType);
-        setMatches(matchesData);
+    fetchUserType();
+  }, [currentUser]);
 
-        if (userInfo.userType === 'donor') {
+  // Fetch matches separately
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (!currentUser || !userType) return;
+      
+      try {
+        setLoadingMatches(true);
+        const userId = currentUser.uid;
+        const matchesData = await getMatches(userId, userType);
+        
+        // Filter matches for this user
+        const userMatches = userType === 'donor'
+          ? matchesData.filter(m => m.donor_id === userId)
+          : matchesData.filter(m => m.shelter_id === userId);
+        
+        setMatches(userMatches);
+      } catch (error: any) {
+        console.error('Error fetching matches:', error);
+      } finally {
+        setLoadingMatches(false);
+      }
+    };
+
+    fetchMatches();
+  }, [currentUser, userType]);
+
+  // Fetch donations/requests separately
+  useEffect(() => {
+    const fetchItems = async () => {
+      if (!currentUser || !userType) return;
+      
+      try {
+        setLoadingItems(true);
+        const userId = currentUser.uid;
+
+        if (userType === 'donor') {
           // Fetch donations for this donor
           const donationsData = await getDonations();
           const userDonations = donationsData.filter(d => d.donor_id === userId) as Donation[];
           setDonations(userDonations);
-          
-          // Filter matches for this donor
-          const userMatches = matchesData.filter(m => m.donor_id === userId);
-          setMatches(userMatches);
-        } else if (userInfo.userType === 'shelter') {
+        } else if (userType === 'shelter') {
           // Fetch requests for this shelter
           const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.shelter_id === userId) as  Request[]; // Note: using donor_id field for shelter_id
+          const userRequests = requestsData.filter(r => r.shelter_id === userId) as Request[];
           setRequests(userRequests);
-          
-          // Filter matches for this shelter
-          const userMatches = matchesData.filter(m => m.shelter_id === userId);
-          setMatches(userMatches);
         }
       } catch (error: any) {
-        console.error('Error fetching data:', error);
-        setError(error.message);
+        console.error('Error fetching items:', error);
       } finally {
-        setLoading(false);
+        setLoadingItems(false);
       }
     };
 
-    fetchUserTypeAndData();
-  }, [currentUser]);
+    fetchItems();
+  }, [currentUser, userType]);
 
   // Calculate stats
   const activeMatches = matches.filter(m => m.status === 'pending').length;
@@ -274,16 +307,9 @@ function Dashboard() {
               cursor: 'pointer'
             }}
           >
-            {loading ? '+' : userType === 'donor' ? '+ New Donation' : '+ New Request'}
+            {!userType ? '+' : userType === 'donor' ? '+ New Donation' : '+ New Request'}
           </button>
         </div>
-
-        {/* Loading State */}
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '48px' }}>
-            <p style={{ fontSize: '18px', color: '#6b7280' }}>Loading...</p>
-          </div>
-        )}
 
         {/* Error State */}
         {error && (
@@ -300,7 +326,7 @@ function Dashboard() {
 
         <div style={{ display: 'flex', flexDirection: 'row', gap: '16px', flex: 1, overflow: 'hidden' }}>
           {/* Active Matches List */}
-          {!loading && !error && (
+          {!error && (
             <div style={{
               backgroundColor: 'white',
               borderRadius: '12px',
@@ -317,13 +343,21 @@ function Dashboard() {
                 flexShrink: 0
               }}>
                 <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
-                  Active Matches ({activeMatches})
+                  Active Matches ({loadingMatches ? '...' : activeMatches})
                 </h2>
               </div>
 
               {/* Matches List */}
               <div style={{ overflow: 'auto', flex: 1 }}>
-                {matches.filter(m => m.status === 'pending').length === 0 ? (
+                {loadingMatches ? (
+                  <div style={{ padding: '48px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '16px', color: '#6b7280' }}>Loading matches...</p>
+                  </div>
+                ) : error ? (
+                  <div style={{ padding: '48px', textAlign: 'center' }}>
+                    <p style={{ fontSize: '16px', color: '#ef4444' }}>Error loading matches</p>
+                  </div>
+                ) : matches.filter(m => m.status === 'pending').length === 0 ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
                     <p style={{ fontSize: '16px', color: '#6b7280' }}>
                       No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
@@ -379,12 +413,12 @@ function Dashboard() {
             </div>
           )}
           {/* Donations/Requests List */}
-          {!loading && !error && userType && (userType === 'donor' || userType === 'shelter') && (
+          {!error && (
             <ItemList
-              items={userType === 'donor' ? donations : requests}
+              items={userType === 'donor' ? donations : userType === 'shelter' ? requests : []}
               itemType={userType === 'donor' ? 'donation' : 'request'}
-              userType={userType}
-              isLoading={false}
+              userType={(userType as 'donor' | 'shelter') || 'donor'}
+              isLoading={loadingItems || !userType}
               onEditItem={handleEditItem}
               onDeleteItem={handleDeleteItem}
             />
