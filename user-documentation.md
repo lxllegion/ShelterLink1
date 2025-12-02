@@ -79,16 +79,37 @@ As a Shelter, you will be able to create request posts by "+ New Request" button
 Visit http://localhost:3000 and click "login" or "signup" from the landing page to either login to an existing account or create a donor or shelter account, filling in the required fields.
 
 ### Dashboard:
-Once logged in/registered, you will be redirected to the dashboard where you can view request or donation details depending on the account type and matches with shelters or donors.
+Once logged in/registered, you will be redirected to the dashboard where you can view your request or donation details depending on the account type and matches with shelters or donors.
 
 If you want to make a request or donation, click the "+ New Request" or "+ New Donation" button if you are a shelter or donor respectively.
+
+After you have made a new donation/request form, you will see the "My Donations" / "My Requests" list on your dashboard be updated with your form information. You can choose to edit your donation/request, which will delete any matches previously made with that donation/request. Upon submitting your changes, you will receive a notification if any matches were found with the new information you input. You may also choose to delete your donation/request, which will delete your donation/request and any matches associated with it. 
+
+If you have any active matches, you will see "My Active Matches" list on your dashboard populated with those matches. You can choose to resolve the match by clicking the "resolve" button which will confirm that you are ready to donate/receive the item. There is no timeline to resolve matches, it all depends on how long each respective party takes to confirm the match. 
 
 ### Form Page:
 Once you choose to make a donation or request, fill in the required fields.
 
-Once required fields are filled, press the "submit" button to submit the form and get matched with donors (if logged in as a shelter) or shelters (if logged in as a donor). If a match is made, you will see a notification at the top of your screen displaying your match information, including your match score and if the match is partial, or complete. If a match isn't found, you will see a message confirming that your form was submitted successfully, but no matches have been made yet.
+Once required fields are filled, press the "submit" button to submit the form and get matched with donors (if logged in as a shelter) or shelters (if logged in as a donor). If a match isn't found, you will see a message confirming that your form was submitted successfully, but no matches have been made yet. If a match is made, you will see a notification at the top of your screen displaying your match information, including your match score and if the match is partial, or complete. When a match is made, both the donor and shelter will receive an email notification of the match.
 
-**Note:** Currently, this functionality is under development, so no emails will be sent to shelters/donors.
+### Email notification:
+Upon a valid match being made, you will receive an email detailing the match information, including contact info for the opposite role you matched with. 
+
+### Profile:
+Upon clicking "Profile", you will be led to view your profile details.
+
+#### Shelter Profile
+You will be able to view your account type (shelter), along with the name of your shelter, email address, phone number, and address. You can choose to edit your profile, and modify all of the details above, including the specific location of the shelter. You may also choose to delete your account if needed. 
+
+#### Donor Profile
+You will be able to view your account type (donor), along with your name, username, email address, and phone number. You can choose to edit your profile, and modify all of the details above. You may also choose to delete your account if needed.
+
+### Shelters Near Me:
+When logged into a donor account, you can view "Shelters Near Me". This feature is not available for shelter accounts. As a donor, you will be able to find homeless shelters in your area. You will be prompted to allow our web app to see your location, and once this is allowed, you can utilize the distance filter. You can choose to view all shelters available, then filter to show shelters within 5, 10, 25, and 50 miles of your location.
+
+The map will display all homeless shelters locations with respect to filtering, along with your own location if you choose to allow our web app to see your location. Zooming in and out of the map is made possible by utilizing the "+" and "-" buttons at the top left corner of the map. Moving around the map is acheived by holding and pulling your cursor from your desired area to the opposite direction.
+
+With respect to filtering, you will see the "Shelter List" displayed on the right side of your screen. Once you have allowed ShelterLink to see your location, each shelter will have how far they are from you displayed in green text underneath the shelter name. You can also click on each of these shelters to view further details, including shelter contact information, items they have requested, and directions to the shelter, which will open up Google Maps in a new tab.
 
 ## How to Report a Bug
 
