@@ -1,7 +1,7 @@
 # TODO: Implement donation and request submissions
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from schemas.forms import DonationForm, RequestForm
+from schemas.forms import DonationForm, DonorUpdate, RequestForm, ShelterUpdate
 from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter
 from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
 from typing import List, Optional
@@ -91,42 +91,28 @@ async def delete_request(request_id: UUID, shelter_id: str):
 @router.put("/donor/{uid}")
 async def modify_donor(
     uid: str,
-    name: Optional[str] = None,
-    username: Optional[str] = None,
-    phone_number: Optional[str] = None
+    donor_update: DonorUpdate
 ):
-    """
-    Update donor information.
-    Only the fields provided will be updated.
-    Returns the full donor info (without donation_ids).
-    """
-    return update_donor(uid=uid, name=name, username=username, phone_number=phone_number)
+    return update_donor(
+        uid=uid,
+        name=donor_update.name,
+        username=donor_update.username,
+        phone_number=donor_update.phone_number
+    )
 
 @router.put("/shelter/{uid}")
 async def modify_shelter(
     uid: str,
-    shelter_name: Optional[str] = None,
-    phone_number: Optional[str] = None,
-    address: Optional[str] = None,
-    city: Optional[str] = None,
-    state: Optional[str] = None,
-    zip_code: Optional[str] = None,
-    latitude: Optional[float] = None,
-    longitude: Optional[float] = None
+    shelter_update: ShelterUpdate
 ):
-    """
-    Update shelter information.
-    Only the fields provided will be updated.
-    Returns the full shelter info.
-    """
     return update_shelter(
         uid=uid,
-        shelter_name=shelter_name,
-        phone_number=phone_number,
-        address=address,
-        city=city,
-        state=state,
-        zip_code=zip_code,
-        latitude=latitude,
-        longitude=longitude
+        shelter_name=shelter_update.shelter_name,
+        phone_number=shelter_update.phone_number,
+        address=shelter_update.address,
+        city=shelter_update.city,
+        state=shelter_update.state,
+        zip_code=shelter_update.zip_code,
+        latitude=shelter_update.latitude,
+        longitude=shelter_update.longitude
     )
