@@ -29,5 +29,5 @@ class ShelterUpdate(BaseModel):
     city: Optional[str] = None
     state: Optional[str] = None
     zip_code: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
+    latitude: Optional[str] = None
+    longitude: Optional[str] = None

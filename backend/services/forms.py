@@ -500,8 +500,8 @@ def update_shelter(
     city: Optional[str] = None,
     state: Optional[str] = None,
     zip_code: Optional[str] = None,
-    latitude: Optional[float] = None,
-    longitude: Optional[float] = None
+    latitude: Optional[str] = None,
+    longitude: Optional[str] = None
 ) -> dict:
     if not any([shelter_name, phone_number, address, city, state, zip_code, latitude, longitude]):
         raise ValueError("At least one field to update must be provided")
