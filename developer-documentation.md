@@ -9,8 +9,11 @@
 - Bash (for windows to run the ./install.sh file)
 
 ### Steps:
-
-To obtain the source code for ShelterLink and set up a personal copy of the ShelterLink1 repository, first ensure that you have Git installed on your system. Navigate to the ShelterLink repository, https://github.com/lxllegion/ShelterLink1.git Copy the URL by clicking on the green "Code" button on the main page of the repository, and select "HTTPS". Open your command prompt or terminal application on your device. Use the "cd" command to navigate to the desired directory on your machine to store the source code. Clone the ShelterLink repository by typing "git clone" followed by our URL and enter. Access the source code by navigating into the repository using the "cd ShelterLink1" command.
+1. Clone the repository (`git@github.com:lxllegion/ShelterLink1.git`)
+2. Make sure Python 3.8 or higher and Node.js 14.0 or higher are installed for the program to run
+3. Install bash if on Windows to run the install file
+4. Run the install file in the terminal by running `./install.sh` while in the root directory (ShelterLink1/)
+5. Create Firebase and Supabase projects
 
 ## The Layout of Our Directory Structure
 
@@ -34,40 +37,46 @@ ShelterLink1/
 ```
 backend/
 ├── main.py
-├── requirements.txt          # Python dependencies
-├── pytest.ini                # pytest configuration file
+├── requirements.txt                   # Python dependencies
+├── pytest.ini                         # Pytest configuration file
+├── add_test_shelters.py               # Script to add test shelters
+├── migrate_add_shelter_location.py    # Script to add location to shelter table
 ├── routers/
-│   ├── register.py           # Endpoints to POST register new accounts
-│   ├── match.py              # Endpoints to GET /match to trigger matching
-│   ├── shelters.py           # Endpoints to GET /shelters for shelter data
-│   ├── user.py               # Token verification
-│   └── forms.py              # Endpoints to GET/POST new/retrieve forms
+│   ├── register.py                    # Endpoints to POST register new accounts
+│   ├── match.py                       # Endpoints to GET /match to trigger matching
+│   ├── shelters.py                    # Endpoints to GET /shelters for shelter data
+│   ├── user.py                        # Token verification
+│   ├── vector_match.py                # Endpoints for vector matching 
+│   └── forms.py                       # Endpoints to GET/POST new/retrieve forms
 │ 
-├── schemas/                  # Pydantic models for data
-│   ├── donor.py              # Pydantic models for donor data
-│   ├── shelter.py            # Pydantic models for shelter data
-│   ├── match.py              # Pydantic models for match data
-│   └── forms.py              # Pydantic models for form data
+├── schemas/                           # Pydantic models for data
+│   ├── donor.py                       # Pydantic models for donor data
+│   ├── shelter.py                     # Pydantic models for shelter data
+│   ├── match.py                       # Pydantic models for match data
+│   └── forms.py                       # Pydantic models for form data
 │ 
-├── services/                 # Logic layer
-│   ├── embeddings.py         # Generates embeddings for the database
-│   ├── forms.py              # Saves/retrieves form data 
-│   ├── match.py              # Matching algorithm
-│   ├── shelters.py           # Retrieves shelter info from database
-│   ├── signup.py             # Saves donor/shelter info to database
-│   └── user.py               # Retrieves user info from database
+├── services/                          # Logic layer
+│   ├── embeddings.py                  # Generates embeddings for the database
+│   ├── forms.py                       # Saves/retrieves form data 
+│   ├── match.py                       # Matching algorithm
+│   ├── shelters.py                    # Retrieves shelter info from database
+│   ├── signup.py                      # Saves donor/shelter info to database
+│   ├── vector_match.py                # Vector matching for similarity between donation/requests
+│   ├── email_utils.py                 # Utility functions for sending match emails
+│   └── user.py                        # Retrieves user info from database
 │ 
-├── data/                     # Mock/test data files
-│   ├── mock_data.json        # Sample user data
-│   ├── mock_donations.json   # Sample donation posts
-│   ├── mock_requests.json    # Sample request posts
-│   └── mock_matches.json     # Sample matches
+├── data/                              # Mock/test data files
+│   ├── mock_data.json                 # Sample user data
+│   ├── mock_donations.json            # Sample donation posts
+│   ├── mock_requests.json             # Sample request posts
+│   └── mock_matches.json              # Sample matches
 │ 
-├── tests/                    # Test suite
-│   └── test_example.py       # Basic tests for matching algorithm
-├── firebase.py               # Firebase utilities
-├── test_supabase.py          # Database test for functionality
-└── database.py               # Database table information
+├── tests/                             # Test suite
+│   ├── test_example.py                # Example of what tests should look like
+│   ├── test_supabase.py               # Database test for functionality
+│   └── test_resolve_match.py          # Basic resolve match tests
+├── firebase.py                        # Firebase utilities
+└── database.py                        # Database table information
 
 
 
@@ -76,34 +85,38 @@ backend/
 ### Frontend:
 ```
 frontend/
-├── public/                   # Static assets
-├── src/                      # Source code
+├── public/                               # Static assets
+├── src/                                  # Source code
 │   ├── index.tsx
-│   ├── App.tsx               # Main component with routing
-│   ├── firebase.ts           # Firebase SDK initialization
+│   ├── App.tsx                           # Main component with routing
+│   ├── firebase.ts                       # Firebase SDK initialization
 │   ├── index.css
-│   ├── api/                  # Backend API integration
-│   │   ├── auth.ts           # Calls backend to /register and /login
-│   │   └── backend.ts        # Calls backend
+│   ├── api/                              # Backend API integration
+│   │   ├── auth.ts                       # Calls backend to /register and /login
+│   │   └── backend.ts                    # Calls backend
 │   │
-│   ├── components/           # Reusable React components
-│   │   ├── NavBar.tsx        # Navigation bar for authenticated flow
-│   │   └── AuthNavBar.tsx    # Navigation bar for signup/login flow
+│   ├── components/                       # Reusable React components
+│   │   ├── NavBar.tsx                    # Navigation bar for authenticated flow
+│   │   ├── DeleteAccountModal.tsx        # Delete account
+│   │   ├── EditItemModal.tsx             # Edit item
+│   │   ├── ItemList.tsx                  # List items
+│   │   ├── ResolveMatchModal.tsx         # Resolve Match
+│   │   └── AuthNavBar.tsx                # Navigation bar for signup/login flow
 │   │
-│   ├── contexts/             # React context providers
+│   ├── contexts/                         # React context providers
 │   │   └── AuthContext.tsx
 │   │
-│   ├── pages/                # Page-level components
-│   │   ├── LandingPage.tsx   # Home page
-│   │   ├── Login.tsx         # Login page
-│   │   ├── Register.tsx      # Registration page
-│   │   ├── Dashboard.tsx     # User dashboard page
-│   │   ├── Form.tsx          # Donation/request form page
-│   │   ├── SheltersNearMe.tsx# Shelters near me page
-│   │   └──  Profile.tsx      # User profile page - stretch goal
+│   ├── pages/                            # Page-level components
+│   │   ├── LandingPage.tsx               # Home page
+│   │   ├── Login.tsx                     # Login page
+│   │   ├── Register.tsx                  # Registration page
+│   │   ├── Dashboard.tsx                 # User dashboard page
+│   │   ├── Form.tsx                      # Donation/request form page
+│   │   ├── SheltersNearMe.tsx            # Shelters near me page
+│   │   └── Profile.tsx                   # User profile page - stretch goal
 │   │
-│   └── tests/                # Test suite
-│       └── App.test.tsx      # Unit/integration tests
+│   └── tests/                            # Test suite
+│       └── App.test.tsx                  # Unit/integration tests
 │ 
 ├── package.json
 ├── package-lock.json
@@ -120,8 +133,37 @@ Run the install.sh file:
 ```
 
 Create .env files in the backend and frontend:
-- for the frontend: email fpazaran@uw.edu for these or follow the steps to create a firebase project at https://firebase.google.com/docs/web/setup#add-sdk-and-initialize
-- for the backend: email fpazaran@uw.edu for these or create a postgreSQL database
+- for the frontend: email fpazaran@uw.edu for these or follow the steps in the following section to create a Firebase project
+- for the backend: email fpazaran@uw.edu for these or create a Supabase database
+
+### How to create a Firebase project
+1. Create a `.env` file in the frontend folder. Add `.env` to the `.gitignore` frontend file.
+   An alternative to setting up a personal Firebase project is to email fpazaran@uw.edu for the Firebase credentials ShelterLink used during development. Otherwise, continue to step 2.
+2. Follow along with the steps detailed at https://firebase.google.com/docs/web/setup#add-sdk-and-initialize to create a Firebase project.
+   - Navigate to Firebase Console and sign in with your Google account if prompted
+   - Create a new project by entering a name for the project, then click "continue" and "create project"
+   - Register the ShelterLink webapp with your project by entering an identifiable nickname in the web icon `(</>)` to add ShelterLink, then click "register app"
+   - You will see a console display a code snippet - that is your Firebase Configuration Object. It should look like:
+   ```
+   FIREBASE_API_KEY=your_api_key
+   FIREBASE_AUTH_DOMAIN=your_auth_domain
+   FIREBASE_PROJECT_ID=your_project_id
+   FIREBASE_APP_ID=your_app_id
+   ```
+   - Copy the <ins>**entire**</ins> code snippet and paste it into your `.env` file in the frontend folder. It should look exactly as it is pictured above.
+   - Click "continue to console" to return to your project dashboard.
+
+### How to create a Supabase project
+1. Create a `.env` file in the backend folder. Add `.env` to the `.gitignore` backend file.
+   An alternative to setting up a personal Supabase project is to email fpazaran@uw.edu for the database URL/API key ShelterLink used during development. Otherwise, continue to step 2.
+2. Follow along with the steps detailed at https://supabase.com/docs/guides/local-development/cli/getting-started?queryGroups=platform&platform=windows to create a Supabase project
+   - Start a new Supabase project from the Dashboard
+   - Create the project by inputting a project name, and setting a database password
+   - Get your project credentials by going to your API settings (Settings > API) and copying the project URL. It should look like:
+   ```
+   DATABASE_URL=your_database_URL
+   ```
+   - Copy the <ins>**entire**</ins> URL and paste it into your `.env` file in the backend folder. It should look exactly as it is pictured above.
 
 Then to build and run the frontend enter the following commands in the terminal (from the frontend folder):
 ```bash
@@ -235,6 +277,32 @@ source venv/bin/activate    // venv\Scripts\activate if on windows
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
+
+### Continuous Integration
+The ShelterLink CI pipeline is configured with GitHub Actions. The workflow file which will run on every push/pull request can be found at 
+```
+ShelterLink1/.github/workflows/ci.yml
+```
+
+#### Pipeline Summary
+
+##### Backend Tests
+- Runs all pytests in ``` backend/tests/ ```
+- Executes unit tests for service logic and endpoint tests
+- Ensures that the backend builds, imports, and runs with no errors
+
+##### Frontend Tests
+- Runs all component and page tests in ``` frontend/src/tests/ ```
+- Ensures that the components render and behave as expected
+
+#### CI Passing
+All pull requests must pass the CI before they can be merged into the ShelterLink main branch. Running the same CI tests locally will help from failing CI after pushing changes. You can do so by following the directions detailed in the previous "How to Test the Software" section of this documentation. 
+
+#### Viewing CI Results
+1. Go to the ShelterLink GitHub repo at https://github.com/lxllegion/ShelterLink1
+2. Click the "Actions" tab at the top of the menu bar
+3. Select any workflow run to see the failed/passed tests, and what jobs were triggered
+
 
 ### Release Steps
 
