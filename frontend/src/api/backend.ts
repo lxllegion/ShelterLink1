@@ -252,9 +252,9 @@ export const createRequest = async (data: RequestForm) => {
   }
 };
 
-export const getDonations = async (): Promise<Donation[]> => {
+export const getDonations = async (donorId: string): Promise<Donation[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/donations`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donations?user_id=${donorId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -273,9 +273,9 @@ export const getDonations = async (): Promise<Donation[]> => {
   }
 };
 
-export const getRequests = async (): Promise<Request[]> => {
+export const getRequests = async (shelterId: string): Promise<Request[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/requests`, {
+    const response = await fetch(`${API_BASE_URL}/forms/requests?user_id=${shelterId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

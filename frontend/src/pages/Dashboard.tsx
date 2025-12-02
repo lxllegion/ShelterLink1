@@ -69,7 +69,7 @@ function Dashboard() {
         localStorage.setItem('userType', fetchedUserType);
 
         // Fetch matches and items in parallel
-        const matchesPromise = getMatches(userId, fetchedUserType)
+        getMatches(userId, fetchedUserType)
           .then(matchesData => {
             const userMatches = fetchedUserType === 'donor'
               ? matchesData.filter(m => m.donor_id === userId)
@@ -82,24 +82,19 @@ function Dashboard() {
             setLoadingMatches(false);
           });
 
-        const itemsPromise = (async () => {
+        (async () => {
           if (fetchedUserType === 'donor') {
-            const donationsData = await getDonations();
-            const userDonations = donationsData.filter(d => d.donor_id === userId) as Donation[];
-            setDonations(userDonations);
+            const donationsData = await getDonations(userId);
+            setDonations(donationsData);
           } else if (fetchedUserType === 'shelter') {
-            const requestsData = await getRequests();
-            const userRequests = requestsData.filter(r => r.shelter_id === userId) as Request[];
-            setRequests(userRequests);
+            const requestsData = await getRequests(userId);
+            setRequests(requestsData);
           }
           setLoadingItems(false);
         })().catch(error => {
           console.error('Error fetching items:', error);
           setLoadingItems(false);
         });
-
-        // Don't await - let them load independently
-        // await Promise.all([matchesPromise, itemsPromise]);
       } catch (error: any) {
         console.error('Error fetching data:', error);
         setError(error.message);
