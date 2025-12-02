@@ -287,12 +287,18 @@ ShelterLink1/.github/workflows/ci.yml
 #### Pipeline Summary
 
 ##### Backend Tests
-- Runs all pytests in ``` backend/tests/ ```
+- Runs all pytests in
+```
+backend/tests/
+```
 - Executes unit tests for service logic and endpoint tests
 - Ensures that the backend builds, imports, and runs with no errors
 
 ##### Frontend Tests
-- Runs all component and page tests in ``` frontend/src/tests/ ```
+- Runs all component and page tests in
+```
+frontend/src/tests/
+```
 - Ensures that the components render and behave as expected
 
 #### CI Passing
