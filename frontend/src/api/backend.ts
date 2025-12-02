@@ -108,10 +108,27 @@ export const registerShelter = async (data: ShelterRegistration) => {
   }
 };
 
+export interface DonorUpdateForm {
+  name: string;
+  username: string;
+  phone_number: string;
+}
+
+export interface ShelterUpdateForm {
+  shelter_name: string;
+  phone_number: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  latitude: string;
+  longitude: string;
+}
+
 // Update API calls
-export const updateDonor = async (donorId: string, data: DonorRegistration) => {
+export const updateDonor = async (donorId: string, data: DonorUpdateForm) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donor/${donorId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -130,9 +147,9 @@ export const updateDonor = async (donorId: string, data: DonorRegistration) => {
   }
 };
 
-export const updateShelter = async (shelterId: string, data: ShelterRegistration) => {
+export const updateShelter = async (shelterId: string, data: ShelterUpdateForm) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/shelter/${shelterId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

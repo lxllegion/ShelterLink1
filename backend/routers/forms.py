@@ -1,8 +1,8 @@
 # TODO: Implement donation and request submissions
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from schemas.forms import DonationForm, RequestForm
-from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service
+from schemas.forms import DonationForm, DonorUpdate, RequestForm, ShelterUpdate
+from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter
 from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
 from typing import List, Optional
 from fastapi import Query
@@ -87,3 +87,32 @@ async def delete_request(request_id: UUID, shelter_id: str):
         return JSONResponse(status_code=200, content={"message": "Request deleted successfully"})
     else:
         raise HTTPException(status_code=404, detail="Request not found")
+
+@router.put("/donor/{uid}")
+async def modify_donor(
+    uid: str,
+    donor_update: DonorUpdate
+):
+    return update_donor(
+        uid=uid,
+        name=donor_update.name,
+        username=donor_update.username,
+        phone_number=donor_update.phone_number
+    )
+
+@router.put("/shelter/{uid}")
+async def modify_shelter(
+    uid: str,
+    shelter_update: ShelterUpdate
+):
+    return update_shelter(
+        uid=uid,
+        shelter_name=shelter_update.shelter_name,
+        phone_number=shelter_update.phone_number,
+        address=shelter_update.address,
+        city=shelter_update.city,
+        state=shelter_update.state,
+        zip_code=shelter_update.zip_code,
+        latitude=shelter_update.latitude,
+        longitude=shelter_update.longitude
+    )
