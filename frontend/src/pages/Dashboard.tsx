@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Donation, Request, Match, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
+import { Donation, Request, Match, UserInfo, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
+import MatchList from '../components/MatchList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
 import ResolveMatchModal from '../components/ResolveMatchModal';
 
@@ -32,14 +33,14 @@ function Dashboard() {
   const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
 
   useEffect(() => {
-    const fetchUserType = async () => {
+    const fetchAllData = async () => {
       if (!currentUser) return;
       
       try {
         const userId = currentUser.uid;
 
         // Fetch user type from backend with retry logic
-        let userInfo;
+        let userInfo: UserInfo | undefined;
         let retries = MAX_RETRIES;
         while (retries > 0) {
           try {
@@ -56,81 +57,59 @@ function Dashboard() {
           }
         }
         
-        if (userInfo?.error || !userInfo?.userType) {
+        if (!userInfo || userInfo.error || !userInfo.userType) {
           setError('User not found in system. Please try logging out and back in.');
           setLoadingMatches(false);
           setLoadingItems(false);
           return;
         }
 
-        setUserType(userInfo.userType);
-        localStorage.setItem('userType', userInfo.userType);
+        const fetchedUserType = userInfo.userType;
+        setUserType(fetchedUserType);
+        localStorage.setItem('userType', fetchedUserType);
+
+        // Fetch matches and items in parallel
+        const matchesPromise = getMatches(userId, fetchedUserType)
+          .then(matchesData => {
+            const userMatches = fetchedUserType === 'donor'
+              ? matchesData.filter(m => m.donor_id === userId)
+              : matchesData.filter(m => m.shelter_id === userId);
+            setMatches(userMatches);
+            setLoadingMatches(false);
+          })
+          .catch(error => {
+            console.error('Error fetching matches:', error);
+            setLoadingMatches(false);
+          });
+
+        const itemsPromise = (async () => {
+          if (fetchedUserType === 'donor') {
+            const donationsData = await getDonations();
+            const userDonations = donationsData.filter(d => d.donor_id === userId) as Donation[];
+            setDonations(userDonations);
+          } else if (fetchedUserType === 'shelter') {
+            const requestsData = await getRequests();
+            const userRequests = requestsData.filter(r => r.shelter_id === userId) as Request[];
+            setRequests(userRequests);
+          }
+          setLoadingItems(false);
+        })().catch(error => {
+          console.error('Error fetching items:', error);
+          setLoadingItems(false);
+        });
+
+        // Don't await - let them load independently
+        // await Promise.all([matchesPromise, itemsPromise]);
       } catch (error: any) {
-        console.error('Error fetching user type:', error);
+        console.error('Error fetching data:', error);
         setError(error.message);
         setLoadingMatches(false);
         setLoadingItems(false);
       }
     };
 
-    fetchUserType();
+    fetchAllData();
   }, [currentUser]);
-
-  // Fetch matches separately
-  useEffect(() => {
-    const fetchMatches = async () => {
-      if (!currentUser || !userType) return;
-      
-      try {
-        setLoadingMatches(true);
-        const userId = currentUser.uid;
-        const matchesData = await getMatches(userId, userType);
-        
-        // Filter matches for this user
-        const userMatches = userType === 'donor'
-          ? matchesData.filter(m => m.donor_id === userId)
-          : matchesData.filter(m => m.shelter_id === userId);
-        
-        setMatches(userMatches);
-      } catch (error: any) {
-        console.error('Error fetching matches:', error);
-      } finally {
-        setLoadingMatches(false);
-      }
-    };
-
-    fetchMatches();
-  }, [currentUser, userType]);
-
-  // Fetch donations/requests separately
-  useEffect(() => {
-    const fetchItems = async () => {
-      if (!currentUser || !userType) return;
-      
-      try {
-        setLoadingItems(true);
-        const userId = currentUser.uid;
-
-        if (userType === 'donor') {
-          // Fetch donations for this donor
-          const donationsData = await getDonations();
-          const userDonations = donationsData.filter(d => d.donor_id === userId) as Donation[];
-          setDonations(userDonations);
-        } else if (userType === 'shelter') {
-          // Fetch requests for this shelter
-          const requestsData = await getRequests();
-          const userRequests = requestsData.filter(r => r.shelter_id === userId) as Request[];
-          setRequests(userRequests);
-        }
-      } catch (error: any) {
-        console.error('Error fetching items:', error);
-      } finally {
-        setLoadingItems(false);
-      }
-    };
-
-    fetchItems();
-  }, [currentUser, userType]);
 
   // Calculate stats
   const activeMatches = matches.filter(m => m.status === 'pending').length;
