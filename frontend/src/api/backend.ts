@@ -108,10 +108,27 @@ export const registerShelter = async (data: ShelterRegistration) => {
   }
 };
 
+export interface DonorUpdateForm {
+  name: string;
+  username: string;
+  phone_number: string;
+}
+
+export interface ShelterUpdateForm {
+  shelter_name: string;
+  phone_number: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  latitude: string;
+  longitude: string;
+}
+
 // Update API calls
-export const updateDonor = async (donorId: string, data: DonorRegistration) => {
+export const updateDonor = async (donorId: string, data: DonorUpdateForm) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donor/${donorId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -130,9 +147,9 @@ export const updateDonor = async (donorId: string, data: DonorRegistration) => {
   }
 };
 
-export const updateShelter = async (shelterId: string, data: ShelterRegistration) => {
+export const updateShelter = async (shelterId: string, data: ShelterUpdateForm) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/shelter/${shelterId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -235,9 +252,9 @@ export const createRequest = async (data: RequestForm) => {
   }
 };
 
-export const getDonations = async (): Promise<DonationForm[]> => {
+export const getDonations = async (donorId: string): Promise<Donation[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/donations`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donations?user_id=${donorId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -256,9 +273,9 @@ export const getDonations = async (): Promise<DonationForm[]> => {
   }
 };
 
-export const getRequests = async (): Promise<RequestForm[]> => {
+export const getRequests = async (shelterId: string): Promise<Request[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/forms/requests`, {
+    const response = await fetch(`${API_BASE_URL}/forms/requests?user_id=${shelterId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -311,6 +328,27 @@ export const getMatches = async (user_id: string, user_type: string): Promise<Ma
     return data.matches || [];
   } catch (error) {
     console.error('Error fetching matches:', error);
+    throw error;
+  }
+};
+
+export const resolveMatch = async (matchId: string, user_id: string): Promise<string> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/match/resolve/${matchId}/${user_id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: user_id }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to resolve match');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error resolving match:', error);
     throw error;
   }
 };
@@ -450,7 +488,6 @@ export const getShelterRequests = async (shelterId: string): Promise<ShelterRequ
   }
 };
 
-export const deleteDonation = async (donationId: string) => {
 export const deleteDonation = async (donationId: string, donorId: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/forms/donation/${donationId}/${donorId}`, {

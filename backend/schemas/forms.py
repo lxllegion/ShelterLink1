@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 # Donation Form
 class DonationForm(BaseModel):
@@ -13,3 +14,20 @@ class RequestForm(BaseModel):
     item_name: str
     quantity: int
     category: str
+
+
+class DonorUpdate(BaseModel):
+    name: Optional[str] = None
+    username: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
+class ShelterUpdate(BaseModel):
+    shelter_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    latitude: Optional[str] = None
+    longitude: Optional[str] = None

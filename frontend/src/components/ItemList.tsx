@@ -21,7 +21,10 @@ function ItemList({
   onEditItem, 
   onDeleteItem 
 }: ItemListProps) {
-  const title = userType === 'donor' ? 'My Donations' : 'My Requests';
+  const title = isLoading 
+    ? 'Loading...' 
+    : userType === 'donor' ? 'My Donations' : 'My Requests';
+  const loadingMessage = userType === 'donor' ? 'Loading donations...' : 'Loading requests...';
   const emptyMessage = userType === 'donor'
     ? 'No donations yet. Press the "+ New Donation" button to create your first donation!'
     : 'No requests yet. Press the "+ New Request" button to create your first request!';
@@ -43,7 +46,7 @@ function ItemList({
         flexShrink: 0
       }}>
         <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
-          {title} ({items.length})
+          {isLoading ? title : `${title} (${items.length})`}
         </h2>
       </div>
 
@@ -51,7 +54,7 @@ function ItemList({
       <div style={{ overflow: 'auto', flex: 1 }}>
         {isLoading ? (
           <div style={{ padding: '48px', textAlign: 'center' }}>
-            <p style={{ fontSize: '16px', color: '#6b7280' }}>Loading...</p>
+            <p style={{ fontSize: '16px', color: '#6b7280' }}>{loadingMessage}</p>
           </div>
         ) : items.length === 0 ? (
           <div style={{ padding: '48px', textAlign: 'center' }}>

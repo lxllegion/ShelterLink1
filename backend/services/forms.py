@@ -22,60 +22,190 @@ def init_files():
         with open(REQUESTS_FILE, "w") as f:
             json.dump([], f)
 
-# Save donation form
-def save_donation(donation: DonationForm) -> DonationForm:
+def save_donation(donation: DonationForm) -> dict:
     try:
-        embedding = generate_embedding(donation.category, donation.item_name, donation.quantity)
         with engine.connect() as conn:
-            result = conn.execute(insert(donations_table).values(
-                donor_id=donation.donor_id,
-                item_name=donation.item_name,
-                quantity=donation.quantity,
-                category=donation.category,
-                embedding=embedding
-            ).returning(donations_table.c.id))
+            result = conn.execute(
+                insert(donations_table)
+                .values(
+                    donor_id=donation.donor_id,
+                    item_name=donation.item_name,
+                    quantity=donation.quantity,
+                    category=donation.category,
+                    embedding=generate_embedding(donation.category, donation.item_name, donation.quantity)
+                )
+                .returning(donations_table.c.id)
+            )
             conn.commit()
-            donation_id = result.fetchone()[0]
-        return {"id": str(donation_id), **donation.model_dump()}
+            donation_id = result.scalar()
+
+            donor_row = conn.execute(
+                select(donors_table.c.donation_ids)
+                .where(donors_table.c.uid == donation.donor_id)
+            ).fetchone()
+
+            if donor_row:
+                updated_ids = donor_row.donation_ids or []
+                updated_ids.append(donation_id)
+
+                conn.execute(
+                    update(donors_table)
+                    .where(donors_table.c.uid == donation.donor_id)
+                    .values(donation_ids=updated_ids)
+                )
+                conn.commit()
+
+        return {
+            "donation_id": str(donation_id),
+            "donor_id": donation.donor_id,
+            "item_name": donation.item_name,
+            "quantity": donation.quantity,
+            "category": donation.category
+        }
+
 
     except Exception as e:
-        print(f"Error saving request: {e}")  # Add logging
-        raise e  # Re-raise to get proper error response
+        print(f"Error saving donation: {e}")
+        raise e
 
-
-# Save req form
 def save_request(request: RequestForm) -> dict:
     try:
-        embedding = generate_embedding(request.category, request.item_name, request.quantity)
         with engine.connect() as conn:
-            result = conn.execute(insert(requests_table).values(
-                shelter_id=request.shelter_id,
-                item_name=request.item_name,
-                quantity=request.quantity,
-                category=request.category,
-                embedding=embedding
-            ).returning(requests_table.c.id))
-            conn.commit()
-            request_id = result.fetchone()[0]
-        return {"id": str(request_id), **request.model_dump()}
 
+            embedding = generate_embedding(
+                request.category,
+                request.item_name,
+                request.quantity
+            )
+
+            result = conn.execute(
+                insert(requests_table)
+                .values(
+                    shelter_id=request.shelter_id,
+                    item_name=request.item_name,
+                    quantity=request.quantity,
+                    category=request.category,
+                    embedding=embedding
+                )
+                .returning(requests_table.c.id)
+            )
+            conn.commit()
+            request_id = result.scalar()
+
+            shelter_row = conn.execute(
+                select(shelters_table.c.request_ids)
+                .where(shelters_table.c.uid == request.shelter_id)
+            ).fetchone()
+
+            if shelter_row:
+                updated_ids = shelter_row.request_ids or []
+                updated_ids.append(request_id)
+
+                conn.execute(
+                    update(shelters_table)
+                    .where(shelters_table.c.uid == request.shelter_id)
+                    .values(request_ids=updated_ids)
+                )
+                conn.commit()
+
+        return {
+            "request_id": str(request_id),
+            "shelter_id": request.shelter_id,
+            "item_name": request.item_name,
+            "quantity": request.quantity,
+            "category": request.category
+        }
     except Exception as e:
-        print(f"Error saving request: {e}")  # Add logging
-        raise e  # Re-raise to get proper error response
+        print(f"Error saving request: {e}")
+        raise e
 
 # Get all donations
-def get_donations() -> List[DonationForm]:
-    init_files()
-    with open(DONATIONS_FILE, "r") as f:
-        donations = json.load(f)
-    return [DonationForm(**donation) for donation in donations]
+def get_donations(user_id: Optional[str] = None) -> List[dict]:
+    if not user_id:
+        # If no user_id is provided, return all donations
+        with engine.connect() as conn:
+            result = conn.execute(select(donations_table)).fetchall()
+        return [
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
+            for row in result
+        ]
 
-# Get all reqs
-def get_requests() -> List[RequestForm]:
-    init_files()
-    with open(REQUESTS_FILE, "r") as f:
-        requests = json.load(f)
-    return [RequestForm(**request) for request in requests]
+    # Step 1: get donation_ids for this donor
+    with engine.connect() as conn:
+        donor_row = conn.execute(
+            select(donors_table.c.donation_ids)
+            .where(donors_table.c.uid == user_id)
+        ).fetchone()
+
+        if not donor_row or not donor_row.donation_ids:
+            return []
+
+        donation_ids = donor_row.donation_ids
+
+        # Step 2: fetch donations matching those IDs
+        result = conn.execute(
+            select(donations_table)
+            .where(donations_table.c.id.in_(donation_ids))
+        ).fetchall()
+
+    return [
+        {
+            "donation_id": str(row.id),
+            "donor_id": row.donor_id,
+            "item_name": row.item_name,
+            "quantity": row.quantity,
+            "category": row.category
+        }
+        for row in result
+    ]
+
+
+def get_requests(user_id: Optional[str] = None) -> List[dict]:
+    if not user_id:
+        with engine.connect() as conn:
+            result = conn.execute(select(requests_table)).fetchall()
+        return [
+            {
+                "donation_id": str(row.id),
+                "donor_id": row.donor_id,
+                "item_name": row.item_name,
+                "quantity": row.quantity,
+                "category": row.category
+            }
+            for row in result
+          ]
+
+    with engine.connect() as conn:
+        shelter_row = conn.execute(
+            select(shelters_table.c.request_ids)
+            .where(shelters_table.c.uid == user_id)
+        ).fetchone()
+
+        if not shelter_row or not shelter_row.request_ids:
+            return []
+
+        request_ids = shelter_row.request_ids
+        result = conn.execute(
+            select(requests_table)
+            .where(requests_table.c.id.in_(request_ids))
+        ).fetchall()
+
+    return [
+        {
+            "request_id": str(row.id),
+            "shelter_id": row.shelter_id,
+            "item_name": row.item_name,
+            "quantity": row.quantity,
+            "category": row.category
+        }
+        for row in result
+    ]
 
 def get_match_from_donation_id(donor_id: str, donation_id: UUID) -> Optional[str]:
     """
@@ -305,4 +435,123 @@ def update_request(request_id: str, request: RequestForm) -> RequestForm:
             return {"id": request_id, **request.model_dump()}
     except Exception as e:
         print(f"Error updating request: {e}")
+        raise e
+
+#update info for donor
+def update_donor(
+    uid: str,
+    name: Optional[str] = None,
+    username: Optional[str] = None,
+    phone_number: Optional[str] = None
+) -> dict:
+    if not any([name, username, phone_number]):
+        raise ValueError("At least one field to update must be provided")
+
+    try:
+        with engine.connect() as conn:
+            # Check if donor exists
+            donor_row = conn.execute(
+                select(donors_table).where(donors_table.c.uid == uid)
+            ).fetchone()
+
+            if not donor_row:
+                raise ValueError(f"No donor found with uid {uid}")
+
+            # Build update values
+            update_values = {
+                key: value for key, value in {
+                    "name": name,
+                    "username": username,
+                    "phone_number": phone_number,
+                }.items() if value is not None
+            }
+
+            if update_values:
+                conn.execute(
+                    update(donors_table)
+                    .where(donors_table.c.uid == uid)
+                    .values(**update_values)
+                )
+                conn.commit()
+
+            # Fetch updated row
+            updated = conn.execute(
+                select(donors_table).where(donors_table.c.uid == uid)
+            ).fetchone()
+
+            # Return dictionary
+            return {
+                "uid": updated.uid,
+                "name": updated.name,
+                "username": updated.username,
+                "phone_number": updated.phone_number
+            }
+
+    except Exception as e:
+        print(f"Error updating donor: {e}")
+        raise e
+
+#update info for shelter
+def update_shelter(
+    uid: str,
+    shelter_name: Optional[str] = None,
+    phone_number: Optional[str] = None,
+    address: Optional[str] = None,
+    city: Optional[str] = None,
+    state: Optional[str] = None,
+    zip_code: Optional[str] = None,
+    latitude: Optional[str] = None,
+    longitude: Optional[str] = None
+) -> dict:
+    if not any([shelter_name, phone_number, address, city, state, zip_code, latitude, longitude]):
+        raise ValueError("At least one field to update must be provided")
+
+    try:
+        with engine.connect() as conn:
+            shelter_row = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == uid)
+            ).fetchone()
+
+            if not shelter_row:
+                raise ValueError(f"No shelter found with uid {uid}")
+
+            update_values = {
+                key: value for key, value in {
+                    "shelter_name": shelter_name,
+                    "phone_number": phone_number,
+                    "address": address,
+                    "city": city,
+                    "state": state,
+                    "zip_code": zip_code,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                }.items() if value is not None
+            }
+
+            if update_values:
+                conn.execute(
+                    update(shelters_table)
+                    .where(shelters_table.c.uid == uid)
+                    .values(**update_values)
+                )
+                conn.commit()
+
+            updated = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == uid)
+            ).fetchone()
+
+            return {
+                "uid": updated.uid,
+                "shelter_name": updated.shelter_name,
+                "phone_number": updated.phone_number,
+                "address": updated.address,
+                "city": updated.city,
+                "state": updated.state,
+                "zip_code": updated.zip_code,
+                "latitude": updated.latitude,
+                "longitude": updated.longitude
+            }
+
+    except Exception as e:
+        print(f"Error updating shelter: {e}")
         raise e
