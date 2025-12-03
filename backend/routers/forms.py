@@ -116,3 +116,21 @@ async def modify_shelter(
         latitude=shelter_update.latitude,
         longitude=shelter_update.longitude
     )
+
+
+@router.delete("/donor/{uid}")
+async def remove_donor(uid: str):
+    """
+    Delete a donor by UID.
+    Returns True if deleted successfully.
+    """
+    return delete_donor(uid)
+
+
+@router.delete("/shelter/{uid}")
+async def remove_shelter(uid: str):
+    """
+    Delete a shelter by UID.
+    Returns True if deleted successfully.
+    """
+    return delete_shelter(uid)
