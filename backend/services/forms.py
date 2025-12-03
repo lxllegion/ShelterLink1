@@ -555,3 +555,52 @@ def update_shelter(
     except Exception as e:
         print(f"Error updating shelter: {e}")
         raise e
+
+# delete Donor
+def delete_donor(uid: str) -> bool:
+    try:
+        with engine.connect() as conn:
+            # Check donor exists
+            donor_row = conn.execute(
+                select(donors_table).where(donors_table.c.uid == uid)
+            ).fetchone()
+
+            if not donor_row:
+                raise ValueError(f"No donor found with uid {uid}")
+
+            # Delete donor
+            conn.execute(
+                delete(donors_table).where(donors_table.c.uid == uid)
+            )
+            conn.commit()
+
+            return True
+
+    except Exception as e:
+        print(f"Error deleting donor: {e}")
+        raise e
+
+
+# Delete Shelter
+def delete_shelter(uid: str) -> bool:
+    try:
+        with engine.connect() as conn:
+            # Check shelter exists
+            shelter_row = conn.execute(
+                select(shelters_table).where(shelters_table.c.uid == uid)
+            ).fetchone()
+
+            if not shelter_row:
+                raise ValueError(f"No shelter found with uid {uid}")
+
+            # Delete shelter
+            conn.execute(
+                delete(shelters_table).where(shelters_table.c.uid == uid)
+            )
+            conn.commit()
+
+            return True
+
+    except Exception as e:
+        print(f"Error deleting shelter: {e}")
+        raise e
