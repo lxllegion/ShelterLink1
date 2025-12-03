@@ -96,6 +96,16 @@ function Profile() {
           phone_number: editPhoneNumber,
           username: editUsername,
         });
+        // Update local state to reflect changes
+        setUserInfo({
+          ...userInfo,
+          userData: {
+            ...userInfo.userData,
+            name: editName,
+            phone_number: editPhoneNumber,
+            username: editUsername,
+          }
+        });
       } else if (userInfo?.userType === 'shelter') {
         // Auto-geocode when address fields are filled
         let lat = editLatitude;
@@ -123,9 +133,25 @@ function Profile() {
           latitude: lat,
           longitude: lon,
         });
+        // Update local state to reflect changes
+        setUserInfo({
+          ...userInfo,
+          userData: {
+            ...userInfo.userData,
+            shelter_name: editShelterName,
+            phone_number: editPhoneNumber,
+            address: editAddress,
+            city: editCity,
+            state: editState,
+            zip_code: editZipCode,
+            latitude: lat,
+            longitude: lon,
+          }
+        });
       }
     } catch (error) {
       alert('Error updating profile: ' + error);
+      return;
     }
     setIsEditing(false);
   };
