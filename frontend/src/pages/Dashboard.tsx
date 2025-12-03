@@ -36,6 +36,8 @@ function Dashboard() {
 
   // Modal state for viewing match details
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [partnerDetails, setPartnerDetails] = useState<any>(null);
+  const [loadingPartner, setLoadingPartner] = useState(false);
 
   const mockDonations = [
     {
@@ -325,8 +327,24 @@ function Dashboard() {
     };
   };
 
-  const handleMatchClick = (match: Match) => {
+  const handleMatchClick = async (match: Match) => {
     setSelectedMatch(match);
+    setLoadingPartner(true);
+    setPartnerDetails(null);
+
+    try {
+      // Fetch partner details based on user type
+      const partnerId = userType === 'donor' ? match.shelter_id : match.donor_id;
+      const partnerInfo = await getUserInfo(partnerId);
+
+      if (partnerInfo && !partnerInfo.error) {
+        setPartnerDetails(partnerInfo.userData);
+      }
+    } catch (error) {
+      console.error('Error fetching partner details:', error);
+    } finally {
+      setLoadingPartner(false);
+    }
   };
 
   return (
@@ -571,16 +589,113 @@ function Dashboard() {
                   <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#8B4513', marginBottom: '0.75rem', borderBottom: '2px solid #FFE5CC', paddingBottom: '0.5rem' }}>
                     {userType === 'donor' ? 'Shelter Information' : 'Donor Information'}
                   </h3>
-                  <div style={{ display: 'grid', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ fontWeight: '600', color: '#A0522D' }}>
-                        {userType === 'donor' ? 'Shelter:' : 'Donor:'}
-                      </span>
-                      <span style={{ color: '#8B4513' }}>
-                        {userType === 'donor' ? selectedMatch.shelter_name : selectedMatch.donor_username}
-                      </span>
+
+                  {loadingPartner ? (
+                    <div style={{ padding: '1rem', textAlign: 'center', color: '#A0522D' }}>
+                      Loading contact details...
                     </div>
-                  </div>
+                  ) : partnerDetails ? (
+                    <div style={{
+                      backgroundColor: '#FFF5EE',
+                      padding: '1rem',
+                      borderRadius: '8px',
+                      border: '1px solid #FFE5CC'
+                    }}>
+                      <div style={{ display: 'grid', gap: '0.75rem' }}>
+                        {/* Name */}
+                        <div>
+                          <div style={{ fontSize: '1.125rem', fontWeight: '600', color: '#8B4513', marginBottom: '0.25rem' }}>
+                            {userType === 'donor' ? partnerDetails.shelter_name : partnerDetails.name}
+                          </div>
+                        </div>
+
+                        {/* Email */}
+                        {partnerDetails.email && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontWeight: '600', color: '#A0522D', minWidth: '60px' }}>Email:</span>
+                            <a
+                              href={`mailto:${partnerDetails.email}`}
+                              style={{
+                                color: '#FF6B35',
+                                textDecoration: 'none',
+                                transition: 'color 0.2s'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.color = '#E85A2A'}
+                              onMouseOut={(e) => e.currentTarget.style.color = '#FF6B35'}
+                            >
+                              {partnerDetails.email}
+                            </a>
+                          </div>
+                        )}
+
+                        {/* Phone */}
+                        {partnerDetails.phone_number && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontWeight: '600', color: '#A0522D', minWidth: '60px' }}>Phone:</span>
+                            <a
+                              href={`tel:${partnerDetails.phone_number}`}
+                              style={{
+                                color: '#FF6B35',
+                                textDecoration: 'none',
+                                transition: 'color 0.2s'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.color = '#E85A2A'}
+                              onMouseOut={(e) => e.currentTarget.style.color = '#FF6B35'}
+                            >
+                              {partnerDetails.phone_number}
+                            </a>
+                          </div>
+                        )}
+
+                        {/* Address (for shelters only) */}
+                        {userType === 'donor' && partnerDetails.address && (
+                          <div>
+                            <div style={{ fontWeight: '600', color: '#A0522D', marginBottom: '0.25rem' }}>Address:</div>
+                            <div style={{ color: '#8B4513', lineHeight: '1.5' }}>
+                              {partnerDetails.address}
+                              {partnerDetails.city && partnerDetails.state && partnerDetails.zip_code && (
+                                <div>{partnerDetails.city}, {partnerDetails.state} {partnerDetails.zip_code}</div>
+                              )}
+                            </div>
+                            {partnerDetails.latitude && partnerDetails.longitude && (
+                              <a
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${partnerDetails.latitude},${partnerDetails.longitude}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: 'inline-block',
+                                  marginTop: '0.5rem',
+                                  padding: '0.5rem 1rem',
+                                  backgroundColor: '#FF6B35',
+                                  color: 'white',
+                                  borderRadius: '6px',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  fontWeight: '600',
+                                  transition: 'background-color 0.2s'
+                                }}
+                                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+                                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
+                              >
+                                Get Directions
+                              </a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontWeight: '600', color: '#A0522D' }}>
+                          {userType === 'donor' ? 'Shelter:' : 'Donor:'}
+                        </span>
+                        <span style={{ color: '#8B4513' }}>
+                          {userType === 'donor' ? selectedMatch.shelter_name : selectedMatch.donor_username}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Item Details */}
