@@ -6,6 +6,34 @@ import DeleteAccountModal from '../components/DeleteAccountModal';
 import { useNavigate } from 'react-router-dom';
 import { deleteUser } from 'firebase/auth';
 
+// Geocoding function using OpenStreetMap Nominatim API
+const geocodeAddress = async (address: string, city: string, state: string, zipCode: string): Promise<{ lat: string; lon: string } | null> => {
+  try {
+    const fullAddress = `${address}, ${city}, ${state} ${zipCode}`;
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}&limit=1`,
+      {
+        headers: {
+          'User-Agent': 'ShelterLink/1.0'
+        }
+      }
+    );
+    
+    if (!response.ok) {
+      throw new Error('Geocoding request failed');
+    }
+    
+    const data = await response.json();
+    if (data && data.length > 0) {
+      return { lat: data[0].lat, lon: data[0].lon };
+    }
+    return null;
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
+};
+
 function Profile() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -14,6 +42,7 @@ function Profile() {
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   
   // Form states for editing
   const [editName, setEditName] = useState('');
@@ -67,7 +96,33 @@ function Profile() {
           phone_number: editPhoneNumber,
           username: editUsername,
         });
+        // Update local state to reflect changes
+        setUserInfo({
+          ...userInfo,
+          userData: {
+            ...userInfo.userData,
+            name: editName,
+            phone_number: editPhoneNumber,
+            username: editUsername,
+          }
+        });
       } else if (userInfo?.userType === 'shelter') {
+        // Auto-geocode when address fields are filled
+        let lat = editLatitude;
+        let lon = editLongitude;
+        
+        if (editAddress && editCity && editState) {
+          setIsGeocoding(true);
+          const coords = await geocodeAddress(editAddress, editCity, editState, editZipCode);
+          if (coords) {
+            lat = coords.lat;
+            lon = coords.lon;
+            setEditLatitude(lat);
+            setEditLongitude(lon);
+          }
+          setIsGeocoding(false);
+        }
+        
         await updateShelter(currentUser?.uid || '', {
           shelter_name: editShelterName,
           phone_number: editPhoneNumber,
@@ -75,12 +130,28 @@ function Profile() {
           city: editCity,
           state: editState,
           zip_code: editZipCode,
-          latitude: editLatitude,
-          longitude: editLongitude,
+          latitude: lat,
+          longitude: lon,
+        });
+        // Update local state to reflect changes
+        setUserInfo({
+          ...userInfo,
+          userData: {
+            ...userInfo.userData,
+            shelter_name: editShelterName,
+            phone_number: editPhoneNumber,
+            address: editAddress,
+            city: editCity,
+            state: editState,
+            zip_code: editZipCode,
+            latitude: lat,
+            longitude: lon,
+          }
         });
       }
     } catch (error) {
-      alert('Error updating donor: ' + error);
+      alert('Error updating profile: ' + error);
+      return;
     }
     setIsEditing(false);
   };
@@ -361,7 +432,7 @@ function Profile() {
                               type="text"
                               value={editState}
                               onChange={(e) => setEditState(e.target.value)}
-                              placeholder="CA"
+                              placeholder="WA"
                               maxLength={2}
                               style={{
                                 width: '100%',
@@ -393,6 +464,7 @@ function Profile() {
                             />
                           </div>
                         </div>
+
                       </>
                     )}
 
@@ -400,6 +472,7 @@ function Profile() {
                     <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                       <button
                         type="submit"
+                        disabled={isGeocoding}
                         style={{
                           flex: 1,
                           backgroundColor: 'black',
@@ -409,10 +482,11 @@ function Profile() {
                           borderRadius: '6px',
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          cursor: 'pointer'
+                          cursor: isGeocoding ? 'not-allowed' : 'pointer',
+                          opacity: isGeocoding ? 0.7 : 1
                         }}
                       >
-                        Save Changes
+                        {isGeocoding ? 'Getting Location...' : 'Save Changes'}
                       </button>
                       <button
                         type="button"
