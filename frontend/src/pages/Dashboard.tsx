@@ -165,7 +165,7 @@ function Dashboard() {
 
         if (userInfo.userType === 'donor') {
           // Fetch donations for this donor
-          const donationsData = await getDonations();
+          const donationsData = await getDonations(userId);
           const userDonations = donationsData.filter(d => d.donor_id === userId) as DonationWithId[];
           setDonations(userDonations);
 
@@ -174,7 +174,7 @@ function Dashboard() {
           setMatches(userMatches);
         } else if (userInfo.userType === 'shelter') {
           // Fetch requests for this shelter
-          const requestsData = await getRequests();
+          const requestsData = await getRequests(userId);
           const userRequests = requestsData.filter(r => r.shelter_id === userId) as RequestWithId[]; // Note: using donor_id field for shelter_id
           setRequests(userRequests);
 

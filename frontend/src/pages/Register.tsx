@@ -46,7 +46,7 @@ function Register() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FFF5EE' }}>
       {/* Navigation Bar */}
       <AuthNavBar />
 
@@ -60,11 +60,12 @@ function Register() {
           <h1 style={{
             fontSize: '48px',
             fontWeight: 'bold',
-            marginBottom: '16px'
+            marginBottom: '16px',
+            color: '#8B4513'
           }}>
             Create Account
           </h1>
-          <p style={{ fontSize: '18px', color: '#6b7280' }}>
+          <p style={{ fontSize: '18px', color: '#A0522D' }}>
             Choose how you want to make an impact
           </p>
         </div>
@@ -81,19 +82,20 @@ function Register() {
             onClick={() => setUserType('donor')}
             style={{
               padding: '32px',
-              border: userType === 'donor' ? '3px solid black' : '2px solid #e5e7eb',
+              border: userType === 'donor' ? '3px solid #FF6B35' : '2px solid #FFB366',
               borderRadius: '16px',
-              backgroundColor: userType === 'donor' ? '#fef2f2' : 'white',
+              backgroundColor: userType === 'donor' ? '#FFE5CC' : 'white',
               cursor: 'pointer',
               textAlign: 'left',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              boxShadow: userType === 'donor' ? '0 4px 6px rgba(255, 107, 53, 0.2)' : 'none'
             }}
           >
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>❤️</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
               I'm a Donor
             </h3>
-            <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            <p style={{ color: '#A0522D', fontSize: '14px' }}>
               I want to donate items to shelters
             </p>
           </button>
@@ -103,19 +105,20 @@ function Register() {
             onClick={() => setUserType('shelter')}
             style={{
               padding: '32px',
-              border: userType === 'shelter' ? '3px solid black' : '2px solid #e5e7eb',
+              border: userType === 'shelter' ? '3px solid #FF6B35' : '2px solid #FFB366',
               borderRadius: '16px',
-              backgroundColor: userType === 'shelter' ? '#eff6ff' : 'white',
+              backgroundColor: userType === 'shelter' ? '#FFE5CC' : 'white',
               cursor: 'pointer',
               textAlign: 'left',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              boxShadow: userType === 'shelter' ? '0 4px 6px rgba(255, 107, 53, 0.2)' : 'none'
             }}
           >
             <div style={{ fontSize: '40px', marginBottom: '16px' }}>🏠</div>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
               I'm a Shelter
             </h3>
-            <p style={{ color: '#6b7280', fontSize: '14px' }}>
+            <p style={{ color: '#A0522D', fontSize: '14px' }}>
               I represent a homeless shelter
             </p>
           </button>
@@ -127,16 +130,16 @@ function Register() {
             backgroundColor: 'white',
             padding: '40px',
             borderRadius: '16px',
-            border: '1px solid #e5e7eb',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            border: '2px solid #FFB366',
+            boxShadow: '0 4px 6px rgba(255, 107, 53, 0.15)'
           }}>
-            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '32px' }}>
+            <h3 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '32px', color: '#8B4513' }}>
               Complete Your Profile
             </h3>
 
             <form onSubmit={handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                   Full Name
                 </label>
                 <input
@@ -147,7 +150,7 @@ function Register() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid #FFB366',
                     borderRadius: '8px',
                     fontSize: '16px',
                     boxSizing: 'border-box'
@@ -157,7 +160,7 @@ function Register() {
 
               {userType === 'donor' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                     Username
                   </label>
                   <input
@@ -169,7 +172,7 @@ function Register() {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: '2px solid #e5e7eb',
+                      border: '2px solid #FFB366',
                       borderRadius: '8px',
                       fontSize: '16px',
                       boxSizing: 'border-box'
@@ -180,7 +183,7 @@ function Register() {
 
               {userType === 'shelter' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                     Shelter Name
                   </label>
                   <input
@@ -191,7 +194,7 @@ function Register() {
                     style={{
                       width: '100%',
                       padding: '12px 16px',
-                      border: '2px solid #e5e7eb',
+                      border: '2px solid #FFB366',
                       borderRadius: '8px',
                       fontSize: '16px',
                       boxSizing: 'border-box'
@@ -201,7 +204,7 @@ function Register() {
               )}
 
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                   Email Address
                 </label>
                 <input
@@ -212,7 +215,7 @@ function Register() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid #FFB366',
                     borderRadius: '8px',
                     fontSize: '16px',
                     boxSizing: 'border-box'
@@ -221,7 +224,7 @@ function Register() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                   Phone Number
                 </label>
                 <input
@@ -233,7 +236,7 @@ function Register() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid #FFB366',
                     borderRadius: '8px',
                     fontSize: '16px',
                     boxSizing: 'border-box'
@@ -242,7 +245,7 @@ function Register() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                   Password
                 </label>
                 <input
@@ -253,7 +256,7 @@ function Register() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid #FFB366',
                     borderRadius: '8px',
                     fontSize: '16px',
                     boxSizing: 'border-box'
@@ -262,7 +265,7 @@ function Register() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                   Confirm Password
                 </label>
                 <input
@@ -273,7 +276,7 @@ function Register() {
                   style={{
                     width: '100%',
                     padding: '12px 16px',
-                    border: '2px solid #e5e7eb',
+                    border: '2px solid #FFB366',
                     borderRadius: '8px',
                     fontSize: '16px',
                     boxSizing: 'border-box'
@@ -282,7 +285,7 @@ function Register() {
               </div>
 
               {error && (
-                <p style={{ color: '#dc2626', fontSize: '14px' }}>{error}</p>
+                <p style={{ color: '#CC2900', fontSize: '14px' }}>{error}</p>
               )}
 
               <button
@@ -290,7 +293,7 @@ function Register() {
                 disabled={loading}
                 style={{
                   width: '100%',
-                  backgroundColor: 'black',
+                  backgroundColor: '#FF6B35',
                   color: 'white',
                   padding: '16px',
                   border: 'none',
@@ -299,15 +302,19 @@ function Register() {
                   fontWeight: 'bold',
                   cursor: loading ? 'not-allowed' : 'pointer',
                   opacity: loading ? 0.5 : 1,
-                  marginTop: '8px'
+                  marginTop: '8px',
+                  transition: 'background-color 0.2s',
+                  boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
                 }}
+                onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#E85A2A')}
+                onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#FF6B35')}
               >
                 {loading ? 'Creating Account...' : 'Create Account'}
               </button>
 
-              <p style={{ textAlign: 'center', color: '#6b7280', marginTop: '8px' }}>
+              <p style={{ textAlign: 'center', color: '#A0522D', marginTop: '8px' }}>
                 Already have an account?{' '}
-                <a href="/login" style={{ textDecoration: 'underline', color: 'black', fontWeight: 'bold' }}>
+                <a href="/login" style={{ textDecoration: 'underline', color: '#FF6B35', fontWeight: 'bold' }}>
                   Log in
                 </a>
               </p>
