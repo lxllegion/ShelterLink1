@@ -127,7 +127,8 @@ function Dashboard() {
     if (editingIndex === null) return;
     try {
       if (editingType === 'donation') {
-        const result = await updateDonation(donations[editingIndex].donation_id, {
+        const donationId = donations[editingIndex].donation_id;
+        const result = await updateDonation(donationId, {
           donor_id: donations[editingIndex].donor_id,
           item_name: itemData.item_name,
           quantity: itemData.quantity,
@@ -143,9 +144,36 @@ function Dashboard() {
         };
         updateDonations(updatedDonations);
         
-        // Show match result if found
+        // Remove old matches for this donation and add new one if found
+        const filteredMatches = matches.filter((m: Match) => m.donation_id !== donationId);
+        
         if (result.best_match) {
           const match = result.best_match;
+          // Add the new match to frontend state
+          const newMatch: Match = {
+            id: match.id || `match-${Date.now()}`,
+            donor_id: donations[editingIndex].donor_id,
+            donation_id: donationId,
+            donor_username: match.donor_username || '',
+            donor_email: match.donor_email,
+            donor_phone: match.donor_phone,
+            shelter_id: match.shelter_id,
+            request_id: match.request_id,
+            shelter_name: match.shelter_name || 'Unknown',
+            shelter_email: match.shelter_email,
+            shelter_phone: match.shelter_phone,
+            shelter_address: match.shelter_address,
+            shelter_city: match.shelter_city,
+            shelter_state: match.shelter_state,
+            shelter_zip_code: match.shelter_zip_code,
+            item_name: match.item_name,
+            quantity: match.quantity,
+            category: match.category || itemData.category,
+            matched_at: match.matched_at || new Date().toISOString(),
+            status: match.status || 'pending',
+          };
+          updateMatches([...filteredMatches, newMatch]);
+          
           alert(
             `Donation Updated! Match Found! 🎉\n\n` +
             `Shelter: ${match.shelter_name || 'Unknown'}\n` +
@@ -155,10 +183,12 @@ function Dashboard() {
             `Can Fulfill: ${match.can_fulfill}`
           );
         } else {
+          updateMatches(filteredMatches);
           alert('Donation updated successfully! No matches found yet.');
         }
       } else {
-        const result = await updateRequest(requests[editingIndex].request_id, {
+        const requestId = requests[editingIndex].request_id;
+        const result = await updateRequest(requestId, {
           shelter_id: requests[editingIndex].shelter_id,
           item_name: itemData.item_name,
           quantity: itemData.quantity,
@@ -174,9 +204,36 @@ function Dashboard() {
         };
         updateRequests(updatedRequests);
         
-        // Show match result if found
+        // Remove old matches for this request and add new one if found
+        const filteredMatches = matches.filter((m: Match) => m.request_id !== requestId);
+        
         if (result.best_match) {
           const match = result.best_match;
+          // Add the new match to frontend state
+          const newMatch: Match = {
+            id: match.id || `match-${Date.now()}`,
+            donor_id: match.donor_id,
+            donation_id: match.donation_id,
+            donor_username: match.donor_username || match.donor_name || 'Unknown',
+            donor_email: match.donor_email,
+            donor_phone: match.donor_phone,
+            shelter_id: requests[editingIndex].shelter_id,
+            request_id: requestId,
+            shelter_name: match.shelter_name || '',
+            shelter_email: match.shelter_email,
+            shelter_phone: match.shelter_phone,
+            shelter_address: match.shelter_address,
+            shelter_city: match.shelter_city,
+            shelter_state: match.shelter_state,
+            shelter_zip_code: match.shelter_zip_code,
+            item_name: match.item_name,
+            quantity: match.quantity,
+            category: match.category || itemData.category,
+            matched_at: match.matched_at || new Date().toISOString(),
+            status: match.status || 'pending',
+          };
+          updateMatches([...filteredMatches, newMatch]);
+          
           alert(
             `Request Updated! Match Found! 🎉\n\n` +
             `Donor: ${match.donor_name || 'Unknown'}\n` +
@@ -186,6 +243,7 @@ function Dashboard() {
             `Can Fulfill: ${match.can_fulfill}`
           );
         } else {
+          updateMatches(filteredMatches);
           alert('Request updated successfully! No matches found yet.');
         }
       }

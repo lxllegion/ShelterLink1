@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
-import { createDonation, createRequest, findMatchVectorDonation, findMatchVectorRequest } from '../api/backend';
+import { createDonation, createRequest, findMatchVectorDonation, findMatchVectorRequest, Donation, Request, Match } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 
 function Form() {
@@ -12,7 +12,7 @@ function Form() {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { currentUser, donations, requests, matches, updateDonations, updateRequests, updateMatches } = useAuth();
 
   useEffect(() => {
     // Get user type from localStorage
@@ -38,11 +38,47 @@ function Form() {
         });
         createdId = result.donation_id;
 
+        // Add the new donation to frontend state
+        const newDonation: Donation = {
+          donation_id: createdId,
+          donor_id: userId,
+          item_name: description,
+          quantity: quantityValue,
+          category: category,
+        };
+        updateDonations([...donations, newDonation]);
+
         // Find best match for the donation
         try {
           const matchResult = await findMatchVectorDonation(createdId);
           if (matchResult.best_match) {
             const match = matchResult.best_match;
+            
+            // Add the new match to frontend state
+            const newMatch: Match = {
+              id: match.id || `match-${Date.now()}`,
+              donor_id: userId,
+              donation_id: createdId,
+              donor_username: match.donor_username || '',
+              donor_email: match.donor_email,
+              donor_phone: match.donor_phone,
+              shelter_id: match.shelter_id,
+              request_id: match.request_id,
+              shelter_name: match.shelter_name || 'Unknown',
+              shelter_email: match.shelter_email,
+              shelter_phone: match.shelter_phone,
+              shelter_address: match.shelter_address,
+              shelter_city: match.shelter_city,
+              shelter_state: match.shelter_state,
+              shelter_zip_code: match.shelter_zip_code,
+              item_name: match.item_name,
+              quantity: match.quantity,
+              category: match.category || category,
+              matched_at: match.matched_at || new Date().toISOString(),
+              status: match.status || 'pending',
+            };
+            updateMatches([...matches, newMatch]);
+
             alert(
               `Match Found! 🎉\n\n` +
               `Shelter: ${match.shelter_name || 'Unknown'}\n` +
@@ -71,11 +107,47 @@ function Form() {
         });
         createdId = result.request_id;
 
+        // Add the new request to frontend state
+        const newRequest: Request = {
+          request_id: createdId,
+          shelter_id: userId,
+          item_name: description,
+          quantity: quantityValue,
+          category: category,
+        };
+        updateRequests([...requests, newRequest]);
+
         // Find best match for the request
         try {
           const matchResult = await findMatchVectorRequest(createdId);
           if (matchResult.best_match) {
             const match = matchResult.best_match;
+            
+            // Add the new match to frontend state
+            const newMatch: Match = {
+              id: match.id || `match-${Date.now()}`,
+              donor_id: match.donor_id,
+              donation_id: match.donation_id,
+              donor_username: match.donor_username || match.donor_name || 'Unknown',
+              donor_email: match.donor_email,
+              donor_phone: match.donor_phone,
+              shelter_id: userId,
+              request_id: createdId,
+              shelter_name: match.shelter_name || '',
+              shelter_email: match.shelter_email,
+              shelter_phone: match.shelter_phone,
+              shelter_address: match.shelter_address,
+              shelter_city: match.shelter_city,
+              shelter_state: match.shelter_state,
+              shelter_zip_code: match.shelter_zip_code,
+              item_name: match.item_name,
+              quantity: match.quantity,
+              category: match.category || category,
+              matched_at: match.matched_at || new Date().toISOString(),
+              status: match.status || 'pending',
+            };
+            updateMatches([...matches, newMatch]);
+
             alert(
               `Match Found! 🎉\n\n` +
               `Donor: ${match.donor_name || 'Unknown'}\n` +
