@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import { createDonation, createRequest, findMatchVectorDonation, findMatchVectorRequest, Donation, Request, Match } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
+import MatchMadeModal, { MatchData } from '../components/MatchMadeModal';
 
 function Form() {
   const [userType, setUserType] = useState<string | null>(null);
@@ -13,6 +14,10 @@ function Form() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { currentUser, donations, requests, matches, updateDonations, updateRequests, updateMatches } = useAuth();
+
+  // Modal state for match made notification
+  const [isMatchMadeModalOpen, setIsMatchMadeModalOpen] = useState(false);
+  const [matchMadeData, setMatchMadeData] = useState<MatchData | null>(null);
 
   useEffect(() => {
     // Get user type from localStorage
@@ -79,20 +84,20 @@ function Form() {
             };
             updateMatches([...matches, newMatch]);
 
-            alert(
-              `Match Found! 🎉\n\n` +
-              `Shelter: ${match.shelter_name || 'Unknown'}\n` +
-              `Item: ${match.item_name}\n` +
-              `Quantity Needed: ${match.quantity}\n` +
-              `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
-              `Can Fulfill: ${match.can_fulfill}`
-            );
-          } else {
-            alert('Donation submitted successfully! No matches found yet.');
+            // Show match made modal
+            setMatchMadeData({
+              shelter_name: match.shelter_name,
+              item_name: match.item_name,
+              quantity: match.quantity,
+              category: match.category || category,
+              similarity_score: match.similarity_score,
+              can_fulfill: match.can_fulfill,
+            });
+            setIsMatchMadeModalOpen(true);
+            return; // Don't navigate yet, let modal close first
           }
         } catch (matchError) {
           console.error('Error finding match:', matchError);
-          alert('Donation submitted successfully!');
         }
         
         // Increment donation counter (temporary mock functionality)
@@ -148,20 +153,21 @@ function Form() {
             };
             updateMatches([...matches, newMatch]);
 
-            alert(
-              `Match Found! 🎉\n\n` +
-              `Donor: ${match.donor_name || 'Unknown'}\n` +
-              `Item: ${match.item_name}\n` +
-              `Quantity Available: ${match.quantity}\n` +
-              `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
-              `Can Fulfill: ${match.can_fulfill}`
-            );
-          } else {
-            alert('Request submitted successfully! No matches found yet.');
+            // Show match made modal
+            setMatchMadeData({
+              donor_name: match.donor_name,
+              donor_username: match.donor_username,
+              item_name: match.item_name,
+              quantity: match.quantity,
+              category: match.category || category,
+              similarity_score: match.similarity_score,
+              can_fulfill: match.can_fulfill,
+            });
+            setIsMatchMadeModalOpen(true);
+            return; // Don't navigate yet, let modal close first
           }
         } catch (matchError) {
           console.error('Error finding match:', matchError);
-          alert('Request submitted successfully!');
         }
         
         // Increment request counter (temporary mock functionality)
@@ -304,6 +310,18 @@ function Form() {
           </p>
         </div>
       </div>
+
+      {/* Match Made Modal */}
+      <MatchMadeModal
+        isOpen={isMatchMadeModalOpen}
+        onClose={() => {
+          setIsMatchMadeModalOpen(false);
+          navigate('/dashboard');
+        }}
+        matchData={matchMadeData}
+        userType={(userType as 'donor' | 'shelter') || 'donor'}
+        actionType="created"
+      />
     </div>
   );
 }
