@@ -34,6 +34,9 @@ function Dashboard() {
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
 
+  // State for expanded match cards
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
+
   const userType = userInfo?.userType || null;
 
   // Fetch dashboard data only if not already loaded
@@ -193,7 +196,7 @@ function Dashboard() {
   };
 
   return (
-    <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100vh', backgroundColor: '#FFF5EE', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Navigation Bar */}
       <NavBar />
 
@@ -210,22 +213,26 @@ function Dashboard() {
           <h1 style={{
             fontSize: '28px',
             fontWeight: 'bold',
-            color: '#1f2937'
+            color: '#8B4513'
           }}>
             Dashboard
           </h1>
           <button
             onClick={() => navigate('/form')}
             style={{
-              backgroundColor: 'black',
+              backgroundColor: '#FF6B35',
               color: 'white',
               padding: '12px 24px',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '8px',
               fontSize: '16px',
               fontWeight: 'bold',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
             }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
           >
             {!userType ? '+' : userType === 'donor' ? '+ New Donation' : '+ New Request'}
           </button>
@@ -234,13 +241,13 @@ function Dashboard() {
         {/* Error State */}
         {error && (
           <div style={{
-            backgroundColor: '#fee2e2',
-            border: '2px solid #ef4444',
+            backgroundColor: '#FFE5E0',
+            border: '2px solid #FF6B35',
             borderRadius: '12px',
             padding: '16px',
             marginBottom: '32px'
           }}>
-            <p style={{ color: '#991b1b', fontWeight: '600' }}>Error: {error}</p>
+            <p style={{ color: '#CC2900', fontWeight: '600' }}>Error: {error}</p>
           </div>
         )}
 
@@ -250,19 +257,21 @@ function Dashboard() {
             <div style={{
               backgroundColor: 'white',
               borderRadius: '12px',
-              border: '2px solid black',
+              border: '2px solid #FFB366',
               overflow: 'hidden',
               flex: 1,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              boxShadow: '0 4px 6px rgba(255, 107, 53, 0.1)'
             }}>
               {/* Header */}
               <div style={{
                 padding: '16px 24px',
-                borderBottom: '1px solid #e5e7eb',
-                flexShrink: 0
+                borderBottom: '2px solid #FFE5CC',
+                flexShrink: 0,
+                background: 'linear-gradient(to right, #FFF5EE, #FFE5CC)'
               }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#8B4513' }}>
                   Active Matches ({loadingMatches ? '...' : activeMatches})
                 </h2>
               </div>
@@ -271,65 +280,181 @@ function Dashboard() {
               <div style={{ overflow: 'auto', flex: 1 }}>
                 {loadingMatches ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>Loading matches...</p>
+                    <p style={{ fontSize: '16px', color: '#A0522D' }}>Loading matches...</p>
                   </div>
                 ) : error ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#ef4444' }}>Error loading matches</p>
+                    <p style={{ fontSize: '16px', color: '#CC2900' }}>Error loading matches</p>
                   </div>
                 ) : matches.filter((m: Match) => m.status === 'pending').length === 0 ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>
+                    <p style={{ fontSize: '16px', color: '#A0522D' }}>
                       No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
                     </p>
                   </div>
                 ) : (
-                  matches.filter((m: Match) => m.status === 'pending').map((match: Match, index: number) => (
-                    <div
-                      key={match.id}
-                      style={{
-                        padding: '24px',
-                        borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #e5e7eb' : 'none',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                          {userType === 'donor' 
-                            ? `Match with ${match.shelter_name}`
-                            : `Match with ${match.donor_username}`
-                          }
-                        </h3>
-                        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
-                          {match.category} • {match.item_name} • Quantity: {match.quantity}
-                        </p>
-                        <p style={{ fontSize: '12px', color: '#9ca3af' }}>
-                          Matched {formatTimeAgo(match.matched_at)}
-                        </p>
-                      </div>
-
-                      <button 
-                        onClick={() => handleResolveMatch(match)}
+                  matches.filter((m: Match) => m.status === 'pending').map((match: Match, index: number) => {
+                    const isExpanded = expandedMatchId === match.id;
+                    return (
+                      <div
+                        key={match.id}
                         style={{
-                          backgroundColor: 'white',
-                          color: 'black',
-                          padding: '10px 20px',
-                          border: '2px solid black',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          cursor: 'pointer'
+                          borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #FFE5CC' : 'none',
+                          transition: 'background-color 0.2s'
                         }}
                       >
-                        Resolve Match
-                      </button>
-                    </div>
-                  ))
+                        {/* Clickable Card Header */}
+                        <div
+                          onClick={() => setExpandedMatchId(isExpanded ? null : match.id)}
+                          style={{
+                            padding: '24px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            backgroundColor: isExpanded ? '#FFF5EE' : 'transparent'
+                          }}
+                          onMouseOver={(e) => !isExpanded && (e.currentTarget.style.backgroundColor = '#FFFBF7')}
+                          onMouseOut={(e) => !isExpanded && (e.currentTarget.style.backgroundColor = 'transparent')}
+                        >
+                          <div style={{ flex: 1 }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#8B4513', marginBottom: '4px' }}>
+                              {userType === 'donor'
+                                ? `Match with ${match.shelter_name}`
+                                : `Match with ${match.donor_username}`
+                              }
+                            </h3>
+                            <p style={{ fontSize: '14px', color: '#A0522D', marginBottom: '4px' }}>
+                              {match.category} • {match.item_name} • Quantity: {match.quantity}
+                            </p>
+                            <p style={{ fontSize: '12px', color: '#CD853F' }}>
+                              Matched {formatTimeAgo(match.matched_at)}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleResolveMatch(match);
+                            }}
+                            style={{
+                              backgroundColor: '#FF6B35',
+                              color: 'white',
+                              padding: '10px 20px',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              boxShadow: '0 2px 4px rgba(255, 107, 53, 0.2)',
+                              marginLeft: '16px'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
+                          >
+                            Resolve Match
+                          </button>
+                        </div>
+
+                        {/* Expanded Details */}
+                        {isExpanded && (
+                          <div style={{
+                            padding: '0 24px 24px 24px',
+                            backgroundColor: '#FFF5EE',
+                            borderTop: '1px solid #FFE5CC'
+                          }}>
+                            <div style={{
+                              display: 'grid',
+                              gridTemplateColumns: '1fr 1fr',
+                              gap: '16px',
+                              marginTop: '16px'
+                            }}>
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  {userType === 'donor' ? 'Shelter Name' : 'Donor Name'}
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {userType === 'donor' ? match.shelter_name : match.donor_username}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Email
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {userType === 'donor' ? (match.shelter_email || 'N/A') : (match.donor_email || 'N/A')}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Phone Number
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {userType === 'donor' ? (match.shelter_phone || 'N/A') : (match.donor_phone || 'N/A')}
+                                </p>
+                              </div>
+
+                              {userType === 'donor' && match.shelter_address && (
+                                <div>
+                                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    Address
+                                  </p>
+                                  <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                    {match.shelter_address}
+                                    {match.shelter_city && `, ${match.shelter_city}`}
+                                    {match.shelter_state && `, ${match.shelter_state}`}
+                                    {match.shelter_zip_code && ` ${match.shelter_zip_code}`}
+                                  </p>
+                                </div>
+                              )}
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Item
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {match.item_name}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Category
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {match.category}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Quantity
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {match.quantity}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Status
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {match.status.charAt(0).toUpperCase() + match.status.slice(1)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
                 )}
               </div>
-              
+
             </div>
           )}
           {/* Donations/Requests List */}
