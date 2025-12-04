@@ -41,14 +41,24 @@ def send_email(to_email: str, subject: str, body: str) -> None:
         server.send_message(msg)
 
 
-def _contact_section(donor_email: Optional[str], shelter_email: Optional[str]) -> str:
-    """Shared contact details section to include in both emails."""
+def _contact_section(
+    donor_email: Optional[str],
+    shelter_email: Optional[str],
+    donor_phone: Optional[str] = None,
+    shelter_phone: Optional[str] = None,
+) -> str:
     lines = ["\n\nContact details (for coordinating this match):"]
+
     if donor_email:
         lines.append(f"- Donor email: {donor_email}")
+    if donor_phone:
+        lines.append(f"- Donor phone: {donor_phone}")
+
     if shelter_email:
         lines.append(f"- Shelter email: {shelter_email}")
-    # If one/both are missing, we still show whatever we have.
+    if shelter_phone:
+        lines.append(f"- Shelter phone: {shelter_phone}")
+
     return "\n".join(lines)
 
 
@@ -56,6 +66,8 @@ def send_match_emails(
     donor_email: Optional[str],
     shelter_email: Optional[str],
     match: Dict[str, Any],
+    donor_phone: Optional[str] = None,
+    shelter_phone: Optional[str] = None,
 ) -> None:
     """
     Send email to the donor and shelter of a match being made.
@@ -64,6 +76,8 @@ def send_match_emails(
         donor_email: email address of the donor user to send to.
         shelter_email: email address of the shelter user to send to.
         match: details of the matching.
+        donor_phone: phone number of the donor.
+        shelter_phone: phone number of the shelter.
     """
     subject = "New match found on ShelterLink!"
 
@@ -75,7 +89,12 @@ def send_match_emails(
         "You can view the full details by logging into ShelterLink."
     )
 
-    contacts = _contact_section(donor_email, shelter_email)
+    contacts = _contact_section(
+        donor_email=donor_email,
+        shelter_email=shelter_email,
+        donor_phone=donor_phone,
+        shelter_phone=shelter_phone,
+    )
 
     if donor_email:
         donor_body = (
