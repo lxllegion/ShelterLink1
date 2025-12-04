@@ -1,26 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Donation, Request, Match, UserInfo, getDonations, getRequests, getMatches, getUserInfo, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
+import { Donation, Request, Match, deleteDonation, deleteRequest, updateDonation, updateRequest } from '../api/backend';
 import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
-import MatchList from '../components/MatchList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
 import ResolveMatchModal from '../components/ResolveMatchModal';
 
-const RETRY_DELAY = 1500;
-const MAX_RETRIES = 3;
-
 function Dashboard() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const [userType, setUserType] = useState<string | null>(null);
-
-  const [donations, setDonations] = useState<Donation[]>([]);
-  const [requests, setRequests] = useState<Request[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(true);
-  const [loadingItems, setLoadingItems] = useState(true);
+  const { 
+    currentUser, 
+    userInfo,
+    donations, 
+    requests, 
+    matches, 
+    dashboardDataLoaded,
+    dashboardLoading,
+    fetchDashboardData,
+    updateDonations,
+    updateRequests,
+    updateMatches
+  } = useAuth();
+  
   const [error, setError] = useState<string | null>(null);
 
   // Modal state for editing items
@@ -32,82 +34,26 @@ function Dashboard() {
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
 
+  const userType = userInfo?.userType || null;
+
+  // Fetch dashboard data only if not already loaded
   useEffect(() => {
-    const fetchAllData = async () => {
-      if (!currentUser) return;
+    const loadDashboardData = async () => {
+      if (!currentUser || !userInfo?.userType) return;
       
-      try {
-        const userId = currentUser.uid;
-
-        // Fetch user type from backend with retry logic
-        let userInfo: UserInfo | undefined;
-        let retries = MAX_RETRIES;
-        while (retries > 0) {
-          try {
-            userInfo = await getUserInfo(userId);
-            if (!userInfo.error && userInfo.userType) {
-              break;
-            }
-          } catch (err) {
-            console.log('Error fetching user info, retrying...', err);
-          }
-          retries--;
-          if (retries > 0) {
-            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-          }
-        }
-        
-        if (!userInfo || userInfo.error || !userInfo.userType) {
-          setError('User not found in system. Please try logging out and back in.');
-          setLoadingMatches(false);
-          setLoadingItems(false);
-          return;
-        }
-
-        const fetchedUserType = userInfo.userType;
-        setUserType(fetchedUserType);
-        localStorage.setItem('userType', fetchedUserType);
-
-        // Fetch matches and items in parallel
-        getMatches(userId, fetchedUserType)
-          .then(matchesData => {
-            const userMatches = fetchedUserType === 'donor'
-              ? matchesData.filter(m => m.donor_id === userId)
-              : matchesData.filter(m => m.shelter_id === userId);
-            setMatches(userMatches);
-            setLoadingMatches(false);
-          })
-          .catch(error => {
-            console.error('Error fetching matches:', error);
-            setLoadingMatches(false);
-          });
-
-        (async () => {
-          if (fetchedUserType === 'donor') {
-            const donationsData = await getDonations(userId);
-            setDonations(donationsData);
-          } else if (fetchedUserType === 'shelter') {
-            const requestsData = await getRequests(userId);
-            setRequests(requestsData);
-          }
-          setLoadingItems(false);
-        })().catch(error => {
-          console.error('Error fetching items:', error);
-          setLoadingItems(false);
-        });
-      } catch (error: any) {
-        console.error('Error fetching data:', error);
-        setError(error.message);
-        setLoadingMatches(false);
-        setLoadingItems(false);
+      if (!dashboardDataLoaded && !dashboardLoading) {
+        await fetchDashboardData(currentUser.uid, userInfo.userType);
       }
     };
 
-    fetchAllData();
-  }, [currentUser]);
+    loadDashboardData();
+  }, [currentUser, userInfo, dashboardDataLoaded, dashboardLoading, fetchDashboardData]);
+
+  const loadingMatches = dashboardLoading || !dashboardDataLoaded;
+  const loadingItems = dashboardLoading || !dashboardDataLoaded;
 
   // Calculate stats
-  const activeMatches = matches.filter(m => m.status === 'pending').length;
+  const activeMatches = matches.filter((m: Match) => m.status === 'pending').length;
 
   // Format time ago
   const formatTimeAgo = (dateString: string) => {
@@ -127,10 +73,10 @@ function Dashboard() {
       try {
         if (type === 'donation') {
           await deleteDonation(donations[index].donation_id, currentUser?.uid || '');
-          setDonations(donations.filter((_, i) => i !== index));
+          updateDonations(donations.filter((_: Donation, i: number) => i !== index));
         } else if (type === 'request') {
           await deleteRequest(requests[index].request_id, currentUser?.uid || '');
-          setRequests(requests.filter((_, i) => i !== index));
+          updateRequests(requests.filter((_: Request, i: number) => i !== index));
         }
       } catch (error) {
         alert('Error deleting item: ' + error);
@@ -162,7 +108,7 @@ function Dashboard() {
           quantity: itemData.quantity,
           category: itemData.category
         };
-        setDonations(updatedDonations);
+        updateDonations(updatedDonations);
         
         // Show match result if found
         if (result.best_match) {
@@ -193,7 +139,7 @@ function Dashboard() {
           quantity: itemData.quantity,
           category: itemData.category
         };
-        setRequests(updatedRequests);
+        updateRequests(updatedRequests);
         
         // Show match result if found
         if (result.best_match) {
@@ -240,8 +186,8 @@ function Dashboard() {
   };
 
   const handleResolveSuccess = (matchId: string, newStatus: string) => {
-    // Update the match status in the local state
-    setMatches(matches.map(m => 
+    // Update the match status in the context
+    updateMatches(matches.map((m: Match) => 
       m.id === matchId ? { ...m, status: newStatus } : m
     ));
   };
@@ -331,19 +277,19 @@ function Dashboard() {
                   <div style={{ padding: '48px', textAlign: 'center' }}>
                     <p style={{ fontSize: '16px', color: '#ef4444' }}>Error loading matches</p>
                   </div>
-                ) : matches.filter(m => m.status === 'pending').length === 0 ? (
+                ) : matches.filter((m: Match) => m.status === 'pending').length === 0 ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
                     <p style={{ fontSize: '16px', color: '#6b7280' }}>
                       No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
                     </p>
                   </div>
                 ) : (
-                  matches.filter(m => m.status === 'pending').map((match, index) => (
+                  matches.filter((m: Match) => m.status === 'pending').map((match: Match, index: number) => (
                     <div
                       key={match.id}
                       style={{
                         padding: '24px',
-                        borderBottom: index < matches.filter(m => m.status === 'pending').length - 1 ? '1px solid #e5e7eb' : 'none',
+                        borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #e5e7eb' : 'none',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'

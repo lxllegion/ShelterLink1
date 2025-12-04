@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserInfo, UserInfo, updateDonor, updateShelter, deleteDonor, deleteShelter } from '../api/backend';
+import { updateDonor, updateShelter, deleteDonor, deleteShelter } from '../api/backend';
 import NavBar from '../components/NavBar';
 import DeleteAccountModal from '../components/DeleteAccountModal';
 import { useNavigate } from 'react-router-dom';
@@ -35,11 +35,8 @@ const geocodeAddress = async (address: string, city: string, state: string, zipC
 };
 
 function Profile() {
-  const { currentUser } = useAuth();
+  const { currentUser, userInfo, userInfoLoading, updateUserInfo } = useAuth();
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
@@ -56,37 +53,21 @@ function Profile() {
   const [editLatitude, setEditLatitude] = useState('');
   const [editLongitude, setEditLongitude] = useState('');
 
+  // Initialize edit form when userInfo changes
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!currentUser) return;
-
-      try {
-        setLoading(true);
-        const data = await getUserInfo(currentUser.uid);
-        setUserInfo(data);
-
-        // Initialize edit form with current data
-        if (data.userData) {
-          setEditName(data.userData.name || '');
-          setEditPhoneNumber(data.userData.phone_number || '');
-          setEditUsername(data.userData.username || '');
-          setEditShelterName(data.userData.shelter_name || '');
-          setEditAddress(data.userData.address || '');
-          setEditCity(data.userData.city || '');
-          setEditState(data.userData.state || '');
-          setEditZipCode(data.userData.zip_code || '');
-          setEditLatitude(data.userData.latitude || '');
-          setEditLongitude(data.userData.longitude || '');
-        }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load user information');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserInfo();
-  }, [currentUser]);
+    if (userInfo?.userData) {
+      setEditName(userInfo.userData.name || '');
+      setEditPhoneNumber(userInfo.userData.phone_number || '');
+      setEditUsername(userInfo.userData.username || '');
+      setEditShelterName(userInfo.userData.shelter_name || '');
+      setEditAddress(userInfo.userData.address || '');
+      setEditCity(userInfo.userData.city || '');
+      setEditState(userInfo.userData.state || '');
+      setEditZipCode(userInfo.userData.zip_code || '');
+      setEditLatitude(userInfo.userData.latitude || '');
+      setEditLongitude(userInfo.userData.longitude || '');
+    }
+  }, [userInfo]);
 
   const handleSaveChanges = async () => {
     try {
@@ -96,8 +77,8 @@ function Profile() {
           phone_number: editPhoneNumber,
           username: editUsername,
         });
-        // Update local state to reflect changes
-        setUserInfo({
+        // Update context with new data
+        updateUserInfo({
           ...userInfo,
           userData: {
             ...userInfo.userData,
@@ -133,8 +114,8 @@ function Profile() {
           latitude: lat,
           longitude: lon,
         });
-        // Update local state to reflect changes
-        setUserInfo({
+        // Update context with new data
+        updateUserInfo({
           ...userInfo,
           userData: {
             ...userInfo.userData,
@@ -212,7 +193,7 @@ function Profile() {
           }}>
             My Profile
           </h1>
-          {!isEditing && !loading && (
+          {!isEditing && !userInfoLoading && userInfo && (
             <button
               onClick={() => setIsEditing(true)}
               style={{
@@ -232,27 +213,14 @@ function Profile() {
         </div>
 
         {/* Loading State */}
-        {loading && (
+        {userInfoLoading && (
           <div style={{ textAlign: 'center', padding: '48px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ fontSize: '18px', color: '#6b7280' }}>Loading...</p>
           </div>
         )}
 
-        {/* Error State */}
-        {error && (
-          <div style={{
-            backgroundColor: '#fee2e2',
-            border: '2px solid #ef4444',
-            borderRadius: '12px',
-            padding: '16px',
-            flexShrink: 0
-          }}>
-            <p style={{ color: '#991b1b', fontWeight: '600' }}>Error: {error}</p>
-          </div>
-        )}
-
         {/* Profile Content */}
-        {!loading && !error && userInfo && (
+        {!userInfoLoading && userInfo && (
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',

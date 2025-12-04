@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import AuthNavBar from '../components/AuthNavBar';
+import { useAuth } from '../contexts/AuthContext';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { fetchUserInfo } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +24,9 @@ function Login() {
       
       // Store userId in localStorage for API calls
       localStorage.setItem('userId', userId);
+      
+      // Fetch user info before navigating to dashboard
+      await fetchUserInfo(userId);
       
       navigate('/dashboard');
     } catch (err: any) {

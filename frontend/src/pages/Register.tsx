@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthNavBar from '../components/AuthNavBar';
 import { register } from '../api/auth';
+import { useAuth } from '../contexts/AuthContext';
 
 function Register() {
   const [userType, setUserType] = useState<'donor' | 'shelter'>('donor');
@@ -15,6 +16,7 @@ function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { fetchUserInfo } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +35,9 @@ function Register() {
         shelterName,
       });
 
-      if (result.success) {
+      if (result.success && result.userId) {
+        // Fetch user info before navigating to dashboard
+        await fetchUserInfo(result.userId);
         navigate('/dashboard');
       } else {
         setError(result.error || 'Registration failed');
