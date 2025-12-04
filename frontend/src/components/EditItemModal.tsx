@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 interface EditItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: ItemData) => void;
+  onSave: (item: ItemData) => Promise<void>;
   itemType: 'donation' | 'request';
   initialData: ItemData | null;
 }
@@ -18,6 +18,8 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
   const [itemName, setItemName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [category, setCategory] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialData) {
@@ -27,14 +29,23 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      item_name: itemName,
-      quantity,
-      category
-    });
-    handleClose();
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      await onSave({
+        item_name: itemName,
+        quantity,
+        category
+      });
+      handleClose();
+    } catch (err: any) {
+      setError(err.message || `Failed to update ${itemType}`);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleClose = () => {
@@ -42,6 +53,7 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
     setItemName('');
     setQuantity(1);
     setCategory('');
+    setError(null);
     onClose();
   };
 
@@ -117,6 +129,7 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
+                disabled={isSaving}
                 style={{
                   width: '100%',
                   padding: '12px 16px',
@@ -124,7 +137,8 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                   borderRadius: '8px',
                   fontSize: '16px',
                   boxSizing: 'border-box',
-                  backgroundColor: 'white'
+                  backgroundColor: isSaving ? '#f3f4f6' : 'white',
+                  opacity: isSaving ? 0.7 : 1
                 }}
               >
                 <option value="">Select a category</option>
@@ -154,6 +168,7 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 required
+                disabled={isSaving}
                 placeholder="e.g., Winter Coats"
                 style={{
                   width: '100%',
@@ -161,7 +176,9 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                   border: '2px solid #e5e7eb',
                   borderRadius: '8px',
                   fontSize: '16px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  backgroundColor: isSaving ? '#f3f4f6' : 'white',
+                  opacity: isSaving ? 0.7 : 1
                 }}
               />
             </div>
@@ -184,6 +201,7 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value))}
                 required
+                disabled={isSaving}
                 min="1"
                 style={{
                   width: '100%',
@@ -191,32 +209,73 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                   border: '2px solid #e5e7eb',
                   borderRadius: '8px',
                   fontSize: '16px',
-                  boxSizing: 'border-box'
+                  boxSizing: 'border-box',
+                  backgroundColor: isSaving ? '#f3f4f6' : 'white',
+                  opacity: isSaving ? 0.7 : 1
                 }}
               />
             </div>
+
+            {/* Warning Note */}
+            <div
+              style={{
+                backgroundColor: '#dbeafe',
+                border: '1px solid #3b82f6',
+                borderRadius: '8px',
+                padding: '16px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-start'
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>ℹ️</span>
+              <div>
+                <p style={{ fontSize: '14px', color: '#1e40af', fontWeight: '600', marginBottom: '4px' }}>
+                  Note
+                </p>
+                <p style={{ fontSize: '14px', color: '#1e40af' }}>
+                  Any existing matches associated with this {itemType} will be replaced with a new match based on the updated information.
+                </p>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {error && (
+              <div
+                style={{
+                  backgroundColor: '#fee2e2',
+                  border: '1px solid #ef4444',
+                  borderRadius: '8px',
+                  padding: '12px'
+                }}
+              >
+                <p style={{ color: '#991b1b', fontSize: '14px' }}>{error}</p>
+              </div>
+            )}
 
             {/* Buttons */}
             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
               <button
                 type="submit"
+                disabled={isSaving}
                 style={{
                   flex: 1,
-                  backgroundColor: 'black',
+                  backgroundColor: isSaving ? '#9ca3af' : 'black',
                   color: 'white',
                   padding: '14px',
                   border: 'none',
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: 'bold',
-                  cursor: 'pointer'
+                  cursor: isSaving ? 'not-allowed' : 'pointer'
                 }}
               >
-                Save Changes
+                {isSaving ? 'Saving...' : 'Save Changes'}
               </button>
               <button
                 type="button"
                 onClick={handleClose}
+                disabled={isSaving}
                 style={{
                   flex: 1,
                   backgroundColor: 'white',
@@ -226,7 +285,8 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
                   borderRadius: '8px',
                   fontSize: '16px',
                   fontWeight: 'bold',
-                  cursor: 'pointer'
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.5 : 1
                 }}
               >
                 Cancel
@@ -240,4 +300,3 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
 }
 
 export default EditItemModal;
-

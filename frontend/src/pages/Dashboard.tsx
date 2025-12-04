@@ -5,7 +5,9 @@ import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
+import DeleteItemModal, { DeleteItemData } from '../components/DeleteItemModal';
 import ResolveMatchModal from '../components/ResolveMatchModal';
+import MatchMadeModal, { MatchData } from '../components/MatchMadeModal';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -30,9 +32,18 @@ function Dashboard() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
 
+  // Modal state for deleting items
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  const [deletingType, setDeletingType] = useState<'donation' | 'request'>('donation');
+
   // Modal state for resolving matches
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
   const [resolvingMatch, setResolvingMatch] = useState<Match | null>(null);
+
+  // Modal state for match made notification
+  const [isMatchMadeModalOpen, setIsMatchMadeModalOpen] = useState(false);
+  const [matchMadeData, setMatchMadeData] = useState<MatchData | null>(null);
 
   // State for expanded match cards
   const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
@@ -71,20 +82,44 @@ function Dashboard() {
   };
 
   // Handler functions for ItemList
-  const handleDeleteItem = async (index: number, type: 'donation' | 'request') => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        if (type === 'donation') {
-          await deleteDonation(donations[index].donation_id, currentUser?.uid || '');
-          updateDonations(donations.filter((_: Donation, i: number) => i !== index));
-        } else if (type === 'request') {
-          await deleteRequest(requests[index].request_id, currentUser?.uid || '');
-          updateRequests(requests.filter((_: Request, i: number) => i !== index));
-        }
-      } catch (error) {
-        alert('Error deleting item: ' + error);
-      }
+  const handleDeleteItem = (index: number, type: 'donation' | 'request') => {
+    setDeletingIndex(index);
+    setDeletingType(type);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deletingIndex === null) return;
+
+    if (deletingType === 'donation') {
+      const donationId = donations[deletingIndex].donation_id;
+      await deleteDonation(donationId, currentUser?.uid || '');
+      updateDonations(donations.filter((_: Donation, i: number) => i !== deletingIndex));
+      // Remove any matches associated with this donation
+      updateMatches(matches.filter((m: Match) => m.donation_id !== donationId));
+    } else if (deletingType === 'request') {
+      const requestId = requests[deletingIndex].request_id;
+      await deleteRequest(requestId, currentUser?.uid || '');
+      updateRequests(requests.filter((_: Request, i: number) => i !== deletingIndex));
+      // Remove any matches associated with this request
+      updateMatches(matches.filter((m: Match) => m.request_id !== requestId));
     }
+  };
+
+  const getDeletingItemData = (): DeleteItemData | null => {
+    if (deletingIndex === null) return null;
+    
+    const item = deletingType === 'donation' 
+      ? donations[deletingIndex] 
+      : requests[deletingIndex];
+
+    if (!item) return null;
+
+    return {
+      item_name: item.item_name,
+      quantity: item.quantity,
+      category: item.category
+    };
   };
 
   const handleEditItem = (index: number, type: 'donation' | 'request') => {
@@ -95,76 +130,134 @@ function Dashboard() {
 
   const handleSaveItem = async (itemData: ItemData) => {
     if (editingIndex === null) return;
-    try {
-      if (editingType === 'donation') {
-        const result = await updateDonation(donations[editingIndex].donation_id, {
+    
+    if (editingType === 'donation') {
+      const donationId = donations[editingIndex].donation_id;
+      const result = await updateDonation(donationId, {
+        donor_id: donations[editingIndex].donor_id,
+        item_name: itemData.item_name,
+        quantity: itemData.quantity,
+        category: itemData.category
+      });
+      
+      const updatedDonations = [...donations];
+      updatedDonations[editingIndex] = {
+        ...updatedDonations[editingIndex],
+        item_name: itemData.item_name,
+        quantity: itemData.quantity,
+        category: itemData.category
+      };
+      updateDonations(updatedDonations);
+      
+      // Remove old matches for this donation and add new one if found
+      const filteredMatches = matches.filter((m: Match) => m.donation_id !== donationId);
+      
+      if (result.best_match) {
+        const match = result.best_match;
+        // Add the new match to frontend state
+        const newMatch: Match = {
+          id: match.id || `match-${Date.now()}`,
           donor_id: donations[editingIndex].donor_id,
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
-        });
-        
-        const updatedDonations = [...donations];
-        updatedDonations[editingIndex] = {
-          ...updatedDonations[editingIndex],
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
+          donation_id: donationId,
+          donor_username: match.donor_username || '',
+          donor_email: match.donor_email,
+          donor_phone: match.donor_phone,
+          shelter_id: match.shelter_id,
+          request_id: match.request_id,
+          shelter_name: match.shelter_name || 'Unknown',
+          shelter_email: match.shelter_email,
+          shelter_phone: match.shelter_phone,
+          shelter_address: match.shelter_address,
+          shelter_city: match.shelter_city,
+          shelter_state: match.shelter_state,
+          shelter_zip_code: match.shelter_zip_code,
+          item_name: match.item_name,
+          quantity: match.quantity,
+          category: match.category || itemData.category,
+          matched_at: match.matched_at || new Date().toISOString(),
+          status: match.status || 'pending',
         };
-        updateDonations(updatedDonations);
+        updateMatches([...filteredMatches, newMatch]);
         
-        // Show match result if found
-        if (result.best_match) {
-          const match = result.best_match;
-          alert(
-            `Donation Updated! Match Found! 🎉\n\n` +
-            `Shelter: ${match.shelter_name || 'Unknown'}\n` +
-            `Item: ${match.item_name}\n` +
-            `Quantity Needed: ${match.quantity}\n` +
-            `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
-            `Can Fulfill: ${match.can_fulfill}`
-          );
-        } else {
-          alert('Donation updated successfully! No matches found yet.');
-        }
+        // Show match made modal
+        setMatchMadeData({
+          shelter_name: match.shelter_name,
+          item_name: match.item_name,
+          quantity: match.quantity,
+          category: match.category || itemData.category,
+          similarity_score: match.similarity_score,
+          can_fulfill: match.can_fulfill,
+        });
+        setIsMatchMadeModalOpen(true);
       } else {
-        const result = await updateRequest(requests[editingIndex].request_id, {
-          shelter_id: requests[editingIndex].shelter_id,
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category 
-        });
-        
-        const updatedRequests = [...requests];
-        updatedRequests[editingIndex] = {
-          ...updatedRequests[editingIndex],
-          item_name: itemData.item_name,
-          quantity: itemData.quantity,
-          category: itemData.category
-        };
-        updateRequests(updatedRequests);
-        
-        // Show match result if found
-        if (result.best_match) {
-          const match = result.best_match;
-          alert(
-            `Request Updated! Match Found! 🎉\n\n` +
-            `Donor: ${match.donor_name || 'Unknown'}\n` +
-            `Item: ${match.item_name}\n` +
-            `Quantity Available: ${match.quantity}\n` +
-            `Match Score: ${(match.similarity_score * 100).toFixed(1)}%\n` +
-            `Can Fulfill: ${match.can_fulfill}`
-          );
-        } else {
-          alert('Request updated successfully! No matches found yet.');
-        }
+        updateMatches(filteredMatches);
       }
-
-      setIsModalOpen(false);
-      setEditingIndex(null);
-    } catch (error) {
-      alert('Error updating item: ' + error);
+    } else {
+      const requestId = requests[editingIndex].request_id;
+      const result = await updateRequest(requestId, {
+        shelter_id: requests[editingIndex].shelter_id,
+        item_name: itemData.item_name,
+        quantity: itemData.quantity,
+        category: itemData.category 
+      });
+      
+      const updatedRequests = [...requests];
+      updatedRequests[editingIndex] = {
+        ...updatedRequests[editingIndex],
+        item_name: itemData.item_name,
+        quantity: itemData.quantity,
+        category: itemData.category
+      };
+      updateRequests(updatedRequests);
+      
+      // Remove old matches for this request and add new one if found
+      const filteredMatches = matches.filter((m: Match) => m.request_id !== requestId);
+      
+      if (result.best_match) {
+        const match = result.best_match;
+        // Add the new match to frontend state
+        const newMatch: Match = {
+          id: match.id || `match-${Date.now()}`,
+          donor_id: match.donor_id,
+          donation_id: match.donation_id,
+          donor_username: match.donor_username || match.donor_name || 'Unknown',
+          donor_email: match.donor_email,
+          donor_phone: match.donor_phone,
+          shelter_id: requests[editingIndex].shelter_id,
+          request_id: requestId,
+          shelter_name: match.shelter_name || '',
+          shelter_email: match.shelter_email,
+          shelter_phone: match.shelter_phone,
+          shelter_address: match.shelter_address,
+          shelter_city: match.shelter_city,
+          shelter_state: match.shelter_state,
+          shelter_zip_code: match.shelter_zip_code,
+          item_name: match.item_name,
+          quantity: match.quantity,
+          category: match.category || itemData.category,
+          matched_at: match.matched_at || new Date().toISOString(),
+          status: match.status || 'pending',
+        };
+        updateMatches([...filteredMatches, newMatch]);
+        
+        // Show match made modal
+        setMatchMadeData({
+          donor_name: match.donor_name,
+          donor_username: match.donor_username,
+          item_name: match.item_name,
+          quantity: match.quantity,
+          category: match.category || itemData.category,
+          similarity_score: match.similarity_score,
+          can_fulfill: match.can_fulfill,
+        });
+        setIsMatchMadeModalOpen(true);
+      } else {
+        updateMatches(filteredMatches);
+      }
     }
+
+    setIsModalOpen(false);
+    setEditingIndex(null);
   };
 
   const getCurrentItemData = (): ItemData | null => {
@@ -479,6 +572,15 @@ function Dashboard() {
           initialData={getCurrentItemData()}
         />
 
+        {/* Delete Item Modal */}
+        <DeleteItemModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          itemType={deletingType}
+          itemData={getDeletingItemData()}
+        />
+
         {/* Resolve Match Modal */}
         <ResolveMatchModal
           isOpen={isResolveModalOpen}
@@ -486,6 +588,15 @@ function Dashboard() {
           match={resolvingMatch}
           userId={currentUser?.uid || ''}
           onResolveSuccess={handleResolveSuccess}
+        />
+
+        {/* Match Made Modal */}
+        <MatchMadeModal
+          isOpen={isMatchMadeModalOpen}
+          onClose={() => setIsMatchMadeModalOpen(false)}
+          matchData={matchMadeData}
+          userType={(userType as 'donor' | 'shelter') || 'donor'}
+          actionType="updated"
         />
       </div>
     </div>
