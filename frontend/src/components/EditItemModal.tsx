@@ -196,6 +196,29 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
               />
             </div>
 
+            {/* Warning Note */}
+            <div
+              style={{
+                backgroundColor: '#dbeafe',
+                border: '1px solid #3b82f6',
+                borderRadius: '8px',
+                padding: '16px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'flex-start'
+              }}
+            >
+              <span style={{ fontSize: '20px' }}>ℹ️</span>
+              <div>
+                <p style={{ fontSize: '14px', color: '#1e40af', fontWeight: '600', marginBottom: '4px' }}>
+                  Note
+                </p>
+                <p style={{ fontSize: '14px', color: '#1e40af' }}>
+                  Any existing matches associated with this {itemType} will be replaced with a new match based on the updated information.
+                </p>
+              </div>
+            </div>
+
             {/* Buttons */}
             <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
               <button

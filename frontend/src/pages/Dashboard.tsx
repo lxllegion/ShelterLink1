@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import NavBar from '../components/NavBar';
 import ItemList from '../components/ItemList';
 import EditItemModal, { ItemData } from '../components/EditItemModal';
+import DeleteItemModal, { DeleteItemData } from '../components/DeleteItemModal';
 import ResolveMatchModal from '../components/ResolveMatchModal';
 
 function Dashboard() {
@@ -29,6 +30,11 @@ function Dashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingType, setEditingType] = useState<'donation' | 'request'>('donation');
+
+  // Modal state for deleting items
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+  const [deletingType, setDeletingType] = useState<'donation' | 'request'>('donation');
 
   // Modal state for resolving matches
   const [isResolveModalOpen, setIsResolveModalOpen] = useState(false);
@@ -68,20 +74,44 @@ function Dashboard() {
   };
 
   // Handler functions for ItemList
-  const handleDeleteItem = async (index: number, type: 'donation' | 'request') => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        if (type === 'donation') {
-          await deleteDonation(donations[index].donation_id, currentUser?.uid || '');
-          updateDonations(donations.filter((_: Donation, i: number) => i !== index));
-        } else if (type === 'request') {
-          await deleteRequest(requests[index].request_id, currentUser?.uid || '');
-          updateRequests(requests.filter((_: Request, i: number) => i !== index));
-        }
-      } catch (error) {
-        alert('Error deleting item: ' + error);
-      }
+  const handleDeleteItem = (index: number, type: 'donation' | 'request') => {
+    setDeletingIndex(index);
+    setDeletingType(type);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deletingIndex === null) return;
+
+    if (deletingType === 'donation') {
+      const donationId = donations[deletingIndex].donation_id;
+      await deleteDonation(donationId, currentUser?.uid || '');
+      updateDonations(donations.filter((_: Donation, i: number) => i !== deletingIndex));
+      // Remove any matches associated with this donation
+      updateMatches(matches.filter((m: Match) => m.donation_id !== donationId));
+    } else if (deletingType === 'request') {
+      const requestId = requests[deletingIndex].request_id;
+      await deleteRequest(requestId, currentUser?.uid || '');
+      updateRequests(requests.filter((_: Request, i: number) => i !== deletingIndex));
+      // Remove any matches associated with this request
+      updateMatches(matches.filter((m: Match) => m.request_id !== requestId));
     }
+  };
+
+  const getDeletingItemData = (): DeleteItemData | null => {
+    if (deletingIndex === null) return null;
+    
+    const item = deletingType === 'donation' 
+      ? donations[deletingIndex] 
+      : requests[deletingIndex];
+
+    if (!item) return null;
+
+    return {
+      item_name: item.item_name,
+      quantity: item.quantity,
+      category: item.category
+    };
   };
 
   const handleEditItem = (index: number, type: 'donation' | 'request') => {
@@ -352,6 +382,15 @@ function Dashboard() {
           onSave={handleSaveItem}
           itemType={editingType}
           initialData={getCurrentItemData()}
+        />
+
+        {/* Delete Item Modal */}
+        <DeleteItemModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={handleConfirmDelete}
+          itemType={deletingType}
+          itemData={getDeletingItemData()}
         />
 
         {/* Resolve Match Modal */}
