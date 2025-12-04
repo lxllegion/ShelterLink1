@@ -37,7 +37,7 @@ function Login() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'white' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#FFF5EE' }}>
       {/* Navigation Bar */}
       <AuthNavBar />
 
@@ -51,7 +51,8 @@ function Login() {
           fontSize: '48px',
           fontWeight: 'bold',
           textAlign: 'center',
-          marginBottom: '48px'
+          marginBottom: '48px',
+          color: '#8B4513'
         }}>
           Welcome Back
         </h1>
@@ -67,10 +68,11 @@ function Login() {
               style={{
                 width: '100%',
                 padding: '16px 20px',
-                border: '2px solid #d1d5db',
+                border: '2px solid #FFB366',
                 borderRadius: '8px',
                 fontSize: '16px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                backgroundColor: 'white'
               }}
             />
           </div>
@@ -85,16 +87,17 @@ function Login() {
               style={{
                 width: '100%',
                 padding: '16px 20px',
-                border: '2px solid #d1d5db',
+                border: '2px solid #FFB366',
                 borderRadius: '8px',
                 fontSize: '16px',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                backgroundColor: 'white'
               }}
             />
           </div>
 
           {error && (
-            <p style={{ color: '#dc2626', fontSize: '14px' }}>{error}</p>
+            <p style={{ color: '#CC2900', fontSize: '14px' }}>{error}</p>
           )}
 
           <button
@@ -102,7 +105,7 @@ function Login() {
             disabled={loading}
             style={{
               width: '100%',
-              backgroundColor: 'black',
+              backgroundColor: '#FF6B35',
               color: 'white',
               padding: '16px',
               border: 'none',
@@ -110,15 +113,19 @@ function Login() {
               fontSize: '18px',
               fontWeight: 'bold',
               cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.5 : 1
+              opacity: loading ? 0.5 : 1,
+              transition: 'background-color 0.2s',
+              boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
             }}
+            onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#E85A2A')}
+            onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#FF6B35')}
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
-          <p style={{ textAlign: 'center', color: '#6b7280' }}>
+          <p style={{ textAlign: 'center', color: '#A0522D' }}>
             Don't have an account?{' '}
-            <a href="/register" style={{ textDecoration: 'underline', color: 'black' }}>
+            <a href="/register" style={{ textDecoration: 'underline', color: '#FF6B35', fontWeight: 'bold' }}>
               Sign up
             </a>
           </p>
