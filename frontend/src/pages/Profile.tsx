@@ -193,7 +193,7 @@ function Profile() {
   };
 
   return (
-    <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100vh', backgroundColor: '#FFF5EE', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <NavBar />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 32px', width: '100%', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -208,7 +208,7 @@ function Profile() {
           <h1 style={{
             fontSize: '28px',
             fontWeight: 'bold',
-            color: '#1f2937'
+            color: '#8B4513'
           }}>
             My Profile
           </h1>
@@ -216,15 +216,19 @@ function Profile() {
             <button
               onClick={() => setIsEditing(true)}
               style={{
-                backgroundColor: 'black',
+                backgroundColor: '#FF6B35',
                 color: 'white',
                 padding: '12px 24px',
                 border: 'none',
                 borderRadius: '6px',
                 fontSize: '16px',
                 fontWeight: 'bold',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
               }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
             >
               Edit Profile
             </button>
@@ -234,20 +238,20 @@ function Profile() {
         {/* Loading State */}
         {loading && (
           <div style={{ textAlign: 'center', padding: '48px', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ fontSize: '18px', color: '#6b7280' }}>Loading...</p>
+            <p style={{ fontSize: '18px', color: '#A0522D' }}>Loading...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div style={{
-            backgroundColor: '#fee2e2',
-            border: '2px solid #ef4444',
+            backgroundColor: '#FFE5E0',
+            border: '2px solid #FF6B35',
             borderRadius: '12px',
             padding: '16px',
             flexShrink: 0
           }}>
-            <p style={{ color: '#991b1b', fontWeight: '600' }}>Error: {error}</p>
+            <p style={{ color: '#CC2900', fontWeight: '600' }}>Error: {error}</p>
           </div>
         )}
 
@@ -256,16 +260,17 @@ function Profile() {
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
-            border: '2px solid black',
+            border: '2px solid #FFB366',
             overflow: 'hidden',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            boxShadow: '0 4px 6px rgba(255, 107, 53, 0.1)'
           }}>
             {/* User Type Badge */}
             <div style={{
               padding: '16px',
-              borderBottom: '1px solid #e5e7eb',
-              backgroundColor: userInfo.userType === 'donor' ? '#fef2f2' : '#eff6ff',
+              borderBottom: '2px solid #FFE5CC',
+              background: 'linear-gradient(to right, #FFF5EE, #FFE5CC)',
               flexShrink: 0
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -273,11 +278,11 @@ function Profile() {
                   {userInfo.userType === 'donor' ? '❤️' : '🏠'}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#8B4513' }}>
                     {userInfo.userType === 'donor' ? 'Donor Account' : 'Shelter Account'}
                   </h2>
-                  <p style={{ fontSize: '13px', color: '#6b7280' }}>
-                    {userInfo.userType === 'donor' 
+                  <p style={{ fontSize: '13px', color: '#A0522D' }}>
+                    {userInfo.userType === 'donor'
                       ? 'Making a difference through donations'
                       : 'Helping those in need'
                     }
@@ -295,7 +300,7 @@ function Profile() {
                     {/* Name (Donor only) */}
                     {userInfo.userType === 'donor' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#8B4513' }}>
                           Full Name
                         </label>
                         <input
@@ -306,7 +311,7 @@ function Profile() {
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            border: '2px solid #e5e7eb',
+                            border: '2px solid #FFB366',
                             borderRadius: '6px',
                             fontSize: '14px',
                             boxSizing: 'border-box'
@@ -318,7 +323,7 @@ function Profile() {
                     {/* Username (Donor only) */}
                     {userInfo.userType === 'donor' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#8B4513' }}>
                           Username
                         </label>
                         <input
@@ -329,7 +334,7 @@ function Profile() {
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            border: '2px solid #e5e7eb',
+                            border: '2px solid #FFB366',
                             borderRadius: '6px',
                             fontSize: '14px',
                             boxSizing: 'border-box'
@@ -341,7 +346,7 @@ function Profile() {
                     {/* Shelter Name (Shelter only) */}
                     {userInfo.userType === 'shelter' && (
                       <div>
-                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
+                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#8B4513' }}>
                           Shelter Name
                         </label>
                         <input
@@ -352,7 +357,7 @@ function Profile() {
                           style={{
                             width: '100%',
                             padding: '8px 12px',
-                            border: '2px solid #e5e7eb',
+                            border: '2px solid #FFB366',
                             borderRadius: '6px',
                             fontSize: '14px',
                             boxSizing: 'border-box'
@@ -363,7 +368,7 @@ function Profile() {
 
                     {/* Phone Number */}
                     <div>
-                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#374151' }}>
+                      <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '4px', color: '#8B4513' }}>
                         Phone Number
                       </label>
                       <input
@@ -374,7 +379,7 @@ function Profile() {
                         style={{
                           width: '100%',
                           padding: '8px 12px',
-                          border: '2px solid #e5e7eb',
+                          border: '2px solid #FFB366',
                           borderRadius: '6px',
                           fontSize: '14px',
                           boxSizing: 'border-box'
@@ -386,7 +391,7 @@ function Profile() {
                     {userInfo.userType === 'shelter' && (
                       <>
                         <div>
-                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                          <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                             Street Address
                           </label>
                           <input
@@ -397,7 +402,7 @@ function Profile() {
                             style={{
                               width: '100%',
                               padding: '12px 16px',
-                              border: '2px solid #e5e7eb',
+                              border: '2px solid #FFB366',
                               borderRadius: '8px',
                               fontSize: '16px',
                               boxSizing: 'border-box'
@@ -407,7 +412,7 @@ function Profile() {
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
                           <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                               City
                             </label>
                             <input
@@ -417,7 +422,7 @@ function Profile() {
                               style={{
                                 width: '100%',
                                 padding: '12px 16px',
-                                border: '2px solid #e5e7eb',
+                                border: '2px solid #FFB366',
                                 borderRadius: '8px',
                                 fontSize: '16px',
                                 boxSizing: 'border-box'
@@ -425,7 +430,7 @@ function Profile() {
                             />
                           </div>
                           <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                               State
                             </label>
                             <input
@@ -437,7 +442,7 @@ function Profile() {
                               style={{
                                 width: '100%',
                                 padding: '12px 16px',
-                                border: '2px solid #e5e7eb',
+                                border: '2px solid #FFB366',
                                 borderRadius: '8px',
                                 fontSize: '16px',
                                 boxSizing: 'border-box'
@@ -445,7 +450,7 @@ function Profile() {
                             />
                           </div>
                           <div>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#374151' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#8B4513' }}>
                               ZIP Code
                             </label>
                             <input
@@ -456,7 +461,7 @@ function Profile() {
                               style={{
                                 width: '100%',
                                 padding: '12px 16px',
-                                border: '2px solid #e5e7eb',
+                                border: '2px solid #FFB366',
                                 borderRadius: '8px',
                                 fontSize: '16px',
                                 boxSizing: 'border-box'
@@ -475,7 +480,7 @@ function Profile() {
                         disabled={isGeocoding}
                         style={{
                           flex: 1,
-                          backgroundColor: 'black',
+                          backgroundColor: '#FF6B35',
                           color: 'white',
                           padding: '10px',
                           border: 'none',
@@ -483,8 +488,12 @@ function Profile() {
                           fontSize: '14px',
                           fontWeight: 'bold',
                           cursor: isGeocoding ? 'not-allowed' : 'pointer',
-                          opacity: isGeocoding ? 0.7 : 1
+                          opacity: isGeocoding ? 0.7 : 1,
+                          transition: 'background-color 0.2s',
+                          boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
                         }}
+                        onMouseOver={(e) => !isGeocoding && (e.currentTarget.style.backgroundColor = '#E85A2A')}
+                        onMouseOut={(e) => !isGeocoding && (e.currentTarget.style.backgroundColor = '#FF6B35')}
                       >
                         {isGeocoding ? 'Getting Location...' : 'Save Changes'}
                       </button>
@@ -494,14 +503,17 @@ function Profile() {
                         style={{
                           flex: 1,
                           backgroundColor: 'white',
-                          color: 'black',
+                          color: '#FF6B35',
                           padding: '10px',
-                          border: '2px solid black',
+                          border: '2px solid #FF6B35',
                           borderRadius: '6px',
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s'
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#FFF5EE'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
                       >
                         Cancel
                       </button>
@@ -514,10 +526,10 @@ function Profile() {
                   {/* Name (Donor only) */}
                   {userInfo.userType === 'donor' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Full Name
                       </label>
-                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                         {userInfo.userData?.name || 'Not provided'}
                       </p>
                     </div>
@@ -526,10 +538,10 @@ function Profile() {
                   {/* Username (Donor only) */}
                   {userInfo.userType === 'donor' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Username
                       </label>
-                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                         {userInfo.userData?.username || 'Not provided'}
                       </p>
                     </div>
@@ -538,10 +550,10 @@ function Profile() {
                   {/* Shelter Name (Shelter only) */}
                   {userInfo.userType === 'shelter' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Shelter Name
                       </label>
-                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                         {userInfo.userData?.shelter_name || 'Not provided'}
                       </p>
                     </div>
@@ -549,20 +561,20 @@ function Profile() {
 
                   {/* Email */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                       Email Address
                     </label>
-                    <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                    <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                       {userInfo.userData?.email || currentUser?.email || 'Not provided'}
                     </p>
                   </div>
 
                   {/* Phone Number */}
                   <div>
-                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                       Phone Number
                     </label>
-                    <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                    <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                       {userInfo.userData?.phone_number || 'Not provided'}
                     </p>
                   </div>
@@ -570,10 +582,10 @@ function Profile() {
                   {/* Address (Shelter only) */}
                   {userInfo.userType === 'shelter' && (
                     <div>
-                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#6b7280', marginBottom: '2px', textTransform: 'uppercase' }}>
+                      <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '2px', textTransform: 'uppercase' }}>
                         Address
                       </label>
-                      <p style={{ fontSize: '16px', color: '#1f2937', fontWeight: '500' }}>
+                      <p style={{ fontSize: '16px', color: '#8B4513', fontWeight: '500' }}>
                         {userInfo.userData?.address && userInfo.userData?.city && userInfo.userData?.state ? (
                           <>
                             {userInfo.userData.address}<br />
@@ -587,7 +599,7 @@ function Profile() {
                   )}
 
                   {/* Delete Account Button */}
-                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #FFE5CC' }}>
                     <button
                       onClick={() => setShowDeleteConfirm(true)}
                       style={{
@@ -599,8 +611,11 @@ function Profile() {
                         fontSize: '13px',
                         fontWeight: 'bold',
                         cursor: 'pointer',
-                        width: '100%'
+                        width: '100%',
+                        transition: 'background-color 0.2s'
                       }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
                     >
                       Delete Account
                     </button>
