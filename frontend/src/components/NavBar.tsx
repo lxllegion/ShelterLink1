@@ -19,30 +19,39 @@ function NavBar() {
   };
 
   return (
-    <nav className="bg-black text-white px-6 py-4">
+    <nav style={{ backgroundColor: '#FF6B35', color: 'white', padding: '16px 24px' }}>
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2">
-              <span className="text-2xl">❤️</span>
+              <span className="text-2xl">🏠</span>
               <span className="text-xl font-bold">ShelterLink</span>
             </div>
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="text-sm hover:text-gray-300 transition-colors"
+                className="text-sm transition-colors"
+                style={{ color: 'white' }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#FFF5EE'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'white'}
               >
                 Dashboard
               </button>
               <button
                 onClick={() => navigate('/profile')}
-                className="text-sm hover:text-gray-300 transition-colors"
+                className="text-sm transition-colors"
+                style={{ color: 'white' }}
+                onMouseOver={(e) => e.currentTarget.style.color = '#FFF5EE'}
+                onMouseOut={(e) => e.currentTarget.style.color = 'white'}
               >
                 Profile
               </button>
               {userType === 'donor' && !userInfoLoading && (
                 <button
                   onClick={() => navigate('/shelters')}
-                  className="text-sm hover:text-gray-300 transition-colors"
+                  className="text-sm transition-colors"
+                  style={{ color: 'white' }}
+                  onMouseOver={(e) => e.currentTarget.style.color = '#FFF5EE'}
+                  onMouseOut={(e) => e.currentTarget.style.color = 'white'}
                 >
                   Shelters Near Me
                 </button>
@@ -53,7 +62,23 @@ function NavBar() {
             <span className="text-sm">Welcome, {currentUser?.email}</span>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-transparent border border-white rounded hover:bg-white hover:text-black transition-colors"
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'transparent',
+                border: '2px solid white',
+                borderRadius: '6px',
+                color: 'white',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.color = '#FF6B35';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'white';
+              }}
             >
               Logout
             </button>

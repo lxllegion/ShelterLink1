@@ -28,16 +28,41 @@ def get_matches_service(user_id: str, user_type: str):
                 match_ids = result.match_ids
             else:
                 return {"error": "Invalid user type"}
-            
+
             # If no match_ids or empty array, return empty matches
             if not match_ids:
                 return {"matches": []}
-            
+
             # get matches from matches table with the array of match_ids
             matches = conn.execute(matches_table.select().where(matches_table.c.id.in_(match_ids))).fetchall()
-            
-            # Convert rows to dictionaries for JSON serialization
-            matches_list = [dict(row._mapping) for row in matches]
+
+            # Convert rows to dictionaries and enrich with contact information
+            matches_list = []
+            for row in matches:
+                match_dict = dict(row._mapping)
+
+                # Fetch donor contact information
+                donor = conn.execute(
+                    donors_table.select().where(donors_table.c.uid == match_dict['donor_id'])
+                ).fetchone()
+                if donor:
+                    match_dict['donor_email'] = donor.email
+                    match_dict['donor_phone'] = donor.phone_number
+
+                # Fetch shelter contact information
+                shelter = conn.execute(
+                    shelters_table.select().where(shelters_table.c.uid == match_dict['shelter_id'])
+                ).fetchone()
+                if shelter:
+                    match_dict['shelter_email'] = shelter.email
+                    match_dict['shelter_phone'] = shelter.phone_number
+                    match_dict['shelter_address'] = shelter.address
+                    match_dict['shelter_city'] = shelter.city
+                    match_dict['shelter_state'] = shelter.state
+                    match_dict['shelter_zip_code'] = shelter.zip_code
+
+                matches_list.append(match_dict)
+
             return {"matches": matches_list}
     except Exception as e:
         return {"error": str(e)}

@@ -13,16 +13,16 @@ interface ItemListProps {
   onDeleteItem: (index: number, type: 'donation' | 'request') => void;
 }
 
-function ItemList({ 
-  items, 
-  itemType, 
-  userType, 
-  isLoading, 
-  onEditItem, 
-  onDeleteItem 
+function ItemList({
+  items,
+  itemType,
+  userType,
+  isLoading,
+  onEditItem,
+  onDeleteItem
 }: ItemListProps) {
-  const title = isLoading 
-    ? 'Loading...' 
+  const title = isLoading
+    ? 'Loading...'
     : userType === 'donor' ? 'My Donations' : 'My Requests';
   const loadingMessage = userType === 'donor' ? 'Loading donations...' : 'Loading requests...';
   const emptyMessage = userType === 'donor'
@@ -33,19 +33,21 @@ function ItemList({
     <div style={{
       backgroundColor: 'white',
       borderRadius: '12px',
-      border: '2px solid black',
+      border: '2px solid #FFB366',
       overflow: 'hidden',
       flex: 1,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      boxShadow: '0 4px 6px rgba(255, 107, 53, 0.1)'
     }}>
       {/* Header */}
       <div style={{
         padding: '16px 24px',
-        borderBottom: '1px solid #e5e7eb',
-        flexShrink: 0
+        borderBottom: '2px solid #FFE5CC',
+        flexShrink: 0,
+        background: 'linear-gradient(to right, #FFF5EE, #FFE5CC)'
       }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#8B4513' }}>
           {isLoading ? title : `${title} (${items.length})`}
         </h2>
       </div>
@@ -54,11 +56,11 @@ function ItemList({
       <div style={{ overflow: 'auto', flex: 1 }}>
         {isLoading ? (
           <div style={{ padding: '48px', textAlign: 'center' }}>
-            <p style={{ fontSize: '16px', color: '#6b7280' }}>{loadingMessage}</p>
+            <p style={{ fontSize: '16px', color: '#A0522D' }}>{loadingMessage}</p>
           </div>
         ) : items.length === 0 ? (
           <div style={{ padding: '48px', textAlign: 'center' }}>
-            <p style={{ fontSize: '16px', color: '#6b7280' }}>
+            <p style={{ fontSize: '16px', color: '#A0522D' }}>
               {emptyMessage}
             </p>
           </div>
@@ -68,17 +70,17 @@ function ItemList({
               key={index}
               style={{
                 padding: '20px 24px',
-                borderBottom: index < items.length - 1 ? '1px solid #e5e7eb' : 'none',
+                borderBottom: index < items.length - 1 ? '1px solid #FFE5CC' : 'none',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center'
               }}
             >
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#8B4513', marginBottom: '4px' }}>
                   {item.item_name}
                 </h3>
-                <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                <p style={{ fontSize: '14px', color: '#A0522D' }}>
                   {item.category} • Quantity: {item.quantity}
                 </p>
               </div>
@@ -87,14 +89,17 @@ function ItemList({
                   onClick={() => onEditItem(index, itemType)}
                   style={{
                     backgroundColor: 'white',
-                    color: 'black',
+                    color: '#8B4513',
                     padding: '8px 16px',
-                    border: '2px solid black',
+                    border: '2px solid #8B4513',
                     borderRadius: '6px',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
                   }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#FFF5EE'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
                   Edit
                 </button>
@@ -108,8 +113,11 @@ function ItemList({
                     borderRadius: '6px',
                     fontSize: '14px',
                     fontWeight: '600',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
                   }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#fee2e2'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
                   Delete
                 </button>
