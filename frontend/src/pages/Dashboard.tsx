@@ -372,7 +372,7 @@ function Dashboard() {
                             }}>
                               <div>
                                 <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
-                                  {userType === 'donor' ? 'Shelter' : 'Donor'}
+                                  {userType === 'donor' ? 'Shelter Name' : 'Donor Name'}
                                 </p>
                                 <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
                                   {userType === 'donor' ? match.shelter_name : match.donor_username}
@@ -381,12 +381,35 @@ function Dashboard() {
 
                               <div>
                                 <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
-                                  Match ID
+                                  Email
                                 </p>
                                 <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
-                                  {match.id.substring(0, 8)}...
+                                  {userType === 'donor' ? (match.shelter_email || 'N/A') : (match.donor_email || 'N/A')}
                                 </p>
                               </div>
+
+                              <div>
+                                <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                  Phone Number
+                                </p>
+                                <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                  {userType === 'donor' ? (match.shelter_phone || 'N/A') : (match.donor_phone || 'N/A')}
+                                </p>
+                              </div>
+
+                              {userType === 'donor' && match.shelter_address && (
+                                <div>
+                                  <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>
+                                    Address
+                                  </p>
+                                  <p style={{ fontSize: '14px', color: '#8B4513', fontWeight: '500' }}>
+                                    {match.shelter_address}
+                                    {match.shelter_city && `, ${match.shelter_city}`}
+                                    {match.shelter_state && `, ${match.shelter_state}`}
+                                    {match.shelter_zip_code && ` ${match.shelter_zip_code}`}
+                                  </p>
+                                </div>
+                              )}
 
                               <div>
                                 <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#A0522D', marginBottom: '4px', textTransform: 'uppercase' }}>

@@ -300,9 +300,17 @@ export interface Match {
   donor_id: string;
   donation_id: string;
   donor_username: string;
+  donor_email?: string;
+  donor_phone?: string;
   shelter_id: string;
   request_id: string;
   shelter_name: string;
+  shelter_email?: string;
+  shelter_phone?: string;
+  shelter_address?: string;
+  shelter_city?: string;
+  shelter_state?: string;
+  shelter_zip_code?: string;
   item_name: string;
   quantity: number;
   category: string;
