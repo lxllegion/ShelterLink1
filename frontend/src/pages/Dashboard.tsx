@@ -193,7 +193,7 @@ function Dashboard() {
   };
 
   return (
-    <div style={{ height: '100vh', backgroundColor: '#f3f4f6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100vh', backgroundColor: '#FFF5EE', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Navigation Bar */}
       <NavBar />
 
@@ -210,22 +210,26 @@ function Dashboard() {
           <h1 style={{
             fontSize: '28px',
             fontWeight: 'bold',
-            color: '#1f2937'
+            color: '#8B4513'
           }}>
             Dashboard
           </h1>
           <button
             onClick={() => navigate('/form')}
             style={{
-              backgroundColor: 'black',
+              backgroundColor: '#FF6B35',
               color: 'white',
               padding: '12px 24px',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '8px',
               fontSize: '16px',
               fontWeight: 'bold',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)'
             }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
           >
             {!userType ? '+' : userType === 'donor' ? '+ New Donation' : '+ New Request'}
           </button>
@@ -234,13 +238,13 @@ function Dashboard() {
         {/* Error State */}
         {error && (
           <div style={{
-            backgroundColor: '#fee2e2',
-            border: '2px solid #ef4444',
+            backgroundColor: '#FFE5E0',
+            border: '2px solid #FF6B35',
             borderRadius: '12px',
             padding: '16px',
             marginBottom: '32px'
           }}>
-            <p style={{ color: '#991b1b', fontWeight: '600' }}>Error: {error}</p>
+            <p style={{ color: '#CC2900', fontWeight: '600' }}>Error: {error}</p>
           </div>
         )}
 
@@ -250,19 +254,21 @@ function Dashboard() {
             <div style={{
               backgroundColor: 'white',
               borderRadius: '12px',
-              border: '2px solid black',
+              border: '2px solid #FFB366',
               overflow: 'hidden',
               flex: 1,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              boxShadow: '0 4px 6px rgba(255, 107, 53, 0.1)'
             }}>
               {/* Header */}
               <div style={{
                 padding: '16px 24px',
-                borderBottom: '1px solid #e5e7eb',
-                flexShrink: 0
+                borderBottom: '2px solid #FFE5CC',
+                flexShrink: 0,
+                background: 'linear-gradient(to right, #FFF5EE, #FFE5CC)'
               }}>
-                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#8B4513' }}>
                   Active Matches ({loadingMatches ? '...' : activeMatches})
                 </h2>
               </div>
@@ -271,15 +277,15 @@ function Dashboard() {
               <div style={{ overflow: 'auto', flex: 1 }}>
                 {loadingMatches ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>Loading matches...</p>
+                    <p style={{ fontSize: '16px', color: '#A0522D' }}>Loading matches...</p>
                   </div>
                 ) : error ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#ef4444' }}>Error loading matches</p>
+                    <p style={{ fontSize: '16px', color: '#CC2900' }}>Error loading matches</p>
                   </div>
                 ) : matches.filter((m: Match) => m.status === 'pending').length === 0 ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
-                    <p style={{ fontSize: '16px', color: '#6b7280' }}>
+                    <p style={{ fontSize: '16px', color: '#A0522D' }}>
                       No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
                     </p>
                   </div>
@@ -289,39 +295,43 @@ function Dashboard() {
                       key={match.id}
                       style={{
                         padding: '24px',
-                        borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #e5e7eb' : 'none',
+                        borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #FFE5CC' : 'none',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center'
                       }}
                     >
                       <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
-                          {userType === 'donor' 
+                        <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#8B4513', marginBottom: '4px' }}>
+                          {userType === 'donor'
                             ? `Match with ${match.shelter_name}`
                             : `Match with ${match.donor_username}`
                           }
                         </h3>
-                        <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '4px' }}>
+                        <p style={{ fontSize: '14px', color: '#A0522D', marginBottom: '4px' }}>
                           {match.category} • {match.item_name} • Quantity: {match.quantity}
                         </p>
-                        <p style={{ fontSize: '12px', color: '#9ca3af' }}>
+                        <p style={{ fontSize: '12px', color: '#CD853F' }}>
                           Matched {formatTimeAgo(match.matched_at)}
                         </p>
                       </div>
 
-                      <button 
+                      <button
                         onClick={() => handleResolveMatch(match)}
                         style={{
-                          backgroundColor: 'white',
-                          color: 'black',
+                          backgroundColor: '#FF6B35',
+                          color: 'white',
                           padding: '10px 20px',
-                          border: '2px solid black',
+                          border: 'none',
                           borderRadius: '6px',
                           fontSize: '14px',
                           fontWeight: '600',
-                          cursor: 'pointer'
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          boxShadow: '0 2px 4px rgba(255, 107, 53, 0.2)'
                         }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#E85A2A'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#FF6B35'}
                       >
                         Resolve Match
                       </button>
@@ -329,7 +339,7 @@ function Dashboard() {
                   ))
                 )}
               </div>
-              
+
             </div>
           )}
           {/* Donations/Requests List */}
