@@ -172,8 +172,8 @@ def get_requests(user_id: Optional[str] = None) -> List[dict]:
             result = conn.execute(select(requests_table)).fetchall()
         return [
             {
-                "donation_id": str(row.id),
-                "donor_id": row.donor_id,
+                "request_id": str(row.id),
+                "shelter_id": row.shelter_id,
                 "item_name": row.item_name,
                 "quantity": row.quantity,
                 "category": row.category
@@ -556,11 +556,11 @@ def update_shelter(
         print(f"Error updating shelter: {e}")
         raise e
 
-# delete Donor
+# delete Donor and together with all donations
 def delete_donor(uid: str) -> bool:
     try:
         with engine.connect() as conn:
-            # Check donor exists
+            # Fetch donor row
             donor_row = conn.execute(
                 select(donors_table).where(donors_table.c.uid == uid)
             ).fetchone()
@@ -568,16 +568,32 @@ def delete_donor(uid: str) -> bool:
             if not donor_row:
                 raise ValueError(f"No donor found with uid {uid}")
 
-            # Delete donor
+            # Directly access the list of UUIDs
+            donation_ids = donor_row.donation_ids  # Already List[UUID]
+
+        # Delete each donation record
+        for donation_id in donation_ids:
+            try:
+                delete_donation(donation_id=donation_id, donor_id=uid)
+            except Exception as e:
+                print(f"Error deleting donation {donation_id} for donor {uid}: {e}")
+                raise
+
+        # Now delete the donor itself
+        with engine.connect() as conn:
             conn.execute(
                 delete(donors_table).where(donors_table.c.uid == uid)
             )
-            conn.commit()
 
-            return True
+            try:
+                conn.commit()
+            except Exception:
+                pass  # depending on connection behavior
+
+        return True
 
     except Exception as e:
-        print(f"Error deleting donor: {e}")
+        print(f"Error deleting donor {uid}: {e}")
         raise e
 
 
@@ -585,7 +601,7 @@ def delete_donor(uid: str) -> bool:
 def delete_shelter(uid: str) -> bool:
     try:
         with engine.connect() as conn:
-            # Check shelter exists
+            # Fetch shelter row
             shelter_row = conn.execute(
                 select(shelters_table).where(shelters_table.c.uid == uid)
             ).fetchone()
@@ -593,14 +609,30 @@ def delete_shelter(uid: str) -> bool:
             if not shelter_row:
                 raise ValueError(f"No shelter found with uid {uid}")
 
-            # Delete shelter
+            # Already a List[UUID]
+            request_ids = shelter_row.request_ids
+
+        # Delete each request linked to the shelter
+        for request_id in request_ids:
+            try:
+                delete_request(request_id=request_id, shelter_id=uid)
+            except Exception as e:
+                print(f"Error deleting request {request_id} for shelter {uid}: {e}")
+                raise
+
+        # Now delete the shelter itself
+        with engine.connect() as conn:
             conn.execute(
                 delete(shelters_table).where(shelters_table.c.uid == uid)
             )
-            conn.commit()
 
-            return True
+            try:
+                conn.commit()
+            except Exception:
+                pass
+
+        return True
 
     except Exception as e:
-        print(f"Error deleting shelter: {e}")
+        print(f"Error deleting shelter {uid}: {e}")
         raise e
