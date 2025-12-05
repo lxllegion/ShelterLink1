@@ -480,6 +480,40 @@ def get_shelter_email(conn, shelter_uid: str) -> str | None:
     ).scalar_one_or_none()
     return result
 
+def get_donor_phone(conn, donor_uid: str) -> str | None:
+    """
+    Retrieves donor phone number from donor table.
+
+    Args:
+        conn: The current connection to database. 
+        donor_uid: The uid of the donor.
+
+    Returns:
+        The phone number of the donor with the given id, if it exists.
+    """
+    if not donor_uid:
+        return None
+    return conn.execute(
+        select(donors_table.c.phone_number).where(donors_table.c.uid == donor_uid)
+    ).scalar_one_or_none()
+
+def get_shelter_phone(conn, shelter_uid: str) -> str | None:
+    """
+    Retrieves shelter phone number from shelter table.
+
+    Args:
+        conn: The current connection to database. 
+        shelter_uid: The uid of the shelter.
+
+    Returns:
+        The phone number of the shelter with the given id, if it exists.
+    """
+    if not shelter_uid:
+        return None
+    return conn.execute(
+        select(shelters_table.c.phone_number).where(shelters_table.c.uid == shelter_uid)
+    ).scalar_one_or_none()
+
 def save_vector_matches(
     matches: List[Dict[str, Any]],
     save_to_file: bool = True,
@@ -533,7 +567,9 @@ def save_vector_matches(
                 shelter_id_email = formatted_match["shelter_id"]
                 donor_email = get_donor_email(conn, donor_id_email)
                 shelter_email = get_shelter_email(conn, shelter_id_email)
-                send_match_emails(donor_email, shelter_email, formatted_match)
+                donor_phone = get_donor_phone(conn, donor_id_email)
+                shelter_phone = get_shelter_phone(conn, shelter_id_email)
+                send_match_emails(donor_email, shelter_email, formatted_match, donor_phone, shelter_phone)
 
                 if save_to_db:
                     # Insert into the matches table
