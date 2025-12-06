@@ -294,7 +294,7 @@ def find_best_match_for_donation(donation_id: str) -> Optional[Dict[str, Any]]:
     Returns:
         Best matching request or None if no good match found
     """
-    matches = find_similar_requests(donation_id, limit=1, threshold=0.7)
+    matches = find_similar_requests(donation_id, limit=1, threshold=0.80)
     return matches[0] if matches else None
 
 
@@ -308,7 +308,7 @@ def find_best_match_for_request(request_id: str) -> Optional[Dict[str, Any]]:
     Returns:
         Best matching donation or None if no good match found
     """
-    matches = find_similar_donations(request_id, limit=1, threshold=0.7)
+    matches = find_similar_donations(request_id, limit=1, threshold=0.80)
     return matches[0] if matches else None
 
 
