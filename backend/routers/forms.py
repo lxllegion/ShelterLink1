@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from schemas.forms import DonationForm, DonorUpdate, RequestForm, ShelterUpdate
-from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter
+from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter, delete_donor, delete_shelter
 from services.vector_match import find_best_match_for_donation, find_best_match_for_request, save_vector_matches
 from typing import List, Optional
 from fastapi import Query
@@ -116,3 +116,21 @@ async def modify_shelter(
         latitude=shelter_update.latitude,
         longitude=shelter_update.longitude
     )
+
+
+@router.delete("/donor/{uid}")
+async def remove_donor(uid: str):
+    """
+    Delete a donor by UID.
+    Returns True if deleted successfully.
+    """
+    return delete_donor(uid)
+
+
+@router.delete("/shelter/{uid}")
+async def remove_shelter(uid: str):
+    """
+    Delete a shelter by UID.
+    Returns True if deleted successfully.
+    """
+    return delete_shelter(uid)
