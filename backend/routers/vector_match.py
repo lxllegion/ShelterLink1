@@ -83,14 +83,23 @@ async def get_best_match_for_donation(donation_id: str) -> Dict[str, Any]:
     """
     best_match = find_best_match_for_donation(donation_id)
     
+    if not best_match:
+        return {
+            "donation_id": donation_id,
+            "best_match": None,
+            "saved": 0
+        }
+
+    # Save and get the formatted match with generated id
+    save_result = save_vector_matches([best_match])
+    saved_matches = save_result.get("matches", [])
+    
+    # Return the saved match which includes the generated id
     result = {
         "donation_id": donation_id,
-        "best_match": best_match
+        "best_match": saved_matches[0] if saved_matches else best_match,
+        "saved": save_result.get("saved", 0)
     }
-
-    # Save
-    save_result = save_vector_matches([best_match])
-    result["saved"] = save_result.get("saved", 0)
 
     return result
 
@@ -104,14 +113,23 @@ async def get_best_match_for_request(request_id: str) -> Dict[str, Any]:
     """
     best_match = find_best_match_for_request(request_id)
 
+    if not best_match:
+        return {
+            "request_id": request_id,
+            "best_match": None,
+            "saved": 0
+        }
+
+    # Save and get the formatted match with generated id
+    save_result = save_vector_matches([best_match])
+    saved_matches = save_result.get("matches", [])
+    
+    # Return the saved match which includes the generated id
     result = {
         "request_id": request_id,
-        "best_match": best_match
+        "best_match": saved_matches[0] if saved_matches else best_match,
+        "saved": save_result.get("saved", 0)
     }
-
-    # Save
-    save_result = save_vector_matches([best_match])
-    result["saved"] = save_result.get("saved", 0)
 
     return result
 

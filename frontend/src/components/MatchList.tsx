@@ -15,8 +15,20 @@ function MatchList({
   error,
   onResolveMatch 
 }: MatchListProps) {
-  // Filter for pending matches only
-  const pendingMatches = matches.filter(m => m.status === 'pending');
+  // Filter matches based on status and user type
+  // - pending: show to both (neither confirmed)
+  // - donor: show to shelter (donor confirmed, waiting for shelter)
+  // - shelter: show to donor (shelter confirmed, waiting for donor)
+  // - both: show to both (fully resolved)
+  const shouldShowMatch = (match: Match) => {
+    if (match.status === 'pending') return true;
+    if (match.status === 'both') return true;
+    if (userType === 'donor' && match.status === 'shelter') return true;
+    if (userType === 'shelter' && match.status === 'donor') return true;
+    return false;
+  };
+
+  const pendingMatches = matches.filter(shouldShowMatch);
   
   // Format time ago
   const formatTimeAgo = (dateString: string) => {

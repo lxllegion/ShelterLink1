@@ -6,24 +6,20 @@ import { useAuth } from '../contexts/AuthContext';
 import MatchMadeModal, { MatchData } from '../components/MatchMadeModal';
 
 function Form() {
-  const [userType, setUserType] = useState<string | null>(null);
   const [category, setCategory] = useState('Food');
   const [description, setDescription] = useState('');
   const [quantity, setQuantity] = useState<number | ''>(1);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentUser, donations, requests, matches, updateDonations, updateRequests, updateMatches } = useAuth();
+  const { currentUser, userInfo, donations, requests, matches, updateDonations, updateRequests, updateMatches } = useAuth();
 
   // Modal state for match made notification
   const [isMatchMadeModalOpen, setIsMatchMadeModalOpen] = useState(false);
   const [matchMadeData, setMatchMadeData] = useState<MatchData | null>(null);
 
-  useEffect(() => {
-    // Get user type from localStorage
-    const type = localStorage.getItem('userType');
-    setUserType(type);
-  }, []);
+  // Get user type from auth context (fetched from backend)
+  const userType = userInfo?.userType || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

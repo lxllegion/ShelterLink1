@@ -170,7 +170,7 @@ export const updateShelter = async (shelterId: string, data: ShelterUpdateForm) 
 
 export const deleteDonor = async (donorId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/donor/${donorId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/donor/${donorId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ export const deleteDonor = async (donorId: string) => {
 
 export const deleteShelter = async (shelterId: string) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/user/shelter/${shelterId}`, {
+    const response = await fetch(`${API_BASE_URL}/forms/shelter/${shelterId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
