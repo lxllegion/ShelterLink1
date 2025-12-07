@@ -19,25 +19,11 @@
             "phone_number": "253-333-3333"
         },
         {
-            "userID": "f5mAv8yIY2YMi94vySLt1ZZY6FR2",
-            "name": "Justin Huynh",
-            "username": "jus.huy206@gmail.com",
-            "email": "jhuynh18@uw.edu",
-            "phone_number": "2064687164"
-        },
-        {
-            "userID": "vp5p3BWERHbXI3hTdfqvby9NfCx2",
-            "name": "Justin Huynh",
-            "username": "jus.huy206@gmail.com",
-            "email": "jus.huy206@gmail.com",
-            "phone_number": "2064687164"
-        },
-        {
-            "userID": "3N5botAyX1TOx57FTwzRnOKmYe73",
-            "name": "justin huynh",
-            "username": "jus.huy206@gmail.com",
-            "email": "jus.huy206@gmail.com",
-            "phone_number": "1234567"
+            "userID": "D00001",
+            "name": "Alice",
+            "username": "alice123",
+            "email": "alice@test.com",
+            "phone_number": "123"
         }
     ],
     "shelters": [
@@ -92,6 +78,19 @@
             "zip_code": "98201",
             "latitude": "47.9790",
             "longitude": "-122.2021"
+        },
+        {
+            "userID": "S00001",
+            "username": "Sea Shelter",
+            "shelter_name": "Sea Shelter",
+            "email": "contact@seashelter.org",
+            "phone_number": "456",
+            "address": null,
+            "city": null,
+            "state": null,
+            "zip_code": null,
+            "latitude": null,
+            "longitude": null
         }
     ]
 }

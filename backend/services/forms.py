@@ -9,18 +9,6 @@ from database import requests_table, donations_table, donors_table, shelters_tab
 from sqlalchemy import insert, delete, select, update, any_, func
 from services.match import delete_match
 from typing import Optional
-# File paths - storing data
-DONATIONS_FILE = "donations.json"
-REQUESTS_FILE = "requests.json"
-
-# Initialize JSON files if they don't exist
-def init_files():
-    if not os.path.exists(DONATIONS_FILE):
-        with open(DONATIONS_FILE, "w") as f:
-            json.dump([], f)
-    if not os.path.exists(REQUESTS_FILE):
-        with open(REQUESTS_FILE, "w") as f:
-            json.dump([], f)
 
 def save_donation(donation: DonationForm) -> dict:
     """
