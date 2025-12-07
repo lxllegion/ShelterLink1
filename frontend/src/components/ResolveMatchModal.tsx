@@ -110,11 +110,13 @@ function ResolveMatchModal({ isOpen, onClose, match, userId, onResolveSuccess }:
                   <span
                     style={{
                       color: match.status === 'pending' ? '#f59e0b' : '#10b981',
-                      fontWeight: '600',
-                      textTransform: 'capitalize'
+                      fontWeight: '600'
                     }}
                   >
-                    {match.status}
+                    {match.status === 'pending' && 'Pending'}
+                    {match.status === 'donor' && 'Donor has resolved'}
+                    {match.status === 'shelter' && 'Shelter has resolved'}
+                    {match.status === 'both' && 'Both have resolved'}
                   </span>
                 </div>
               </div>

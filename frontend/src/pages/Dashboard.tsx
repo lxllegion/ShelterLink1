@@ -66,8 +66,23 @@ function Dashboard() {
   const loadingMatches = dashboardLoading || !dashboardDataLoaded;
   const loadingItems = dashboardLoading || !dashboardDataLoaded;
 
+  // Filter matches based on status and user type
+  // - pending: show to both (neither confirmed)
+  // - donor: show to shelter (donor confirmed, waiting for shelter)
+  // - shelter: show to donor (shelter confirmed, waiting for donor)
+  // - both: show to both (fully resolved)
+  const shouldShowMatch = (match: Match) => {
+    if (match.status === 'pending') return true;
+    if (match.status === 'both') return true;
+    if (userType === 'donor' && match.status === 'shelter') return true;
+    if (userType === 'shelter' && match.status === 'donor') return true;
+    return false;
+  };
+
+  const visibleMatches = matches.filter(shouldShowMatch);
+
   // Calculate stats
-  const activeMatches = matches.filter((m: Match) => m.status === 'pending').length;
+  const activeMatches = visibleMatches.length;
 
   // Format time ago
   const formatTimeAgo = (dateString: string) => {
@@ -379,20 +394,20 @@ function Dashboard() {
                   <div style={{ padding: '48px', textAlign: 'center' }}>
                     <p style={{ fontSize: '16px', color: '#CC2900' }}>Error loading matches</p>
                   </div>
-                ) : matches.filter((m: Match) => m.status === 'pending').length === 0 ? (
+                ) : visibleMatches.length === 0 ? (
                   <div style={{ padding: '48px', textAlign: 'center' }}>
                     <p style={{ fontSize: '16px', color: '#A0522D' }}>
                       No active matches yet. {userType === 'donor' ? 'Create a donation' : 'Create a request'} to get started!
                     </p>
                   </div>
                 ) : (
-                  matches.filter((m: Match) => m.status === 'pending').map((match: Match, index: number) => {
+                  visibleMatches.map((match: Match, index: number) => {
                     const isExpanded = expandedMatchId === match.id;
                     return (
                       <div
                         key={match.id}
                         style={{
-                          borderBottom: index < matches.filter((m: Match) => m.status === 'pending').length - 1 ? '1px solid #FFE5CC' : 'none',
+                          borderBottom: index < visibleMatches.length - 1 ? '1px solid #FFE5CC' : 'none',
                           transition: 'background-color 0.2s'
                         }}
                       >

@@ -525,6 +525,8 @@ def save_vector_matches(
                     "status": "pending",
                     "donation_id": raw_match.get("donation_id", ""),
                     "request_id": raw_match.get("request_id", ""),
+                    "similarity_score": raw_match.get("similarity_score"),
+                    "can_fulfill": raw_match.get("can_fulfill"),
                 }
                 formatted_matches.append(formatted_match)
 

@@ -28,10 +28,17 @@ async def update_donation(donation_id: UUID, donation: DonationForm):
     # Find new best match
     try:
         best_match = find_best_match_for_donation(str(donation_id))
-        save_vector_matches([best_match])
+        if not best_match:
+            return {
+                "donation": updated_donation,
+                "best_match": None
+            }
+        # Save and get the formatted match with generated id
+        save_result = save_vector_matches([best_match])
+        saved_matches = save_result.get("matches", [])
         return {
             "donation": updated_donation,
-            "best_match": best_match
+            "best_match": saved_matches[0] if saved_matches else best_match
         }
     except Exception as e:
         print(f"Error finding match after update: {e}")
@@ -50,10 +57,17 @@ async def update_request(request_id: UUID, request: RequestForm):
     # Find new best match
     try:
         best_match = find_best_match_for_request(str(request_id))
-        save_vector_matches([best_match])
+        if not best_match:
+            return {
+                "request": updated_request,
+                "best_match": None
+            }
+        # Save and get the formatted match with generated id
+        save_result = save_vector_matches([best_match])
+        saved_matches = save_result.get("matches", [])
         return {
             "request": updated_request,
-            "best_match": best_match
+            "best_match": saved_matches[0] if saved_matches else best_match
         }
     except Exception as e:
         print(f"Error finding match after update: {e}")
