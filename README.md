@@ -32,7 +32,7 @@ ShelterLink is a web app designed to help Seattle-based shelters effectively rec
 - Bash (for Windows to run the ./install.sh file)
   
 ## Building, Testing, Running
-To use ShelterLink as a <ins>**user**</ins>, click the following link for the instructions: **[User Guide](/docs/user-documentation.md)**
+To use ShelterLink as a <ins>**user**</ins>, click the following link for the instructions: **[User Guide](user-documentation.md)**
 
 To use ShelterLink as a <ins>**developer**</ins> (e.g. someone who would like to contribute to ShelterLink code), click the following link for the instructions:  **[Developer Guide](developer-documentation.md)**
 
