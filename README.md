@@ -62,4 +62,4 @@ To use ShelterLink as a <ins>**developer**</ins> (e.g. someone who would like to
 ## Documentation
 * **[Living Document:](https://docs.google.com/document/d/1s5NMwjEzoDznN2sx6Q9rOc3J_6tVi-ZZtgh33FRwXoA/edit?usp=sharing)** Detailed information on ShelterLink's purpose, technical description, developmental timeline, and requirements. 
 * **[Developer Guide:](developer-documentation.md)** Instructions for understanding ShelterLink's file directory, development environment, building and running the software. 
-* **[User Guide:](/docs/user-documentation.md)** Instructions for installing, running, and using the ShelterLink web app.  
+* **[User Guide:](user-documentation.md)** Instructions for installing, running, and using the ShelterLink web app.  
