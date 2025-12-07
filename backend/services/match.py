@@ -66,31 +66,6 @@ def get_matches_service(user_id: str, user_type: str):
             return {"matches": matches_list}
     except Exception as e:
         return {"error": str(e)}
-    
-def load_json(file_path: str) -> List[Dict[Any, Any]]:
-    with open(file_path, 'r') as f:
-        return json.load(f)
-
-def save_matches(new_matches: list):
-    """
-    Save new matches
-    """
-    try:
-        # Existing
-        try:
-            with open("data/mock_matches.json", "r") as f:
-                existing = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            existing = []
-
-        # Add new
-        existing.extend(new_matches)
-
-        # Save
-        with open("data/mock_matches.json", "w") as f:
-            json.dump(existing, f, indent=2)
-    except Exception as e:
-        print(f"Error saving matches: {e}")
 
 def delete_match(match_id: UUID):
     """
