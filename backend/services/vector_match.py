@@ -4,7 +4,7 @@ Vector-based matching service using pgvector for semantic similarity between don
 from sqlalchemy import select, text, insert
 from database import engine, donations_table, requests_table, donors_table, shelters_table, matches_table
 from typing import List, Dict, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from services.email_utils import send_match_emails
 
@@ -543,7 +543,7 @@ def save_vector_matches(
             for raw_match in matches:
                 # Generate an ID and timestamp once so JSON + DB stay in sync
                 match_id = str(uuid.uuid4())
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
 
                 formatted_match = {
                     "id": match_id,
