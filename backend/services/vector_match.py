@@ -4,7 +4,6 @@ Vector-based matching service using pgvector for semantic similarity between don
 from sqlalchemy import select, text, insert
 from database import engine, donations_table, requests_table, donors_table, shelters_table, matches_table
 from typing import List, Dict, Any, Optional
-from services.match import save_matches
 from datetime import datetime
 import uuid
 from services.email_utils import send_match_emails
