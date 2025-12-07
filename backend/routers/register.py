@@ -6,14 +6,6 @@ from services.signup import create_donor, create_shelter
 from pathlib import Path
 import json
 
-
-DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "mock_data.json"
-
-# mock data
-with open(DATA_FILE, "r") as f:
-    data = json.load(f)
-
-
 # Create a router for registration-related endpoints
 router = APIRouter(
     prefix="/register",
@@ -32,12 +24,7 @@ def register_donor(donor: Donor):
     # Check if registration failed
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
-    
-    # Only add to mock data if database registration succeeded
-    data["donors"].append(donor.dict())
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
-    
+
     return result
 
 
@@ -53,10 +40,5 @@ def register_shelter(shelter: Shelter):
     # Check if registration failed
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
-    
-    # Only add to mock data if database registration succeeded
-    data["shelters"].append(shelter.dict())
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
     
     return result
