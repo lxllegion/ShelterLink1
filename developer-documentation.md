@@ -36,47 +36,47 @@ ShelterLink1/
 ### Backend:
 ```
 backend/
-├── main.py
-├── requirements.txt                   # Python dependencies
+├── add_test_shelters.py               # Adds mock test shelters
+├── add_mock_requests.py               # Adds mock requests to shelters
+├── database.py                        # Database table information
+├── main.py                            # Main
 ├── pytest.ini                         # Pytest configuration file
-├── add_test_shelters.py               # Script to add test shelters
-├── migrate_add_shelter_location.py    # Script to add location to shelter table
+├── requirements.txt                   # Python dependencies
 ├── routers/
-│   ├── register.py                    # Endpoints to POST register new accounts
+│   ├── forms.py                       # Endpoints to GET/POST new/retrieve forms
 │   ├── match.py                       # Endpoints to GET /match to trigger matching
+│   ├── register.py                    # Endpoints to POST register new accounts
 │   ├── shelters.py                    # Endpoints to GET /shelters for shelter data
 │   ├── user.py                        # Token verification
-│   ├── vector_match.py                # Endpoints for vector matching 
-│   └── forms.py                       # Endpoints to GET/POST new/retrieve forms
+│   └── vector_match.py                # Endpoints for vector matching 
 │ 
 ├── schemas/                           # Pydantic models for data
 │   ├── donor.py                       # Pydantic models for donor data
-│   ├── shelter.py                     # Pydantic models for shelter data
+│   ├── forms.py                       # Pydantic models for form data
 │   ├── match.py                       # Pydantic models for match data
-│   └── forms.py                       # Pydantic models for form data
+│   └── shelter.py                     # Pydantic models for shelter data
 │ 
 ├── services/                          # Logic layer
+│   ├── email_utils.py                 # Utility functions for sending match emails
 │   ├── embeddings.py                  # Generates embeddings for the database
 │   ├── forms.py                       # Saves/retrieves form data 
 │   ├── match.py                       # Matching algorithm
 │   ├── shelters.py                    # Retrieves shelter info from database
 │   ├── signup.py                      # Saves donor/shelter info to database
-│   ├── vector_match.py                # Vector matching for similarity between donation/requests
-│   ├── email_utils.py                 # Utility functions for sending match emails
-│   └── user.py                        # Retrieves user info from database
-│ 
-├── data/                              # Mock/test data files
-│   ├── mock_data.json                 # Sample user data
-│   ├── mock_donations.json            # Sample donation posts
-│   ├── mock_requests.json             # Sample request posts
-│   └── mock_matches.json              # Sample matches
+│   ├── user.py                        # Retrieves user info from database
+│   └── vector_match.py                # Vector matching for similarity between donation/requests
 │ 
 ├── tests/                             # Test suite
-│   ├── test_example.py                # Example of what tests should look like
-│   ├── test_supabase.py               # Database test for functionality
-│   └── test_resolve_match.py          # Basic resolve match tests
-├── firebase.py                        # Firebase utilities
-└── database.py                        # Database table information
+│   ├── test_create_routers.py         # Donation/Request form creation tests
+│   ├── test_forms_router.py           # GET, DELETE, UPDATE Donation/Request form tests
+│   ├── test_forms_schemas.py          # Donation/Request forms and Shelter/Donor update tests
+│   ├── test_register_router.py        # Donor and Shelter registration tests
+│   ├── test_resolve_match.py          # Resolve match tests
+│   ├── test_shelters_router.py        # Shelter router tests
+│   ├── test_valid_users.py            # Donor/Shelter schema tests
+│   ├── test_vector_match.py           # Router/Service vector match tests
+└── firebase.py                        # Firebase utilities
+
 
 
 
@@ -90,39 +90,47 @@ frontend/
 │   ├── index.tsx
 │   ├── App.tsx                           # Main component with routing
 │   ├── firebase.ts                       # Firebase SDK initialization
-│   ├── index.css
+│   ├── index.css                         # Global CSS File
+│   ├── index.tsx                         # Launches React
+│   │ 
 │   ├── api/                              # Backend API integration
 │   │   ├── auth.ts                       # Calls backend to /register and /login
 │   │   └── backend.ts                    # Calls backend
 │   │
 │   ├── components/                       # Reusable React components
-│   │   ├── NavBar.tsx                    # Navigation bar for authenticated flow
+│   │   ├── AuthNavBar.tsx                # Navigation bar for signup/login flow
 │   │   ├── DeleteAccountModal.tsx        # Delete account
-│   │   ├── EditItemModal.tsx             # Edit item
+│   │   ├── DeleteItemModal.tsx           # Delete items
+│   │   ├── EditItemModal.tsx             # Edit items
 │   │   ├── ItemList.tsx                  # List items
-│   │   ├── ResolveMatchModal.tsx         # Resolve Match
-│   │   └── AuthNavBar.tsx                # Navigation bar for signup/login flow
+│   │   ├── MatchList.tsx                 # List matches
+│   │   ├── MatchMadeModal.tsx            # Match Made
+│   │   ├── NavBar.tsx                    # Navigation bar for authenticated flow
+│   │   └── ResolveMatchModal.tsx         # Resolve Match
 │   │
 │   ├── contexts/                         # React context providers
-│   │   └── AuthContext.tsx
+│   │   └── AuthContext.tsx               # Global authentication
 │   │
 │   ├── pages/                            # Page-level components
-│   │   ├── LandingPage.tsx               # Home page
-│   │   ├── Login.tsx                     # Login page
-│   │   ├── Register.tsx                  # Registration page
 │   │   ├── Dashboard.tsx                 # User dashboard page
 │   │   ├── Form.tsx                      # Donation/request form page
-│   │   ├── SheltersNearMe.tsx            # Shelters near me page
-│   │   └── Profile.tsx                   # User profile page - stretch goal
+│   │   ├── LandingPage.tsx               # Home page
+│   │   ├── Login.tsx                     # Login page
+│   │   ├── Profile.tsx                   # User profile page
+│   │   ├── Register.tsx                  # Registration page
+│   │   └── SheltersNearMe.tsx            # Shelters near me page
 │   │
 │   └── tests/                            # Test suite
-│       └── App.test.tsx                  # Unit/integration tests
+│       ├── App.test.tsx                  # Tests main app component
+│       ├── ItemList.test.tsx             # Tests item list
+│       ├── LandingPage.test.tsx          # Tests landing page
+│       └── NavBar.test.tsx               # Unit/integration tests
 │ 
 ├── package.json
 ├── package-lock.json
-├── tsconfig.json
+├── postcss.config.js
 ├── tailwind.config.js
-└── postcss.config.js
+└── tsconfig.json
 ```
 
 ## How to Build the Software
