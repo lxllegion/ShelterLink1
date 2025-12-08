@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
+# Donor data model
 class Donor(BaseModel):
     userID: str
     name: str
