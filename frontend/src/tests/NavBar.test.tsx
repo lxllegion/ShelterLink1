@@ -9,12 +9,18 @@ jest.mock('../firebase', () => ({
   },
 }));
 
-// Mock AuthContext
+// Mock AuthContext with default values
+const defaultAuthValue = {
+  currentUser: { email: 'test@example.com', uid: 'test-uid' },
+  loading: false,
+  userInfo: null,
+  userInfoLoading: false,
+};
+
+const mockUseAuth = jest.fn(() => defaultAuthValue);
+
 jest.mock('../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    currentUser: { email: 'test@example.com', uid: 'test-uid' },
-    loading: false,
-  }),
+  useAuth: () => mockUseAuth(),
 }));
 
 const mockNavigate = jest.fn();
@@ -26,7 +32,8 @@ jest.mock('react-router-dom', () => ({
 
 describe('NavBar Component', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    mockUseAuth.mockReturnValue(defaultAuthValue);
+    mockNavigate.mockClear();
     localStorage.clear();
   });
 
@@ -38,7 +45,7 @@ describe('NavBar Component', () => {
     );
 
     expect(screen.getByText('ShelterLink')).toBeInTheDocument();
-    expect(screen.getByText('❤️')).toBeInTheDocument();
+    expect(screen.getByText('🏠')).toBeInTheDocument();
   });
 
   test('displays user email', () => {
@@ -90,7 +97,12 @@ describe('NavBar Component', () => {
   });
 
   test('shows Shelters Near Me button for donors', () => {
-    localStorage.setItem('userType', 'donor');
+    mockUseAuth.mockReturnValueOnce({
+      currentUser: { email: 'test@example.com', uid: 'test-uid' },
+      loading: false,
+      userInfo: { userType: 'donor' } as any,
+      userInfoLoading: false,
+    });
 
     render(
       <BrowserRouter>
@@ -102,7 +114,12 @@ describe('NavBar Component', () => {
   });
 
   test('hides Shelters Near Me button for shelters', () => {
-    localStorage.setItem('userType', 'shelter');
+    mockUseAuth.mockReturnValueOnce({
+      currentUser: { email: 'test@example.com', uid: 'test-uid' },
+      loading: false,
+      userInfo: { userType: 'shelter' } as any,
+      userInfoLoading: false,
+    });
 
     render(
       <BrowserRouter>
