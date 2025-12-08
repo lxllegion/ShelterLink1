@@ -19,12 +19,10 @@ FROM_EMAIL = os.getenv("FROM_EMAIL", SMTP_USER)
 
 def send_email(to_email: str, subject: str, body: str) -> None:
     """
-    Send email to specific email address.
+    Send an email to a specific address.
 
-    Args:
-        to_email: email address to send to.
-        subject: the topic of the email.
-        body: the email body.
+    - Uses SMTP server defined in environment variables
+    - Sends plain text email with subject and body
     """
     if not to_email:
         return
@@ -70,14 +68,10 @@ def send_match_emails(
     shelter_phone: Optional[str] = None,
 ) -> None:
     """
-    Send email to the donor and shelter of a match being made.
+    Send match notification emails to donor and shelter.
 
-    Args:
-        donor_email: email address of the donor user to send to.
-        shelter_email: email address of the shelter user to send to.
-        match: details of the matching.
-        donor_phone: phone number of the donor.
-        shelter_phone: phone number of the shelter.
+    - Includes match details and contact information
+    - Sends separate emails to donor and shelter if emails are provided
     """
     subject = "New match found on ShelterLink!"
 

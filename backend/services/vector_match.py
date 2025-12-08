@@ -11,15 +11,15 @@ from services.email_utils import send_match_emails
 def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """
     Find shelter requests that are similar to a specific donation using cosine similarity
-    
+
     Args:
         donation_id: UUID of the donation to match
         limit: Maximum number of matches to return (default: 10)
         threshold: Minimum similarity score 0-1, where 1 is identical (default: 0.7)
-    
+
     Returns:
         List of matching requests with similarity scores, sorted by similarity (highest first)
-        
+
     Example:
         matches = find_similar_requests("123e4567-e89b-12d3-a456-426614174000", limit=5, threshold=0.8)
         # Returns: [{"request_id": "...", "similarity_score": 0.95, ...}, ...]
@@ -30,17 +30,17 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             donation = conn.execute(
                 select(donations_table).where(donations_table.c.id == donation_id)
             ).fetchone()
-            
+
             if not donation:
                 print(f"Donation {donation_id} not found")
                 return []
-            
+
             # Get donor info to include in match (required by Match schema)
             donor = conn.execute(
                 select(donors_table).where(donors_table.c.uid == donation.donor_id)
             ).fetchone()
             donor_name = donor.name if donor else "Unknown"
-            
+
             # Find similar requests using cosine similarity
             # <=> is the cosine distance operator (0 = identical, 2 = opposite)
             # 1 - cosine_distance = cosine_similarity (0 = opposite, 1 = identical)
@@ -51,7 +51,7 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
             # Format embedding as comma-separated list for pgvector
             embedding_list = donation.embedding.tolist() if hasattr(donation.embedding, 'tolist') else list(donation.embedding)
             embedding_str = '[' + ','.join(map(str, embedding_list)) + ']'
-            
+
             query = text("""
                 SELECT 
                     r.id,
@@ -70,16 +70,16 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
                 ORDER BY r.embedding <=> CAST(:embedding AS vector)
                 LIMIT :limit
             """)
-            
+
             results = conn.execute(
-                query, 
+                query,
                 {
                     "embedding": embedding_str,
                     "threshold": threshold,
                     "limit": limit
                 }
             ).fetchall()
-            
+
             matches = []
             for row in results:
                 print("donation_id: ", donation.id)
@@ -103,9 +103,9 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
                     "donation_id": donation.id,
                 }
                 matches.append(match)
-            
+
             return matches
-            
+
     except Exception as e:
         print(f"Error finding similar requests: {e}")
         return []
@@ -114,15 +114,15 @@ def find_similar_requests(donation_id: str, limit: int = 10, threshold: float = 
 def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """
     Find donations that match a specific shelter request using cosine similarity
-    
+
     Args:
         request_id: UUID of the request to match
         limit: Maximum number of matches to return (default: 10)
         threshold: Minimum similarity score 0-1, where 1 is identical (default: 0.7)
-    
+
     Returns:
         List of matching donations with similarity scores, sorted by similarity (highest first)
-        
+
     Example:
         matches = find_similar_donations("123e4567-e89b-12d3-a456-426614174000", limit=5, threshold=0.8)
         # Returns: [{"donation_id": "...", "similarity_score": 0.92, ...}, ...]
@@ -133,17 +133,17 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
             request = conn.execute(
                 select(requests_table).where(requests_table.c.id == request_id)
             ).fetchone()
-            
+
             if not request:
                 print(f"Request {request_id} not found")
                 return []
-            
+
             # Get shelter info to include in match (required by Match schema)
             shelter = conn.execute(
                 select(shelters_table).where(shelters_table.c.uid == request.shelter_id)
             ).fetchone()
             shelter_name = shelter.shelter_name if shelter else "Unknown"
-            
+
             # Find similar donations using cosine similarity
             # Convert embedding to proper format for pgvector
             if request.embedding is None:
@@ -152,7 +152,7 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
             # Format embedding as comma-separated list for pgvector
             embedding_list = request.embedding.tolist() if hasattr(request.embedding, 'tolist') else list(request.embedding)
             embedding_str = '[' + ','.join(map(str, embedding_list)) + ']'
-            
+
             query = text("""
                 SELECT 
                     d.id,
@@ -171,7 +171,7 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                 ORDER BY d.embedding <=> CAST(:embedding AS vector)
                 LIMIT :limit
             """)
-            
+
             results = conn.execute(
                 query,
                 {
@@ -180,7 +180,7 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                     "limit": limit
                 }
             ).fetchall()
-            
+
             matches = []
             for row in results:
                 match = {
@@ -202,9 +202,9 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
                     "request_id": row.request_id,
                 }
                 matches.append(match)
-            
+
             return matches
-            
+
     except Exception as e:
         print(f"Error finding similar donations: {e}")
         return []
@@ -213,14 +213,14 @@ def find_similar_donations(request_id: str, limit: int = 10, threshold: float = 
 def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -> List[Dict[str, Any]]:
     """
     Find all potential matches between donations and requests in the system
-    
+
     Args:
         threshold: Minimum similarity score 0-1 (default: 0.7)
         min_quantity_match: If True, only return matches where donation quantity >= request quantity
-    
+
     Returns:
         List of all matches with both donation and request details
-        
+
     Example:
         all_matches = find_all_matches(threshold=0.8, min_quantity_match=True)
     """
@@ -229,7 +229,7 @@ def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -
             quantity_filter = ""
             if min_quantity_match:
                 quantity_filter = "AND d.quantity >= r.quantity"
-            
+
             query = text(f"""
                 SELECT 
                     d.id as donation_id,
@@ -253,9 +253,9 @@ def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -
                 {quantity_filter}
                 ORDER BY similarity DESC
             """)
-            
+
             results = conn.execute(query, {"threshold": threshold}).fetchall()
-            
+
             matches = []
             for row in results:
                 match = {
@@ -275,9 +275,9 @@ def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -
                     "can_fulfill": "full" if row.donation_quantity >= row.request_quantity else "partial"
                 }
                 matches.append(match)
-            
+
             return matches
-            
+
     except Exception as e:
         print(f"Error finding all matches: {e}")
         return []
@@ -286,10 +286,10 @@ def find_all_matches(threshold: float = 0.7, min_quantity_match: bool = False) -
 def find_best_match_for_donation(donation_id: str) -> Optional[Dict[str, Any]]:
     """
     Find the single best matching request for a donation
-    
+
     Args:
         donation_id: UUID of the donation
-    
+
     Returns:
         Best matching request or None if no good match found
     """
@@ -300,10 +300,10 @@ def find_best_match_for_donation(donation_id: str) -> Optional[Dict[str, Any]]:
 def find_best_match_for_request(request_id: str) -> Optional[Dict[str, Any]]:
     """
     Find the single best matching donation for a request
-    
+
     Args:
         request_id: UUID of the request
-    
+
     Returns:
         Best matching donation or None if no good match found
     """
@@ -314,12 +314,12 @@ def find_best_match_for_request(request_id: str) -> Optional[Dict[str, Any]]:
 def get_matches_for_donor(donor_id: str, limit: int = 10, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """
     Find all requests that match any donations from a specific donor
-    
+
     Args:
         donor_id: Firebase UID of the donor
         limit: Maximum matches per donation
         threshold: Minimum similarity score
-    
+
     Returns:
         List of all matches for this donor's donations
     """
@@ -329,7 +329,7 @@ def get_matches_for_donor(donor_id: str, limit: int = 10, threshold: float = 0.7
             donations = conn.execute(
                 select(donations_table).where(donations_table.c.donor_id == donor_id)
             ).fetchall()
-            
+
             all_matches = []
             for donation in donations:
                 matches = find_similar_requests(str(donation.id), limit=limit, threshold=threshold)
@@ -338,11 +338,11 @@ def get_matches_for_donor(donor_id: str, limit: int = 10, threshold: float = 0.7
                     match["donation_quantity"] = donation.quantity
                     match["donation_category"] = donation.category
                 all_matches.extend(matches)
-            
+
             # Sort by similarity score
             all_matches.sort(key=lambda x: x["similarity_score"], reverse=True)
             return all_matches
-            
+
     except Exception as e:
         print(f"Error getting matches for donor: {e}")
         return []
@@ -351,12 +351,12 @@ def get_matches_for_donor(donor_id: str, limit: int = 10, threshold: float = 0.7
 def get_matches_for_shelter(shelter_id: str, limit: int = 10, threshold: float = 0.7) -> List[Dict[str, Any]]:
     """
     Find all donations that match any requests from a specific shelter
-    
+
     Args:
         shelter_id: Firebase UID of the shelter
         limit: Maximum matches per request
         threshold: Minimum similarity score
-    
+
     Returns:
         List of all matches for this shelter's requests
     """
@@ -366,7 +366,7 @@ def get_matches_for_shelter(shelter_id: str, limit: int = 10, threshold: float =
             requests = conn.execute(
                 select(requests_table).where(requests_table.c.shelter_id == shelter_id)
             ).fetchall()
-            
+
             all_matches = []
             for request in requests:
                 matches = find_similar_donations(str(request.id), limit=limit, threshold=threshold)
@@ -375,11 +375,11 @@ def get_matches_for_shelter(shelter_id: str, limit: int = 10, threshold: float =
                     match["request_quantity"] = request.quantity
                     match["request_category"] = request.category
                 all_matches.extend(matches)
-            
+
             # Sort by similarity score
             all_matches.sort(key=lambda x: x["similarity_score"], reverse=True)
             return all_matches
-            
+
     except Exception as e:
         print(f"Error getting matches for shelter: {e}")
         return []
@@ -388,7 +388,7 @@ def user_save_match_id(match_id: str, user_id: str, user_type: str, conn):
     """
     Add a match ID to the user's match_ids list in their table.
     Uses a connection from the parent transaction.
-    
+
     Args:
         match_id: The UUID of the match to add
         user_id: The UID of the donor or shelter
@@ -402,15 +402,15 @@ def user_save_match_id(match_id: str, user_id: str, user_type: str, conn):
             table = shelters_table
         else:
             raise ValueError(f"Invalid user type: {user_type}")
-        
+
         # Get current match_ids for this user
         result = conn.execute(
             select(table.c.match_ids).where(table.c.uid == user_id)
         ).fetchone()
-        
+
         if result:
             current_match_ids = result.match_ids
-            
+
             # Handle different data types (list, string, or None)
             if current_match_ids is None:
                 match_ids_list = []
@@ -425,21 +425,21 @@ def user_save_match_id(match_id: str, user_id: str, user_type: str, conn):
                     match_ids_list = []
             else:
                 match_ids_list = []
-            
+
             # Ensure match_id is a string
             match_id_str = str(match_id)
-            
+
             # Add new match_id if not already present
             if match_id_str not in match_ids_list:
                 match_ids_list.append(match_id_str)
-            
+
             # Update the user's record with the list (PostgreSQL will handle array conversion)
             conn.execute(
                 table.update()
                 .where(table.c.uid == user_id)
                 .values(match_ids=match_ids_list)
             )
-            
+
     except Exception as e:
         print(f"Error saving match ID to {user_type} {user_id}: {e}")
 
@@ -448,7 +448,7 @@ def get_donor_email(conn, donor_uid: str) -> str | None:
     Retrieves user email from donor table.
 
     Args:
-        conn: The current connection to database. 
+        conn: The current connection to database.
         donor_uid: The uid of the donor.
 
     Returns:
@@ -466,7 +466,7 @@ def get_shelter_email(conn, shelter_uid: str) -> str | None:
     Retrieves user email from shelter table.
 
     Args:
-        conn: The current connection to database. 
+        conn: The current connection to database.
         shelter_uid: The uid of the shelter.
 
     Returns:
@@ -484,7 +484,7 @@ def get_donor_phone(conn, donor_uid: str) -> str | None:
     Retrieves donor phone number from donor table.
 
     Args:
-        conn: The current connection to database. 
+        conn: The current connection to database.
         donor_uid: The uid of the donor.
 
     Returns:
@@ -501,7 +501,7 @@ def get_shelter_phone(conn, shelter_uid: str) -> str | None:
     Retrieves shelter phone number from shelter table.
 
     Args:
-        conn: The current connection to database. 
+        conn: The current connection to database.
         shelter_uid: The uid of the shelter.
 
     Returns:
@@ -590,11 +590,11 @@ def save_vector_matches(
                             request_id=formatted_match["request_id"],
                         )
                     )
-                    
+
                     # Add match_id to both donor and shelter match_ids lists
                     donor_id = formatted_match["donor_id"]
                     shelter_id = formatted_match["shelter_id"]
-                    
+
                     if donor_id:
                         user_save_match_id(match_id, donor_id, "donor", conn)
                     if shelter_id:
