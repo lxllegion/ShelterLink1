@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from schemas.forms import DonationForm, DonorUpdate, RequestForm, ShelterUpdate
 from services.forms import save_donation, save_request, get_donations, get_requests, delete_donation as delete_donation_service, delete_request as delete_request_service, update_donation as update_donation_service, update_request as update_request_service, update_donor, update_shelter, delete_donor, delete_shelter
@@ -112,7 +112,7 @@ async def list_donations(user_id: Optional[str] = Query(None)):
     """
     return get_donations(user_id=user_id)
 
-# Endpoint to get all requests
+
 @router.get("/requests", response_model=List[dict])
 async def list_requests(user_id: Optional[str] = Query(None)):
     """
