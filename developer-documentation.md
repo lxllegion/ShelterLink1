@@ -13,7 +13,8 @@
 2. Make sure Python 3.8 or higher and Node.js 14.0 or higher are installed for the program to run
 3. Install bash if on Windows to run the install file
 4. Run the install file in the terminal by running `./install.sh` while in the root directory (ShelterLink1/)
-5. Create Firebase and Supabase projects
+5. Email either xllegion@uw.edu or fpazaran@uw.edu for the `.env` file for email notification functionality. Place the `.env` file in backend/services. 
+6. Create Firebase and Supabase projects, detailed in the section after ShelterLink's directory structure
 
 ## The Layout of Our Directory Structure
 
@@ -140,9 +141,9 @@ Run the install.sh file:
 ./install.sh
 ```
 
-Create .env files in the backend and frontend:
-- for the frontend: email fpazaran@uw.edu for these or follow the steps in the following section to create a Firebase project
-- for the backend: email fpazaran@uw.edu for these or create a Supabase database
+Create `.env` files in the backend and frontend:
+- For the frontend: Email fpazaran@uw.edu for the Firebase credentials ShelterLink used during development or follow the steps in the following section to create a Firebase project. Place in the frontend folder. 
+- For the backend: Email fpazaran@uw.edu for the database URL/API key ShelterLink used during development or create a Supabase database. Place in the backend folder. If you haven't emailed either xllegion@uw.edu or fpazaran@uw.edu for the `.env` file ShelterLink used for email notification functionality, do so now, and place in backend/services.
 
 ### How to create a Firebase project
 1. Create a `.env` file in the frontend folder. Add `.env` to the `.gitignore` frontend file.
@@ -259,7 +260,7 @@ import Dashboard from '../pages/Dashboard';
 ### Pre-Release Steps
 
 1. Run all tests and ensure they all pass
-2. Run linters for code quality and fix any issues
+2. Check our coding guidelines for code quality and fix any issues
 3. Update dependencies:
    - `pip list --outdated` (in backend)
    - `npm outdated` (in frontend)

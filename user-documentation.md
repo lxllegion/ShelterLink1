@@ -19,7 +19,8 @@ ShelterLink is a web application designed to connect donors with homeless shelte
 2. Make sure Python 3.8 or higher and Node.js 14.0 or higher are installed for the program to run
 3. Install bash if on Windows to run the install file
 4. Run the install file in the terminal by running `./install.sh` while in the root directory (ShelterLink1/)
-5. Create Firebase and Supabase projects
+5. Email either xllegion@uw.edu or fpazaran@uw.edu for the `.env` file for email notification functionality. Place the `.env` file in backend/services. 
+6. Create Firebase and Supabase projects
 
 ## How to create a Firebase project
 1. Create a `.env` file in the frontend folder. Add `.env` to the `.gitignore` frontend file.
@@ -61,7 +62,7 @@ ShelterLink is a web application designed to connect donors with homeless shelte
 
 ### Running the Backend
 (Follow steps given after running install.sh or from the backend folder):
-1. Ensure that a Supabase project has been created, and the `.env` file with the database URL/API key is placed in the backend folder
+1. Ensure that a Supabase project has been created, and the `.env` file with the database URL/API key is placed in the backend folder. Make sure that the email notification `.env` file is correctly placed in backend/services.
 2. Run `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
 3. Run `uvicorn main:app --reload`
 
@@ -118,6 +119,8 @@ With respect to filtering, you will see the "Shelter List" displayed on the righ
 3. Provide specific details:
    - **Title**: A clear and concise description (e.g., unresponsive "+ New Donation" button)
    - **Description**: A detailed explanation of the issue occurring
+   - **Expected Behavior**: What you expected to happen
+   - **Actual Behavior**: What actually happened
    - **Steps to Reproduce**:
    - (e.g.
      1. Go to Dashboard
