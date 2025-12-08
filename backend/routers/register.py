@@ -20,7 +20,7 @@ def register_donor(donor: Donor):
     Accepts JSON with userID, username, email, and phone_number. for now.
     """
     result = create_donor(donor)
-    
+
     # Check if registration failed
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
@@ -36,9 +36,9 @@ def register_shelter(shelter: Shelter):
     Accepts JSON with userID, username, shelter_name, email, and phone_number. for now
     """
     result = create_shelter(shelter)
-    
+
     # Check if registration failed
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
-    
+
     return result

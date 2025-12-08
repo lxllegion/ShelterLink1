@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
+# Shelter data model
 class Shelter(BaseModel):
     userID: str
     username: str

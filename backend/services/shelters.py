@@ -3,7 +3,11 @@ from sqlalchemy import select
 
 def get_all_shelters_service():
     """
-    Get all shelters from the database with their location information
+    Fetch all shelters.
+
+    - Retrieves all shelter records from the database
+    - Includes full location and contact details
+    - Returns list of shelters and total count
     """
     try:
         with engine.connect() as conn:
@@ -21,7 +25,11 @@ def get_all_shelters_service():
 
 def get_shelter_requests_service(shelter_id: str):
     """
-    Get all requests for a specific shelter
+    Fetch all requests for a shelter.
+
+    - Retrieves all requests linked to a given shelter
+    - Excludes embedding data for efficiency
+    - Returns list of requests and total count
     """
     try:
         with engine.connect() as conn:

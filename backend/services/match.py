@@ -9,6 +9,14 @@ from sqlalchemy.orm import sessionmaker
 from uuid import UUID
 
 def get_matches_service(user_id: str, user_type: str):
+    """
+    Fetch all matches for a donor or shelter.
+
+    - Looks up the user's match_id list
+    - Retrieves each match from the database
+    - Adds donor and shelter contact information
+    - Returns a list of enriched match records
+    """
     try:
         with engine.connect() as conn:
             # get match_ids array from user table
@@ -69,7 +77,11 @@ def get_matches_service(user_id: str, user_type: str):
 
 def delete_match(match_id: UUID):
     """
-    Delete a match
+    Delete a match from the system.
+
+    - Removes match_id from donor and shelter match lists
+    - Deletes the match entry from the database
+    - Returns True on success
     """
     try:
         with engine.connect() as conn:
@@ -86,12 +98,17 @@ def delete_match(match_id: UUID):
     except Exception as e:
         print(f"Error deleting match: {e}")
         return False
-    
+
 SessionLocal = sessionmaker(bind=engine)
 
 def resolve_match_db(match_id: UUID, user_uid: UUID) -> str:
     """
-    Resolves matches based on donor/shelter confirmation
+    Confirm a match on behalf of a donor or shelter.
+
+    - Loads the match record
+    - Determines whether the confirmer is donor or shelter
+    - Updates match status (pending → donor/shelter → both)
+    - Returns the new match status
     """
     session = SessionLocal()
     try:
@@ -132,8 +149,11 @@ def resolve_match_db(match_id: UUID, user_uid: UUID) -> str:
 
 def resolve_match_status(current_status: str, user_is_donor: bool) -> str:
     """
-    Pure logic: given current status and whether current user is donor,
-    decide the new match status.
+    Compute the next match status.
+
+    - pending → donor or shelter
+    - donor/shelter → both (if the other side confirms)
+    - No change once both have confirmed
     """
     if current_status == "pending":
         return "donor" if user_is_donor else "shelter"

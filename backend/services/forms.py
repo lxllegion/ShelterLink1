@@ -1,12 +1,10 @@
-import json
-import os
 from schemas.forms import DonationForm, RequestForm
 from typing import List
 from uuid import UUID
 from database import engine
 from services.embeddings import generate_embedding
 from database import requests_table, donations_table, donors_table, shelters_table, matches_table
-from sqlalchemy import insert, delete, select, update, any_, func
+from sqlalchemy import insert, delete, select, update, func
 from services.match import delete_match
 from typing import Optional
 
