@@ -67,6 +67,8 @@ function EditItemModal({ isOpen, onClose, onSave, itemType, initialData }: EditI
     'Hygiene',
     'Baby Care',
     'Educational',
+    'Toys',
+    'Electronics',
     'Emergency Supplies',
     'Other'
   ];

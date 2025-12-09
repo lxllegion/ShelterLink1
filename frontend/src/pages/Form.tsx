@@ -183,13 +183,14 @@ function Form() {
   const categories = [
     'Food',
     'Clothing',
-    'Toiletries',
-    'Blankets',
+    'Bedding',
     'Medical Supplies',
-    'Books',
+    'Hygiene',
+    'Baby Care',
+    'Educational',
     'Toys',
-    'Furniture',
     'Electronics',
+    'Emergency Supplies',
     'Other'
   ];
 
